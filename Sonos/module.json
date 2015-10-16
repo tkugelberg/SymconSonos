@@ -1,0 +1,14 @@
+{
+	"id": "{F6F3A773-F685-4FD2-805E-83FD99407EE8}",
+	"name": "Sonos",
+	"type": 3,
+	"vendor": "",
+	"aliases": 
+	[
+		"Sonos"
+	],
+	"parentRequirements": [],
+	"childRequirements": [],
+	"implemented": [],
+	"prefix": "SNS"
+}
