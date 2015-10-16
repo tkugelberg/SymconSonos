@@ -183,7 +183,7 @@ class Sonos extends IPSModule
         // Start add scripts for regular status and grouping updates
         // 1) _updateStatus 
         $statusScriptID = $this->RegisterScript("_updateStatus", "_updateStatus", '<?
-include_once("../modules/SymconMisc/Sonos/sonos.php");
+include_once("../modules/SymconSonos/Sonos/sonos.php");
 
 $ip = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
 
@@ -278,7 +278,7 @@ if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")){
 
         // 2) _updateGrouping
         $groupingScriptID = $this->RegisterScript("_updateGrouping", "_updateGrouping", '<?
-include_once("../modules/SymconMisc/Sonos/sonos.php");
+include_once("../modules/SymconSonos/Sonos/sonos.php");
 
 // Nothing to do if Instance is Group Coordinator
 if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")) exit;
