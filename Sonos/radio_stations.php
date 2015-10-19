@@ -21,7 +21,9 @@ function get_available_stations(){
             Array( ('name') => "SWR1 RP",          ('url') => "x-rincon-mp3radio://mp3-live.swr.de/swr1rp_m.m3u" ),
             Array( ('name') => "WDR2",             ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/wdr2.m3u" ),
             Array( ('name') => "KiRaKa",           ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/kiraka.m3u" ),
-            Array( ('name') => "1LIVE",            ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/einslive.m3u" )
+            Array( ('name') => "1LIVE",            ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/einslive.m3u" ),
+            Array( ('name') => "Radio Duisburg",   ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radioduisburg/livestream.mp3.m3u" ),
+            Array( ('name') => "Radio K.W.",       ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radiokw/livestream.mp3" )
                          );
 
    // sort by name
