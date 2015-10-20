@@ -23,6 +23,7 @@ function get_available_stations(){
             Array( ('name') => "KiRaKa",           ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/kiraka.m3u" ),
             Array( ('name') => "1LIVE",            ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/einslive.m3u" ),
             Array( ('name') => "Radio Duisburg",   ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radioduisburg/livestream.mp3.m3u" ),
+            Array( ('name') => "Radio Essen",      ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radioessen/livestream.mp3.m3u" ),
             Array( ('name') => "Radio K.W.",       ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radiokw/livestream.mp3" )
                          );
 
