@@ -131,7 +131,7 @@ class Sonos extends IPSModule
             $this->removeVariableAction("Treble", $links);
         }
 
-        // 2c) Loudness
+        // 2c) Mute
         if ($this->ReadPropertyBoolean("MuteControl")){
             $this->RegisterVariableInteger("Mute","Mute", "Switch.SONOS", 31);
             $this->EnableAction("Mute");

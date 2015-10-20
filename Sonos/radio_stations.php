@@ -24,6 +24,7 @@ function get_available_stations(){
             Array( ('name') => "1LIVE",            ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/einslive.m3u" ),
             Array( ('name') => "Radio Duisburg",   ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radioduisburg/livestream.mp3.m3u" ),
             Array( ('name') => "Radio Essen",      ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radioessen/livestream.mp3.m3u" ),
+            Array( ('name') => "MDR1",             ('url') => "x-rincon-mp3radio://avw.mdr.de/livestreams/mdr1_radio_sachsen_live_128.m3u" ),
             Array( ('name') => "Radio K.W.",       ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radiokw/livestream.mp3" )
                          );
 
