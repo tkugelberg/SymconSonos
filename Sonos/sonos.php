@@ -414,6 +414,22 @@ SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#Seek"
 
         $this->sendPacket($content);
     }
+
+    public function Seek($unit,$position)
+    {
+
+$content='POST /MediaRenderer/AVTransport/Control HTTP/1.1
+CONNECTION: close
+HOST: '.$this->address.':1400
+CONTENT-LENGTH: '.(293+strlen($unit)+strlen($position)).'
+CONTENT-TYPE: text/xml; charset="utf-8"
+SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#Seek"
+
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Seek xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><Unit>'. $unit .'</Unit><Target>'.$position.'</Target></u:Seek></s:Envelope></s:Body></s:Envelope>';
+
+    $returnContent = $this->sendPacket($content);
+    }
+
 	
     public function SetAVTransportURI($tspuri,$MetaData="")
     {
