@@ -397,8 +397,11 @@ if (Sys_Ping($ipAddress, 1000) == true) {
           $sonos->SetRadio($mediaInfo["CurrentURI"]);
         }else{
           $sonos->SetAVTransportURI($mediaInfo["CurrentURI"],$mediaInfo["CurrentURIMetaData"]);
-          $sonos->Seek("TRACK_NR",$positionInfo["Track"]);
-          $sonos->Seek("REL_TIME",$positionInfo["RelTime"]);
+          try{
+            $sonos->Seek("TRACK_NR",$positionInfo["Track"]);
+            $sonos->Seek("REL_TIME",$positionInfo["RelTime"]);
+          }catch(Exception $e){}
+ 
         }
 
         if ($transportInfo==1){
