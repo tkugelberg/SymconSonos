@@ -376,6 +376,35 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         include_once(__DIR__ . "/sonos.php");
         (new PHPSonos($this->ReadPropertyString("IPAddress")))->Pause();
     }
+
+    public function PlayFiles(array $files)
+    {
+        include_once(__DIR__ . "/sonos.php");
+        $sonos = new PHPSonos($this->ReadPropertyString("IPAddress"));
+    
+        $positionInfo  = $sonos->GetPositionInfo();
+        $mediaInfo     = $sonos->GetMediaInfo();
+        $transportInfo = $sonos->GetTransportInfo();
+
+        foreach ($files as $key => $file) {
+          $sonos->SetAVTransportURI("x-file-cifs:".$file);
+          $sonos->Play();
+          IPS_Sleep(500);
+          while ($sonos->GetTransportInfo()==1){ IPS_Sleep(200);}
+        }
+
+        if (strpos($mediaInfo["CurrentURI"],"x-sonosapi-stream:") === 0 || strpos($mediaInfo["CurrentURI"],"x-rincon-mp3radio:") === 0 ){
+          $sonos->SetRadio($mediaInfo["CurrentURI"]);
+        }else{
+          $sonos->SetAVTransportURI($mediaInfo["CurrentURI"],$mediaInfo["CurrentURIMetaData"]);
+          $sonos->Seek("TRACK_NR",$positionInfo["Track"]);
+          $sonos->Seek("REL_TIME",$positionInfo["RelTime"]);
+        }
+
+        if ($transportInfo==1){
+          $sonos->Play();
+        }
+    }
     
     public function Previous()
     {
