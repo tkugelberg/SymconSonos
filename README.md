@@ -37,11 +37,11 @@ IP-Symcon PHP module for accessing Sonos audio systems
         address the Sonos component can be reached under. When applying the settings a connection test is performed.
      -  Default Volume:
         Volume that will be set when executing
-       ```php
+       ```
        SNS_SetDefaultVolume(<InstanceID>);
        ```
        or
-       ```php
+       ```
        SNS_SetDefaultGroupVolume(<InstanceID>);
        ```
      - RINCON:
