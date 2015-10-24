@@ -33,9 +33,9 @@ IP-Symcon PHP module for accessing Sonos audio systems
         `git://github.com/tkugelberg/SymconSonos.git`  
    - configuration  
      <img src="http://www.kugelberg.de/SymconSonos/instance_config.png">
-     -  IP-Address/Host: 
+     -  IP-Address/Host: <br>
         address the Sonos component can be reached under. When applying the settings a connection test is performed.
-     -  Default Volume:
+     -  Default Volume:<br>
         Volume that will be set when executing
        ```
        SNS_SetDefaultVolume(<InstanceID>);
@@ -44,24 +44,24 @@ IP-Symcon PHP module for accessing Sonos audio systems
        ```
        SNS_SetDefaultGroupVolume(<InstanceID>);
        ```
-     - RINCON:
+     - RINCON:<br>
        Not to be set in configuration. Will be set when automatic script "_updateGrouping" is executed  is executed the first time.
-     - Group Coordinator:
+     - Group Coordinator:<br>
        If this flag is set, the instance can be used as leading member of a group.
-     - Force Grouping in Sonos:
+     - Force Grouping in Sonos:<br>
        If this flag is set, the grouping settings from IP-Symcon will be set in Sonos, if they differ.
        If this Flag is not set, the grouping information in IP-Symcon will be updated if Sonos settings differ.
-     - Enable Mute Control:
+     - Enable Mute Control:<br>
        If this flag is set, the function SNS_SetMute(<InstanceID>) is enabled and a variable "Mute" is added.
-     - Enable Loudness Control:
+     - Enable Loudness Control:<br>
        If this flag is set, the function SNS_SetLoudness(<InstanceID>) is enabled and a variable "Loudness" is added.
-     - Enable Bass Control:
+     - Enable Bass Control:<br>
        If this flag is set, the function SNS_SetBass(<InstanceID>) is enabled and a variable "Bass" is added.
-     - Enable Treble Control:
+     - Enable Treble Control:<br>
        If this flag is set, the function SNS_SetTreble(<InstanceID>) is enabled and a variable "Treble" is added.
-     - Favorite Radio Station:
+     - Favorite Radio Station:<br>
        This selection defines which radio station is started when function SNS_SetRadioFavorite(<InstranceID>) is executed.
-     - Stations in WebFront:
+     - Stations in WebFront:<br>
        This is a comma separated list of Radio Stations which should appear as Buttion in WebFront. If it is set to "<all>", all are being displayed.
       
       
