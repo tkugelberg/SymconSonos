@@ -295,17 +295,17 @@ SOAPACTION: "urn:schemas-upnp-org:service:RenderingControl:1#GetTreble"
         return (int)$this->sendPacket($content);
     }
 
-    public function GetVolume()
+    public function GetVolume($channel = 'Master')
     {
 
 $content='POST /MediaRenderer/RenderingControl/Control HTTP/1.1
 CONNECTION: close
 HOST: '.$this->address.':1400
-CONTENT-LENGTH: 290
+CONTENT-LENGTH: '.(284+strlen($channel)).'
 CONTENT-TYPE: text/xml; charset="utf-8"
 SOAPACTION: "urn:schemas-upnp-org:service:RenderingControl:1#GetVolume"
 
-<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume></s:Body></s:Envelope>';
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>'.$channel.'</Channel></u:GetVolume></s:Body></s:Envelope>';
 
         return (int)$this->sendPacket($content);
     }
@@ -561,17 +561,17 @@ SOAPACTION: "urn:schemas-upnp-org:service:RenderingControl:1#SetTreble"
         $this->sendPacket($content);
     }
 
-    public function SetVolume($volume)
+    public function SetVolume($volume, $channel = 'Master')
     {
 
 $content='POST /MediaRenderer/RenderingControl/Control HTTP/1.1
 CONNECTION: close
 HOST: '.$this->address.':1400
-CONTENT-LENGTH: '.(321+strlen($volume)).'
+CONTENT-LENGTH: '.(315+strlen($volume)+strlen($channel)).'
 CONTENT-TYPE: text/xml; charset="utf-8"
 SOAPACTION: "urn:schemas-upnp-org:service:RenderingControl:1#SetVolume"
 
-<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>'.$volume.'</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>'.$channel.'</Channel><DesiredVolume>'.$volume.'</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
 
         $this->sendPacket($content);
     }

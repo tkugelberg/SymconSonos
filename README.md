@@ -9,7 +9,8 @@ IP-Symcon PHP module for accessing Sonos audio systems
 1. [functional range](#1-functional--range) 
 2. [requirements](#2-requirements)
 3. [installation & configuration](#3-installation--configuration)
-4. [functional reference](#4-functional--reference) 
+4. [background scripts](#4-background--scripts)
+5. [functional reference](#4-functional--reference) 
 
 ## 1. functional range
 
@@ -52,21 +53,34 @@ IP-Symcon PHP module for accessing Sonos audio systems
        If this flag is set, the grouping settings from IP-Symcon will be set in Sonos, if they differ.
        If this Flag is not set, the grouping information in IP-Symcon will be updated if Sonos settings differ.
      - Enable Mute Control:<br>
-       If this flag is set, the function SNS_SetMute(<InstanceID>) is enabled and a variable "Mute" is added.
+       If this flag is set, the function SNS_SetMute(InstanceID, mute) is enabled and a variable "Mute" is added.
      - Enable Loudness Control:<br>
-       If this flag is set, the function SNS_SetLoudness(<InstanceID>) is enabled and a variable "Loudness" is added.
+       If this flag is set, the function SNS_SetLoudness(InstanceID, loudness) is enabled and a variable "Loudness" is added.
      - Enable Bass Control:<br>
-       If this flag is set, the function SNS_SetBass(<InstanceID>) is enabled and a variable "Bass" is added.
+       If this flag is set, the function SNS_SetBass(InstanceID, bass) is enabled and a variable "Bass" is added.
      - Enable Treble Control:<br>
-       If this flag is set, the function SNS_SetTreble(<InstanceID>) is enabled and a variable "Treble" is added.
+       If this flag is set, the function SNS_SetTreble(InstanceID, treble) is enabled and a variable "Treble" is added.
+     - Enable Balance Control:<br>
+       If this flag is set, the function SNS_SetBalance(InstanceID, balance)  is enabled and a variable "Balance" is added.
      - Favorite Radio Station:<br>
        This selection defines which radio station is started when function SNS_SetRadioFavorite(<InstranceID>) is executed.
      - Stations in WebFront:<br>
        This is a comma separated list of Radio Stations which should appear as Buttion in WebFront. If it is set to "<all>", all are being displayed.
       
-      
+## 4. background scripts
+When settig up a Sonos instance, two scripts are automatically created and started with a timer.<br>
+1. _updateStatus<br>
+This script is executed every 5 seconds.<br>
+It updates teh variables Voume, Mute, Loudness, Bass, Treble and Balance from the settings in Sonos, if the corresponding activation switches are set.<br>
+In addition the Parameters Status, Radio and NowPlaying are filled.
+For Group Coordinators the group volume is set.
 
-## 4. functional reference
+2. _updateGrouping<br>
+This script is executed every 300 seconds.<br>
+It ensures that all RINCON values are set.
+It updates the group settings either in Sonos or in IP-Symcon.
+
+## 5. functional reference
 
 ```php
 SNS_ChangeGroupVolume(integer $InstanceID, integer $increment)
@@ -124,6 +138,14 @@ SNS_Previous(integer $InstanceID)
 Will jump one track back in Playlist (or to the beginning of the track).
 
 ---  
+
+```php
+SNS_SetBalance(integer $InstanceID, integer $bass)
+```
+Will modify the balance settings in the equlizer of the selected box. Only makes sence for stereo pairs and amps
+Possible entry is between -100 and 100.
+
+---
 
 ```php
 SNS_SetBass(integer $InstanceID, integer $bass)

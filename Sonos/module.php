@@ -17,6 +17,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyBoolean("LoudnessControl", false);
         $this->RegisterPropertyBoolean("BassControl", false);
         $this->RegisterPropertyBoolean("TrebleControl", false);
+        $this->RegisterPropertyBoolean("BalanceControl", false);
         $this->RegisterPropertyString("FavoriteStation", "");
         $this->RegisterPropertyString("WebFrontStations", "<all>");
         $this->RegisterPropertyString("RINCON", "");
@@ -51,6 +52,7 @@ class Sonos extends IPSModule
         ));
         $this->RegisterProfileInteger("Volume.SONOS", "Intensity", "", " %",   0, 100, 1);
         $this->RegisterProfileInteger("Tone.SONOS",   "Intensity", "", " %", -10,  10, 1);
+        $this->RegisterProfileInteger("Balance.SONOS",   "Intensity", "", " %", -100,  100, 1);
         $this->RegisterProfileIntegerEx("Switch.SONOS", "Information", "", "", Array(
                                              Array(0, "Off", "", 0xFF0000),
                                              Array(1, "On",  "", 0x00FF00)
@@ -146,8 +148,16 @@ class Sonos extends IPSModule
         }else{
             $this->removeVariableAction("Loudness", $links);
         }
+
+        // 2d) Balance
+        if ($this->ReadPropertyBoolean("BalanceControl")){
+            $this->RegisterVariableInteger("Balance", "Balance", "Balance.SONOS", 38);
+            $this->EnableAction("Balance");
+        }else{
+            $this->removeVariableAction("Loudness", $links);
+        }
         
-        // 2e) GroupVolume, GroupMembers, MemberOfGroup
+        // 2f) GroupVolume, GroupMembers, MemberOfGroup
         if ( $this->ReadPropertyBoolean("GroupCoordinator")){
             IPS_SetHidden( $this->RegisterVariableString("GroupMembers", "GroupMembers", "", 10), true);
             $this->RegisterVariableInteger("GroupVolume", "GroupVolume", "Volume.SONOS", 11);
@@ -160,7 +170,7 @@ class Sonos extends IPSModule
             $this->removeVariable(      "GroupMembers", $links);
         }
         
-        // 2f) Hide/unhide MemberOfGroup depending on presence of GroupCoordinators
+        // 2g) Hide/unhide MemberOfGroup depending on presence of GroupCoordinators
         if (sizeof($GroupAssociations) === 1){
             // hide MemberOfGroup
             foreach($allSonosInstances as $key=>$SonosID) {
@@ -182,7 +192,7 @@ class Sonos extends IPSModule
         
         // Start add scripts for regular status and grouping updates
         // 1) _updateStatus 
-        $statusScriptID = $this->RegisterScript("_updateStatus", "_updateStatus", '<?
+        $updateStatusScript = '<?
 include_once("../modules/SymconSonos/Sonos/sonos.php");
 
 $ip = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
@@ -205,6 +215,19 @@ if (Sys_Ping($ip, 1000) == true) {
 
     if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TrebleControl"))
         SetValueInteger(IPS_GetObjectIDByName("Treble", IPS_GetParent($_IPS["SELF"])), $sonos->GetTreble());
+
+    if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "BalanceControl")){
+        $leftVolume  = $sonos->GetVolume("LF");
+        $rightVolume = $sonos->GetVolume("RF");
+
+        if ( $leftVolume == $rightVolume ){
+          SetValueInteger(IPS_GetObjectIDByName("Balance", IPS_GetParent($_IPS["SELF"])), 0);
+        }elseif ( $leftVolume > $rightVolume ){
+          SetValueInteger(IPS_GetObjectIDByName("Balance", IPS_GetParent($_IPS["SELF"])), $rightVolume - 100 );
+        }else{
+          SetValueInteger(IPS_GetObjectIDByName("Balance", IPS_GetParent($_IPS["SELF"])), 100 - $leftVolume );
+        }
+    }
 
     $MemberOfGroupID = @IPS_GetObjectIDByName("MemberOfGroup", IPS_GetParent($_IPS["SELF"]));
     $MemberOfGroup = 0;
@@ -271,13 +294,20 @@ if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")){
   
   SetValueInteger(IPS_GetObjectIDByName("GroupVolume", IPS_GetParent($_IPS["SELF"])), intval(round($GroupVolume / sizeof($groupMembersArray))));
 }
-?>', 98);
+?>';
+
+        $statusScriptID = @$this->GetIDForIdent("_updateStatus");
+        if ( $statusScriptID === false ){
+          $statusScriptID = $this->RegisterScript("_updateStatus", "_updateStatus", $updateStatusScript, 98);
+        }else{
+          IPS_SetScriptContent($statusScriptID, $updateStatusScript);
+        }
 
         IPS_SetHidden($statusScriptID,true);
         IPS_SetScriptTimer($statusScriptID, 5); 
 
         // 2) _updateGrouping
-        $groupingScriptID = $this->RegisterScript("_updateGrouping", "_updateGrouping", '<?
+        $updateGroupingScript = '<?
 include_once("../modules/SymconSonos/Sonos/sonos.php");
 
 // Nothing to do if Instance is Group Coordinator
@@ -347,7 +377,14 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         }
     }
 }
-?>', 99);
+?>';
+
+        $groupingScriptID = @$this->GetIDForIdent("_updateGrouping");
+        if ( $groupingScriptID === false ){
+          $groupingScriptID = $this->RegisterScript("_updateGrouping", "_updateGrouping", $updateGroupingScript, 99);
+        }else{
+          IPS_SetScriptContent($groupingScriptID, $updateGroupingScript);
+        }
 
         IPS_SetHidden($groupingScriptID,true);
         IPS_SetScriptTimer($groupingScriptID, 300); 
@@ -455,6 +492,26 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         SetValue($this->GetIDForIdent("Treble"), $treble);
         include_once(__DIR__ . "/sonos.php");
         (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetTreble($treble);
+    }
+    
+    public function SetBalance($balance)	
+    {
+        if (!$this->ReadPropertyBoolean("BalanceControl")) die("This function is not enabled for this instance");
+
+        SetValue($this->GetIDForIdent("Balance"), $balance);
+
+        $leftVolume  = 100;
+        $rightVolume = 100;     
+        if ( $balance < 0 ){
+          $rightVolume = 100 + $balance;
+        }else{
+          $leftVolume  = 100 - $balance;
+        }
+
+        include_once(__DIR__ . "/sonos.php");
+        $sonos = (new PHPSonos($this->ReadPropertyString("IPAddress")));
+        $sonos->SetVolume($leftVolume,'LF');
+        $sonos->SetVolume($rightVolume,'RF');
     }
     
     public function SetVolume($volume)
@@ -574,6 +631,9 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     public function RequestAction($Ident, $Value)
     {
         switch($Ident) {
+            case "Balance":
+                $this->SetBalance($Value);
+                break;
             case "Bass":
                 $this->SetBass($Value);
                 break;

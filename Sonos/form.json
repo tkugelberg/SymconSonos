@@ -11,6 +11,7 @@
                 { "name": "LoudnessControl",  "type": "CheckBox",          "caption": "Enable Loudness Control" },
                 { "name": "BassControl",      "type": "CheckBox",          "caption": "Enable Bass Control" },
                 { "name": "TrebleControl",    "type": "CheckBox",          "caption": "Enable Treble Control" },
+                { "name": "BalanceControl",   "type": "CheckBox",          "caption": "Enable Balance Control" },
                 { "type": "Label", "label": "Settings for radio stations:"},
 		{ "name": "FavoriteStation",  "type": "Select",            "caption": "Favorite radio station", 
                     "options": [
