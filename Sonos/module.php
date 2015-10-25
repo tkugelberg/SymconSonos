@@ -149,12 +149,12 @@ class Sonos extends IPSModule
             $this->removeVariableAction("Loudness", $links);
         }
 
-        // 2d) Balance
+        // 2e) Balance
         if ($this->ReadPropertyBoolean("BalanceControl")){
             $this->RegisterVariableInteger("Balance", "Balance", "Balance.SONOS", 38);
             $this->EnableAction("Balance");
         }else{
-            $this->removeVariableAction("Loudness", $links);
+            $this->removeVariableAction("Balance", $links);
         }
         
         // 2f) GroupVolume, GroupMembers, MemberOfGroup
