@@ -612,8 +612,8 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
 
-        SetValue($this->GetIDForIdent("GroupVolume"), $volume);
         $this->ChangeGroupVolume($volume - GetValue($this->GetIDForIdent("GroupVolume")));
+        SetValue($this->GetIDForIdent("GroupVolume"), $volume);
     }
     
     public function SetRadioFavorite()
