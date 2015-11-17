@@ -62,6 +62,8 @@ IP-Symcon PHP module for accessing Sonos audio systems
        If this flag is set, the function SNS_SetTreble(InstanceID, treble) is enabled and a variable "Treble" is added.
      - Enable Balance Control:<br>
        If this flag is set, the function SNS_SetBalance(InstanceID, balance)  is enabled and a variable "Balance" is added.
+     - Enable Sleeptimer Contorl:<br>
+       If this flag is set, the function SNS_SetSleepTimer(InstanceID, minuites)  is enabled and a variable "Sleeptimer" is added.
      - Favorite Radio Station:<br>
        This selection defines which radio station is started when function SNS_SetRadioFavorite(<InstranceID>) is executed.
      - Stations in WebFront:<br>
@@ -71,7 +73,7 @@ IP-Symcon PHP module for accessing Sonos audio systems
 When settig up a Sonos instance, two scripts are automatically created and started with a timer.<br>
 1. _updateStatus<br>
 This script is executed every 5 seconds.<br>
-It updates teh variables Voume, Mute, Loudness, Bass, Treble and Balance from the settings in Sonos, if the corresponding activation switches are set.<br>
+It updates teh variables Voume, Mute, Loudness, Bass, Treble, Balance and Sleeptimer from the settings in Sonos, if the corresponding activation switches are set.<br>
 In addition the Parameters Status, Radio and NowPlaying are filled.
 For Group Coordinators the group volume is set.
 
@@ -81,6 +83,13 @@ It ensures that all RINCON values are set.
 It updates the group settings either in Sonos or in IP-Symcon.
 
 ## 5. functional reference
+
+```php
+SNS_DeleteSleepTimer(integer $InstanceID, integer $minutes)
+```
+Cancels the active Sleeptimer
+
+---
 
 ```php
 SNS_ChangeGroupVolume(integer $InstanceID, integer $increment)
@@ -138,6 +147,13 @@ SNS_Previous(integer $InstanceID)
 Will jump one track back in Playlist (or to the beginning of the track).
 
 ---  
+
+```php
+SNS_SetAnalogInput(integer $InstanceID, integer $InputInstanceID)
+```
+This will start playing the analog input of the provided instance.
+
+---
 
 ```php
 SNS_SetBalance(integer $InstanceID, integer $bass)
@@ -217,6 +233,7 @@ Currently available are:
 - Antenne 1
 - Antenne Bayern
 - Antenne MV
+- Antenne Thueringen
 - Bayern 3
 - bigFM
 - Deutschlandfunk
@@ -225,6 +242,7 @@ Currently available are:
 - HR3
 - KiRaKa
 - MDR1
+- MDR Jump
 - NDR2
 - N-JOY
 - OE3
@@ -232,11 +250,19 @@ Currently available are:
 - Radio Essen
 - Radio K.W.
 - Radio Lippe
+- Radio Top40
 - RPR1
 - SWR1 BW
 - SWR1 RP
 - SWR3
 - WDR2
+
+---  
+
+```php
+SNS_SetSleepTimer(integer $InstanceID, integer $minutes)
+```
+This will set the Sleeptimer to the provided minutes.
 
 ---  
 
@@ -247,7 +273,6 @@ Will modify the treble settings in the equlizer of the selected box.
 Possible entry is between -10 and 10.
 
 ---  
-
 ```php
 SNS_SetVolume(integer $InstanceID, integer $volume)
 ```

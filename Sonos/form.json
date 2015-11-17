@@ -1,19 +1,20 @@
 {
 	"elements":
 	[
-		{ "name": "IPAddress",        "type": "ValidationTextBox", "caption": "IP-Address/Host" },
-		{ "name": "DefaultVolume",    "type": "NumberSpinner",     "caption": "Default volume (%)" },
+		{ "name": "IPAddress",         "type": "ValidationTextBox", "caption": "IP-Address/Host" },
+		{ "name": "DefaultVolume",     "type": "NumberSpinner",     "caption": "Default volume (%)" },
                 { "type": "Label", "label": "RINCON should be filled automatically by grouping automatism. Only for support here" },
-                { "name": "RINCON",           "type": "ValidationTextBox", "caption": "RINCON" },
-                { "name": "GroupCoordinator", "type": "CheckBox",          "caption": "Group coordinator" },
-                { "name": "GroupForcing",     "type": "CheckBox",          "caption": "Force grouping in Sonos" },
-                { "name": "MuteControl",      "type": "CheckBox",          "caption": "Enable Mute Control" },
-                { "name": "LoudnessControl",  "type": "CheckBox",          "caption": "Enable Loudness Control" },
-                { "name": "BassControl",      "type": "CheckBox",          "caption": "Enable Bass Control" },
-                { "name": "TrebleControl",    "type": "CheckBox",          "caption": "Enable Treble Control" },
-                { "name": "BalanceControl",   "type": "CheckBox",          "caption": "Enable Balance Control" },
+                { "name": "RINCON",            "type": "ValidationTextBox", "caption": "RINCON" },
+                { "name": "GroupCoordinator",  "type": "CheckBox",          "caption": "Group coordinator" },
+                { "name": "GroupForcing",      "type": "CheckBox",          "caption": "Force grouping in Sonos" },
+                { "name": "MuteControl",       "type": "CheckBox",          "caption": "Enable Mute Control" },
+                { "name": "LoudnessControl",   "type": "CheckBox",          "caption": "Enable Loudness Control" },
+                { "name": "BassControl",       "type": "CheckBox",          "caption": "Enable Bass Control" },
+                { "name": "TrebleControl",     "type": "CheckBox",          "caption": "Enable Treble Control" },
+                { "name": "BalanceControl",    "type": "CheckBox",          "caption": "Enable Balance Control" },
+                { "name": "SleeptimerControl", "type": "CheckBox",          "caption": "Enable Sleeptimer Control" },
                 { "type": "Label", "label": "Settings for radio stations:"},
-		{ "name": "FavoriteStation",  "type": "Select",            "caption": "Favorite radio station", 
+		{ "name": "FavoriteStation",   "type": "Select",            "caption": "Favorite radio station", 
                     "options": [ 
                                  { "label": "1LIVE",              "value": "1LIVE" },
                                  { "label": "Antenne 1",          "value": "Antenne 1" },
@@ -43,7 +44,7 @@
                                  { "label": "SWR3",               "value": "SWR3" },
                                  { "label": "WDR2",               "value": "WDR2" }
                   ] },
-		{ "name": "WebFrontStations", "type": "ValidationTextBox", "caption": "Stations in WebFront" }
+		{ "name": "WebFrontStations",  "type": "ValidationTextBox", "caption": "Stations in WebFront" }
 	],
 	"actions":
 	[

@@ -18,6 +18,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyBoolean("BassControl", false);
         $this->RegisterPropertyBoolean("TrebleControl", false);
         $this->RegisterPropertyBoolean("BalanceControl", false);
+        $this->RegisterPropertyBoolean("SleeptimerControl", false);
         $this->RegisterPropertyString("FavoriteStation", "");
         $this->RegisterPropertyString("WebFrontStations", "<all>");
         $this->RegisterPropertyString("RINCON", "");
@@ -157,7 +158,15 @@ class Sonos extends IPSModule
             $this->removeVariableAction("Balance", $links);
         }
         
-        // 2f) GroupVolume, GroupMembers, MemberOfGroup
+        // 2f Sleeptimer
+        if ($this->ReadPropertyBoolean("SleeptimerControl")){
+            $this->RegisterVariableInteger("Sleeptimer", "Sleeptimer", "", 39);
+        }else{
+            $this->removeVariable("Sleeptimer", $links);
+        }
+
+
+        // 2g) GroupVolume, GroupMembers, MemberOfGroup
         if ( $this->ReadPropertyBoolean("GroupCoordinator")){
             IPS_SetHidden( $this->RegisterVariableString("GroupMembers", "GroupMembers", "", 10), true);
             $this->RegisterVariableInteger("GroupVolume", "GroupVolume", "Volume.SONOS", 11);
@@ -170,7 +179,7 @@ class Sonos extends IPSModule
             $this->removeVariable(      "GroupMembers", $links);
         }
         
-        // 2g) Hide/unhide MemberOfGroup depending on presence of GroupCoordinators
+        // 2h) Hide/unhide MemberOfGroup depending on presence of GroupCoordinators
         if (sizeof($GroupAssociations) === 1){
             // hide MemberOfGroup
             foreach($allSonosInstances as $key=>$SonosID) {
@@ -227,6 +236,16 @@ if (Sys_Ping($ip, 1000) == true) {
         }else{
           SetValueInteger(IPS_GetObjectIDByName("Balance", IPS_GetParent($_IPS["SELF"])), 100 - $leftVolume );
         }
+    }
+
+    if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "SleeptimerControl")){
+        $SleeptimerArray = explode(":",$sonos->GetSleeptimer());
+
+        $SleeptimerMinutes = $SleeptimerArray[0]*60+$SleeptimerArray[1];
+        if($SleeptimerArray[2])
+            $SleeptimerMinutes = $SleeptimerMinutes + 1;
+
+        SetValueInteger(IPS_GetObjectIDByName("Sleeptimer", IPS_GetParent($_IPS["SELF"])), $SleeptimerMinutes);
     }
 
     $MemberOfGroupID = @IPS_GetObjectIDByName("MemberOfGroup", IPS_GetParent($_IPS["SELF"]));
@@ -415,6 +434,14 @@ if (Sys_Ping($ipAddress, 1000) == true) {
           } 
           SNS_SetVolume($ID, $newVolume );
         }
+    }
+
+    public function DeleteSleepTimer()
+    {
+        if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
+ 
+        include_once(__DIR__ . "/sonos.php");
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetSleeptimer(0,0,0);
     }
     
     public function Next()
@@ -610,10 +637,26 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         include_once(__DIR__ . "/sonos.php");
         include_once(__DIR__ . "/radio_stations.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetRadio( get_station_url($radio), $radio);
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Play();
+        $sonos = new PHPSonos($this->ReadPropertyString("IPAddress"));
+        $sonos->SetRadio( get_station_url($radio), $radio);
+        $sonos->Play();
     }
     
+    public function SetSleepTimer($minutes)
+    {
+        if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
+
+        $hours = 0;
+
+        while( $minutes > 59 ){
+          $hours   = $hours + 1;
+          $minutes = $minutes - 60;
+        }
+
+        include_once(__DIR__ . "/sonos.php");
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetSleeptimer($hours,$minutes,0);
+    }
+
     public function SetTreble($treble)	
     {
         if (!$this->ReadPropertyBoolean("TrebleControl")) die("This function is not enabled for this instance");

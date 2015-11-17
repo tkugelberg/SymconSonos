@@ -257,6 +257,23 @@ SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#GetPositionInfo"
         return $positionInfo;
     }
 	
+    public function GetSleeptimer()
+    {
+
+$content='POST /MediaRenderer/AVTransport/Control HTTP/1.1
+SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#GetRemainingSleepTimerDuration"
+CONTENT-TYPE: text/xml; charset="utf-8"
+HOST: '.$this->address.':1400
+Content-Length: 302
+
+<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetRemainingSleepTimerDuration xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID></u:GetRemainingSleepTimerDuration></s:Body></s:Envelope>';
+
+       $returnContent = $this->XMLsendPacket($content);
+       //$ret=preg_replace("#(.*)<RemainingSleepTimerDuration>(.*?)\</RemainingSleepTimerDuration>(.*)#is",'$2',$returnContent);
+       //return $ret;
+       return preg_replace("#(.*)<RemainingSleepTimerDuration>(.*?)\</RemainingSleepTimerDuration>(.*)#is",'$2',$returnContent);
+    }
+
     public function GetTransportInfo()
     {
 
@@ -530,6 +547,26 @@ SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI"
 <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><CurrentURI>'.htmlspecialchars($radio).'</CurrentURI><CurrentURIMetaData>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;item id=&quot;R:0/0/0&quot; parentID=&quot;R:0/0&quot; restricted=&quot;true&quot;&gt;&lt;dc:title&gt;'.htmlspecialchars($radio_name).'&lt;/dc:title&gt;&lt;upnp:class&gt;object.item.audioItem.audioBroadcast&lt;/upnp:class&gt;&lt;desc id=&quot;cdudn&quot; nameSpace=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot;&gt;SA_RINCON65031_&lt;/desc&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</CurrentURIMetaData></u:SetAVTransportURI></s:Body></s:Envelope>';
 
         return (bool)$this->sendPacket($content);
+    }
+
+    public function SetSleeptimer($hours,$minutes,$seconds)
+    {
+        if( $hours == 0 && $minutes == 0 && $seconds == 0 ){
+          $sleeptimer = '';
+        }else{
+          $sleeptimer = $hours.':'.$minutes.':'.$seconds;
+        }      
+
+$content='POST /MediaRenderer/AVTransport/Control HTTP/1.1
+CONNECTION: close
+HOST: '.$this->address.':1400
+CONTENT-LENGTH: '.(327+strlen($sleeptimer)).'
+CONTENT-TYPE: text/xml; charset="utf-8"
+SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#ConfigureSleepTimer"
+
+<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ConfigureSleepTimer xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><NewSleepTimerDuration>'.$sleeptimer.'</NewSleepTimerDuration></u:ConfigureSleepTimer></s:Body></s:Envelope>';
+
+        $this->sendPacket($content);
     }
 	
     public function SetTrack($track)
