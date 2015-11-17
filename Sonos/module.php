@@ -426,7 +426,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         foreach ($files as $key => $file) {
           // only files on SMB share can be used
           if (preg_match('/^\/\/[\w,.,\d,-]*\/\S*/',$file) == 0)
-            throw new Exception("File has to be located on a Samba share (e.g. //ipsymcon.fritz.box/tts/text.mp3)");
+            throw new Exception("File (".$file.") has to be located on a Samba share (e.g. //ipsymcon.fritz.box/tts/text.mp3)");
 
           $sonos->SetAVTransportURI("x-file-cifs:".$file);
           $sonos->Play();
