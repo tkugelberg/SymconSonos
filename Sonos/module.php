@@ -393,18 +393,34 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     }
     
     /**
-    * This function will be available automatically after the module is imported with the module control.
-    * Using the custom prefix this function will be callable from PHP and JSON-RPC through:
-    *
-    * SNS_Play($id);
-    *
+    * Start of Module functions
     */
-    public function Play()
+
+    public function ChangeGroupVolume($increment)
     {
-        SetValue($this->GetIDForIdent("Status"), 1);
+        if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
+
+        $groupMembers        = GetValueString(IPS_GetObjectIDByName("GroupMembers",$this->InstanceID ));
+        $groupMembersArray   = Array();
+        if($groupMembers)
+            $groupMembersArray = array_map("intval", explode(",",$groupMembers));
+        $groupMembersArray[] = $this->InstanceID;
+            
+        foreach($groupMembersArray as $key=>$ID) {
+          $newVolume = (GetValueInteger(IPS_GetObjectIDByName("Volume",$ID)) + $increment);
+          if ($newVolume > 100){
+              $newVolume = 100;
+          }elseif($newVolume < 0){
+              $newVolume = 0;
+          } 
+          SNS_SetVolume($ID, $newVolume );
+        }
+    }
+    
+    public function Next()
+    {
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Play();
-        
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Next();
     }
     
     public function Pause()
@@ -412,6 +428,13 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         SetValue($this->GetIDForIdent("Status"), 2);
         include_once(__DIR__ . "/sonos.php");
         (new PHPSonos($this->ReadPropertyString("IPAddress")))->Pause();
+    }
+
+    public function Play()
+    {
+        SetValue($this->GetIDForIdent("Status"), 1);
+        include_once(__DIR__ . "/sonos.php");
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Play();
     }
 
     public function PlayFiles(array $files)
@@ -449,55 +472,22 @@ if (Sys_Ping($ipAddress, 1000) == true) {
           $sonos->Play();
         }
     }
-    
+
     public function Previous()
     {
         include_once(__DIR__ . "/sonos.php");
         (new PHPSonos($this->ReadPropertyString("IPAddress")))->Previous();
     }
     
-    public function Next()
+    public function SetAnalogInput($input_instance)
     {
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Next();
-    }
-    
-    public function SetBass($bass)
-    {
-        if (!$this->ReadPropertyBoolean("BassControl")) die("This function is not enabled for this instance");
- 
-        SetValue($this->GetIDForIdent("Bass"), $bass);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetBass($bass);
+        $sonos = new PHPSonos($this->ReadPropertyString("IPAddress"));
+        
+        $sonos->SetAVTransportURI("x-rincon-stream:".IPS_GetProperty($input_instance ,"RINCON"));
+        $sonos->Play();
     }
 
-    public function SetLoudness($loudness)
-    {
-        if (!$this->ReadPropertyBoolean("LoudnessControl")) die("This function is not enabled for this instance");
- 
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetLoudness($loudness);
-        SetValue($this->GetIDForIdent("Loudness"), $loudness);
-    }
-
-    public function SetMute($mute)
-    {
-        if (!$this->ReadPropertyBoolean("MuteControl")) die("This function is not enabled for this instance");
-
-        SetValue($this->GetIDForIdent("Mute"), $mute);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetMute($mute);
-    }
-    
-    public function SetTreble($treble)	
-    {
-        if (!$this->ReadPropertyBoolean("TrebleControl")) die("This function is not enabled for this instance");
-
-        SetValue($this->GetIDForIdent("Treble"), $treble);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetTreble($treble);
-    }
-    
     public function SetBalance($balance)	
     {
         if (!$this->ReadPropertyBoolean("BalanceControl")) die("This function is not enabled for this instance");
@@ -518,24 +508,33 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         $sonos->SetVolume($rightVolume,'RF');
     }
     
-    public function SetVolume($volume)
+    public function SetBass($bass)
     {
-        SetValue($this->GetIDForIdent("Volume"), $volume);
+        if (!$this->ReadPropertyBoolean("BassControl")) die("This function is not enabled for this instance");
+ 
+        SetValue($this->GetIDForIdent("Bass"), $bass);
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetVolume($volume);
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetBass($bass);
+    }
+
+    public function SetDefaultGroupVolume()
+    {
+        if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
+
+        $groupMembers        = GetValueString(IPS_GetObjectIDByName("GroupMembers",$this->InstanceID ));
+        $groupMembersArray   = Array();
+        if($groupMembers)
+            $groupMembersArray = array_map("intval", explode(",",$groupMembers));
+        $groupMembersArray[] = $this->InstanceID;
+
+        foreach($groupMembersArray as $key=>$ID) {
+          SNS_SetDefaultVolume($ID);
+        }
     }
 
     public function SetDefaultVolume()
     {
         $this->SetVolume($this->ReadPropertyInteger("DefaultVolume"));
-    }
-    
-    public function SetRadio($radio)
-    {
-        include_once(__DIR__ . "/sonos.php");
-        include_once(__DIR__ . "/radio_stations.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetRadio( get_station_url($radio), $radio);
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Play();
     }
     
     public function SetGroup($groupCoordinator)
@@ -576,42 +575,6 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetAVTransportURI($uri);
     }
 
-    public function SetDefaultGroupVolume()
-    {
-        if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
-
-        $groupMembers        = GetValueString(IPS_GetObjectIDByName("GroupMembers",$this->InstanceID ));
-        $groupMembersArray   = Array();
-        if($groupMembers)
-            $groupMembersArray = array_map("intval", explode(",",$groupMembers));
-        $groupMembersArray[] = $this->InstanceID;
-
-        foreach($groupMembersArray as $key=>$ID) {
-          SNS_SetDefaultVolume($ID);
-        }
-    }
-
-    public function ChangeGroupVolume($increment)
-    {
-        if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
-
-        $groupMembers        = GetValueString(IPS_GetObjectIDByName("GroupMembers",$this->InstanceID ));
-        $groupMembersArray   = Array();
-        if($groupMembers)
-            $groupMembersArray = array_map("intval", explode(",",$groupMembers));
-        $groupMembersArray[] = $this->InstanceID;
-            
-        foreach($groupMembersArray as $key=>$ID) {
-          $newVolume = (GetValueInteger(IPS_GetObjectIDByName("Volume",$ID)) + $increment);
-          if ($newVolume > 100){
-              $newVolume = 100;
-          }elseif($newVolume < 0){
-              $newVolume = 0;
-          } 
-          SNS_SetVolume($ID, $newVolume );
-        }
-    }
-    
     public function SetGroupVolume($volume)
     {
         if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
@@ -619,12 +582,54 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         $this->ChangeGroupVolume($volume - GetValue($this->GetIDForIdent("GroupVolume")));
         SetValue($this->GetIDForIdent("GroupVolume"), $volume);
     }
+
+    public function SetLoudness($loudness)
+    {
+        if (!$this->ReadPropertyBoolean("LoudnessControl")) die("This function is not enabled for this instance");
+ 
+        include_once(__DIR__ . "/sonos.php");
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetLoudness($loudness);
+        SetValue($this->GetIDForIdent("Loudness"), $loudness);
+    }
+
+    public function SetMute($mute)
+    {
+        if (!$this->ReadPropertyBoolean("MuteControl")) die("This function is not enabled for this instance");
+
+        SetValue($this->GetIDForIdent("Mute"), $mute);
+        include_once(__DIR__ . "/sonos.php");
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetMute($mute);
+    }
     
     public function SetRadioFavorite()
     {
         $this->SetRadio($this->ReadPropertyString("FavoriteStation"));
     }
     
+    public function SetRadio($radio)
+    {
+        include_once(__DIR__ . "/sonos.php");
+        include_once(__DIR__ . "/radio_stations.php");
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetRadio( get_station_url($radio), $radio);
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Play();
+    }
+    
+    public function SetTreble($treble)	
+    {
+        if (!$this->ReadPropertyBoolean("TrebleControl")) die("This function is not enabled for this instance");
+
+        SetValue($this->GetIDForIdent("Treble"), $treble);
+        include_once(__DIR__ . "/sonos.php");
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetTreble($treble);
+    }
+    
+    public function SetVolume($volume)
+    {
+        SetValue($this->GetIDForIdent("Volume"), $volume);
+        include_once(__DIR__ . "/sonos.php");
+        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetVolume($volume);
+    }
+
     public function Stop()
     {
         SetValue($this->GetIDForIdent("Status"), 3);
@@ -632,6 +637,10 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         (new PHPSonos($this->ReadPropertyString("IPAddress")))->Stop();
     }
     
+    /**
+    * End of Module functions
+    */
+
     public function RequestAction($Ident, $Value)
     {
         switch($Ident) {
