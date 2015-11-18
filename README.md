@@ -230,6 +230,7 @@ SNS_SetRadio(integer $InstanceID, string $radio)
 Switches on the provided radio station in $radio.
 Currently available are:
 - 1LIVE
+- A State Of Trance
 - Antenne 1
 - Antenne Bayern
 - Antenne MV
@@ -251,7 +252,11 @@ Currently available are:
 - Radio K.W.
 - Radio Lippe
 - Radio Top40
+- RevivalKult
 - RPR1
+- Sunshine Live
+- Sunshine Live (classic)
+- Sunshine Live (trance)
 - SWR1 BW
 - SWR1 RP
 - SWR3
