@@ -657,6 +657,15 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetSleeptimer($hours,$minutes,0);
     }
 
+    public function SetSpdifInput($input_instance)
+    {
+        include_once(__DIR__ . "/sonos.php");
+        $sonos = new PHPSonos($this->ReadPropertyString("IPAddress"));
+        
+        $sonos->SetAVTransportURI("x-sonos-htastream:".IPS_GetProperty($input_instance ,"RINCON").":spdif");
+        $sonos->Play();
+    }
+
     public function SetTreble($treble)	
     {
         if (!$this->ReadPropertyBoolean("TrebleControl")) die("This function is not enabled for this instance");

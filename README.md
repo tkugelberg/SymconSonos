@@ -272,6 +272,13 @@ This will set the Sleeptimer to the provided minutes.
 ---  
 
 ```php
+SNS_SetSpdifInput(integer $InstanceID, integer $InputInstanceID)
+```
+This will start playing the SPDIF input of the provided instance.
+
+---
+
+```php
 SNS_SetTreble(integer $InstanceID, integer $treble)
 ```
 Will modify the treble settings in the equlizer of the selected box.
