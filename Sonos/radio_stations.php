@@ -29,12 +29,12 @@ function get_available_stations(){
             Array( ('name') => "SWR1 BW",                  ('url') => "x-rincon-mp3radio://mp3-live.swr.de/swr1bw_m.m3u" ),
             Array( ('name') => "SWR1 RP",                  ('url') => "x-rincon-mp3radio://mp3-live.swr.de/swr1rp_m.m3u" ),
             Array( ('name') => "SWR3",                     ('url') => "x-rincon-mp3radio://mp3-live.swr3.de/swr3_m.m3u" ),
-            Array( ('name') => "WDR2",                     ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/wdr2.m3u" )
+            Array( ('name') => "WDR2",                     ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/wdr2.m3u" ),
             Array( ('name') => "Sunshine Live",            ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshinelive-mp3-128" ),
             Array( ('name') => "Sunshine Live - classics", ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshine-classics-mp3-128" ),
             Array( ('name') => "Sunshine Live - trance",   ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshine-trance-mp3-128" ),
             Array( ('name') => "A State Of Trance",        ('url') => "x-sonosapi-stream:s142421?sid=254" ),
-            Array( ('name') => "RevivalKult",              ('url') => "x-sonosapi-stream:s186710?sid=254" ),
+            Array( ('name') => "RevivalKult",              ('url') => "x-sonosapi-stream:s186710?sid=254" )
                          );
 
   return  $RadioStations ;
