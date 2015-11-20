@@ -3,7 +3,6 @@ function get_available_stations(){
   //Taken URLs from  http://wiki.ubuntuusers.de/internetradio/stationen 
   $RadioStations =  Array(
             Array( ('name') => "1LIVE",                    ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/einslive.m3u" ),
-            Array( ('name') => "A State Of Trance",        ('url') => "x-sonosapi-stream:s142421?sid=254" ),
             Array( ('name') => "Antenne 1",                ('url') => "x-rincon-mp3radio://stream.antenne1.de/stream1/livestream.mp3" ),
             Array( ('name') => "Antenne Bayern",           ('url') => "x-rincon-mp3radio://mp3channels.webradio.antenne.de/antenne" ),
             Array( ('name') => "Antenne MV",               ('url') => "x-rincon-mp3radio://streams.antennemv.de/antennemv-live/mp3-192/amv" ),
@@ -26,23 +25,17 @@ function get_available_stations(){
             Array( ('name') => "Radio K.W.",               ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radiokw/livestream.mp3" ),
             Array( ('name') => "Radio Lippe",              ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radiolippe/livestream.mp3" ),
             Array( ('name') => "Radio Top40",              ('url') => "x-rincon-mp3radio://xapp2023227392c40000.f.l.i.lb.core-cdn.net/40000mb/live/app2023227392/w2075033610/live_de_128.mp3"),
-            Array( ('name') => "RevivalKult",              ('url') => "x-sonosapi-stream:s186710?sid=254" ),
             Array( ('name') => "RPR1",                     ('url') => "x-rincon-mp3radio://rpr1.fmstreams.de/stream1.m3u" ),
-            Array( ('name') => "Sunshine Live",            ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshinelive-mp3-128" ),
-            Array( ('name') => "Sunshine Live - classics", ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshine-classics-mp3-128" ),
-            Array( ('name') => "Sunshine Live - trance",   ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshine-trance-mp3-128" ),
             Array( ('name') => "SWR1 BW",                  ('url') => "x-rincon-mp3radio://mp3-live.swr.de/swr1bw_m.m3u" ),
             Array( ('name') => "SWR1 RP",                  ('url') => "x-rincon-mp3radio://mp3-live.swr.de/swr1rp_m.m3u" ),
             Array( ('name') => "SWR3",                     ('url') => "x-rincon-mp3radio://mp3-live.swr3.de/swr3_m.m3u" ),
             Array( ('name') => "WDR2",                     ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/wdr2.m3u" )
+            Array( ('name') => "Sunshine Live",            ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshinelive-mp3-128" ),
+            Array( ('name') => "Sunshine Live - classics", ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshine-classics-mp3-128" ),
+            Array( ('name') => "Sunshine Live - trance",   ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshine-trance-mp3-128" ),
+            Array( ('name') => "A State Of Trance",        ('url') => "x-sonosapi-stream:s142421?sid=254" ),
+            Array( ('name') => "RevivalKult",              ('url') => "x-sonosapi-stream:s186710?sid=254" ),
                          );
-
-   // sort by name
-  foreach ($RadioStations as $key => $row) {
-      $dates[$key]  = $row['name']; 
-  }
-
-  array_multisort($dates, SORT_ASC, $RadioStations);
 
   return  $RadioStations ;
 }

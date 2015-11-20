@@ -76,6 +76,9 @@ class Sonos extends IPSModule
                     $Color = -1;
                 }
                 $Associations[] = Array($Value++, $val['name'], "", $Color);
+                // associations only support ip to 32 variables
+                if( $Value === 32 )
+                        break;
             }
         }
         
