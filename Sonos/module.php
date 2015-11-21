@@ -445,7 +445,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
  
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -455,7 +455,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     
     public function Next()
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -465,7 +465,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     
     public function Pause()
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -476,7 +476,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
 
     public function Play()
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -487,7 +487,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
 
     public function PlayFiles(array $files)
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -527,7 +527,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
 
     public function Previous()
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -537,7 +537,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     
     public function SetAnalogInput($input_instance)
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -554,7 +554,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
 
         SetValue($this->GetIDForIdent("Balance"), $balance);
 
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -576,7 +576,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("BassControl")) die("This function is not enabled for this instance");
  
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -607,7 +607,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     
     public function SetGroup($groupCoordinator)
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -668,7 +668,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("MuteControl")) die("This function is not enabled for this instance");
 
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -684,7 +684,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     
     public function SetRadio($radio)
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -699,7 +699,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
 
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -716,7 +716,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
 
     public function SetSpdifInput($input_instance)
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -731,7 +731,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("TrebleControl")) die("This function is not enabled for this instance");
 
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -742,7 +742,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     
     public function SetVolume($volume)
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true) 
            throw new Exception("Sonos Box ".$ip." is not available");
 
@@ -753,7 +753,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
 
     public function Stop()
     {
-        $ip = $this->ReadPropertyString("IPAddress")
+        $ip = $this->ReadPropertyString("IPAddress");
         if (Sys_Ping($ip, 1000) != true) 
            throw new Exception("Sonos Box ".$ip." is not available");
 
