@@ -435,7 +435,9 @@ if (Sys_Ping($ipAddress, 1000) == true) {
           }elseif($newVolume < 0){
               $newVolume = 0;
           } 
-          SNS_SetVolume($ID, $newVolume );
+          try{
+            SNS_SetVolume($ID, $newVolume );
+          }catch (Exception $e){}
         }
     }
 
@@ -443,34 +445,54 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
  
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetSleeptimer(0,0,0);
+        (new PHPSonos($ip))->SetSleeptimer(0,0,0);
     }
     
     public function Next()
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Next();
+        (new PHPSonos($ip))->Next();
     }
     
     public function Pause()
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         SetValue($this->GetIDForIdent("Status"), 2);
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Pause();
+        (new PHPSonos($ip))->Pause();
     }
 
     public function Play()
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         SetValue($this->GetIDForIdent("Status"), 1);
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Play();
+        (new PHPSonos($ip))->Play();
     }
 
     public function PlayFiles(array $files)
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         include_once(__DIR__ . "/sonos.php");
-        $sonos = new PHPSonos($this->ReadPropertyString("IPAddress"));
+        $sonos = new PHPSonos($ip);
     
         $positionInfo  = $sonos->GetPositionInfo();
         $mediaInfo     = $sonos->GetMediaInfo();
@@ -505,14 +527,22 @@ if (Sys_Ping($ipAddress, 1000) == true) {
 
     public function Previous()
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Previous();
+        (new PHPSonos($ip))->Previous();
     }
     
     public function SetAnalogInput($input_instance)
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         include_once(__DIR__ . "/sonos.php");
-        $sonos = new PHPSonos($this->ReadPropertyString("IPAddress"));
+        $sonos = new PHPSonos($ip);
         
         $sonos->SetAVTransportURI("x-rincon-stream:".IPS_GetProperty($input_instance ,"RINCON"));
         $sonos->Play();
@@ -524,6 +554,10 @@ if (Sys_Ping($ipAddress, 1000) == true) {
 
         SetValue($this->GetIDForIdent("Balance"), $balance);
 
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         $leftVolume  = 100;
         $rightVolume = 100;     
         if ( $balance < 0 ){
@@ -533,7 +567,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         }
 
         include_once(__DIR__ . "/sonos.php");
-        $sonos = (new PHPSonos($this->ReadPropertyString("IPAddress")));
+        $sonos = (new PHPSonos($ip));
         $sonos->SetVolume($leftVolume,'LF');
         $sonos->SetVolume($rightVolume,'RF');
     }
@@ -542,9 +576,13 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("BassControl")) die("This function is not enabled for this instance");
  
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         SetValue($this->GetIDForIdent("Bass"), $bass);
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetBass($bass);
+        (new PHPSonos($ip))->SetBass($bass);
     }
 
     public function SetDefaultGroupVolume()
@@ -569,6 +607,10 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     
     public function SetGroup($groupCoordinator)
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         // get variable of coordinator members to be updated
         if ($groupCoordinator){
             $groupMembersID = @IPS_GetObjectIDByIdent("GroupMembers",$groupCoordinator);
@@ -602,7 +644,7 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         IPS_SetHidden($this->GetIDForIdent("Status"),$hidden);
         
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetAVTransportURI($uri);
+        (new PHPSonos($ip))->SetAVTransportURI($uri);
     }
 
     public function SetGroupVolume($volume)
@@ -626,9 +668,13 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("MuteControl")) die("This function is not enabled for this instance");
 
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         SetValue($this->GetIDForIdent("Mute"), $mute);
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetMute($mute);
+        (new PHPSonos($ip))->SetMute($mute);
     }
     
     public function SetRadioFavorite()
@@ -638,9 +684,13 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     
     public function SetRadio($radio)
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         include_once(__DIR__ . "/sonos.php");
         include_once(__DIR__ . "/radio_stations.php");
-        $sonos = new PHPSonos($this->ReadPropertyString("IPAddress"));
+        $sonos = new PHPSonos($ip);
         $sonos->SetRadio( get_station_url($radio), $radio);
         $sonos->Play();
     }
@@ -648,6 +698,10 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     public function SetSleepTimer($minutes)
     {
         if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
+
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
 
         $hours = 0;
 
@@ -657,13 +711,17 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         }
 
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetSleeptimer($hours,$minutes,0);
+        (new PHPSonos($ip))->SetSleeptimer($hours,$minutes,0);
     }
 
     public function SetSpdifInput($input_instance)
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         include_once(__DIR__ . "/sonos.php");
-        $sonos = new PHPSonos($this->ReadPropertyString("IPAddress"));
+        $sonos = new PHPSonos($ip);
         
         $sonos->SetAVTransportURI("x-sonos-htastream:".IPS_GetProperty($input_instance ,"RINCON").":spdif");
         $sonos->Play();
@@ -673,23 +731,35 @@ if (Sys_Ping($ipAddress, 1000) == true) {
     {
         if (!$this->ReadPropertyBoolean("TrebleControl")) die("This function is not enabled for this instance");
 
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         SetValue($this->GetIDForIdent("Treble"), $treble);
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetTreble($treble);
+        (new PHPSonos($ip))->SetTreble($treble);
     }
     
     public function SetVolume($volume)
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true) 
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         SetValue($this->GetIDForIdent("Volume"), $volume);
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->SetVolume($volume);
+        (new PHPSonos($ip))->SetVolume($volume);
     }
 
     public function Stop()
     {
+        $ip = $this->ReadPropertyString("IPAddress")
+        if (Sys_Ping($ip, 1000) != true) 
+           throw new Exception("Sonos Box ".$ip." is not available");
+
         SetValue($this->GetIDForIdent("Status"), 3);
         include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($this->ReadPropertyString("IPAddress")))->Stop();
+        (new PHPSonos($ip))->Stop();
     }
     
     /**
