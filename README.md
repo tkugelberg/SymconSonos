@@ -218,6 +218,13 @@ Accepts 0,1, true and false as input.
 ---  
 
 ```php
+SNS_SetPlaylist(integer $InstanceID, strin $name)
+```
+Clears the queue of selected Box and adds all files of the requested playlist.
+
+---  
+
+```php
 SNS_SetRadioFavorite(integer $InstanceID)
 ```
 Switches on the favorite Radio, that is set in instance settings.
