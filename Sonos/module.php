@@ -681,6 +681,41 @@ if (Sys_Ping($ipAddress, 1000) == true) {
         (new PHPSonos($ip))->SetMute($mute);
     }
     
+    public function SetPlaylist($name){
+        $ip = $this->ReadPropertyString("IPAddress");
+        if (Sys_Ping($ip, 500) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
+        include_once(__DIR__ . "/sonos.php");
+        $sonos = new PHPSonos($ip);
+
+        $browseResult = $sonos->BrowseContentDirectory('SQ:');
+
+        $list = Array();
+        foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')))->container as $container) {
+            $list[] = Array( ('id')    => (string)$container->attributes()['id'],
+                             ('title') => (string)$container->xpath('dc:title')[0],
+                             ('uri')   => (string)$container->res );
+        }  
+
+        $uri = '';
+        foreach ($list as $key => $value) {
+            if ($value['title'] == $name) {
+                $uri = $value['uri'];
+                break;
+            }
+        }
+
+        if($uri === '')
+            throw new Exception('Playlist \''.$name.'\' not found');
+
+        $sonos->ClearQueue();
+        $sonos->AddToQueue($uri);
+        $sonos->SetAVTransportURI('x-rincon-queue:'.$this->ReadPropertyString("RINCON").'#0');
+        $sonos->Play();
+
+    }
+
     public function SetRadioFavorite()
     {
         $this->SetRadio($this->ReadPropertyString("FavoriteStation"));

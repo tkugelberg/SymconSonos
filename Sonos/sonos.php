@@ -26,6 +26,22 @@ SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue"
         $this->sendPacket($content);
     }
 	
+    public function BrowseContentDirectory($objectID='SQ:',$browseFlag='BrowseDirectChildren',$requestedCount=100,$startingIndex=0,$filter='',$sortCriteria=''){
+
+$content='POST /MediaServer/ContentDirectory/Control HTTP/1.1
+CONNECTION: close
+HOST: '.$this->address.':1400
+CONTENT-LENGTH: '.(389+strlen($objectID)+strlen($browseFlag)+strlen($requestedCount)+strlen($startingIndex)+strlen($filter)+strlen($sortCriteria)).'
+CONTENT-TYPE: text/xml; charset="utf-8"
+SOAPACTION: "urn:schemas-upnp-org:service:ContentDirectory:1#Browse"
+
+<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>'.$objectID.'</ObjectID><BrowseFlag>'.$browseFlag.'</BrowseFlag><Filter>'.$filter.'</Filter><StartingIndex>'.$startingIndex.'</StartingIndex><RequestedCount>'.$requestedCount.'</RequestedCount><SortCriteria>'.$sortCriteria.'</SortCriteria></u:Browse></s:Body></s:Envelope>';
+
+        $result = $this->XMLsendPacket($content);
+        return (new SimpleXMLElement($result))->children("s",true)->Body->children("u",true)->BrowseResponse->children()->Result;
+    
+    }
+
     public function ClearQueue()
     {
 
@@ -656,9 +672,34 @@ SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#Stop"
 
         if(strpos($ret, "200 OK") === false)
             throw new Exception("Error sending command: ".$ret);
-        $array = preg_split("/\n/", $ret);
+
+        $array = preg_split("/\r\n/", $ret);
+
+        $result = "";
+        if(strpos($ret, "TRANSFER-ENCODING: chunked") === false){
+            $result = $array[count($array) - 1];
+        }else{
+            $chunksStarted = false;
+            $content       = false;
+            foreach($array as $key => $value){
+                if($value == ""){
+                    $chunksStarted = true;
+                    continue;
+                }
+                if($chunksStarted === false)
+                    continue;
+                if($content === false){
+                    if( $value === 0)
+                        break;
+                    $content = true;
+                    continue;
+                }
+                $result = $result.$value;
+                $content = false;
+            }
+        } 
 		
-        return $array[count($array) - 1];
+        return $result;
     }
 
 /**
@@ -686,9 +727,33 @@ SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#Stop"
         if(strpos($ret, "200 OK") === false)
             throw new Exception("Error sending command: ".$ret);
 		
-        $array = preg_split("/\n/", $ret);
+        $array = preg_split("/\r\n/", $ret);
 
-        return $array[count($array) - 1];
+        $result = "";
+        if(strpos($ret, "TRANSFER-ENCODING: chunked") === false){
+            $result = $array[count($array) - 1];
+        }else{
+            $chunksStarted = false;
+            $content       = false;
+            foreach($array as $key => $value){
+                if($value == ""){
+                    $chunksStarted = true;
+                    continue;
+                }
+                if($chunksStarted === false)
+                    continue;
+                if($content === false){
+                    if( $value === 0)
+                        break;
+                    $content = true;
+                    continue;
+                }
+                $result = $result.$value;
+                $content = false;
+            }
+        } 
+		
+        return $result;
     }
 
 }
