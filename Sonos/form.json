@@ -2,6 +2,7 @@
 	"elements":
 	[
 		{ "name": "IPAddress",         "type": "ValidationTextBox", "caption": "IP-Address/Host" },
+		{ "name": "TimeOut",           "type": "NumberSpinner",     "caption": "Maximal ping timeout" },
 		{ "name": "DefaultVolume",     "type": "NumberSpinner",     "caption": "Default volume (%)" },
                 { "type": "Label", "label": "RINCON should be filled automatically by grouping automatism. Only for support here" },
                 { "name": "RINCON",            "type": "ValidationTextBox", "caption": "RINCON" },

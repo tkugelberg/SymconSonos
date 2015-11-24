@@ -36,6 +36,9 @@ IP-Symcon PHP module for accessing Sonos audio systems
      <img src="http://www.kugelberg.de/SymconSonos/instance_config.png">
      -  IP-Address/Host: <br>
         address the Sonos component can be reached under. When applying the settings a connection test is performed.
+     -  Maximal ping timeout:<br>
+        before sending a command to a Sonos box, it is checked if the Box is available via Sys_Ping().<br>
+        This Parameter is setting the value after how many milliseconds the IP is considered to be down.
      -  Default Volume:<br>
         Volume that will be set when executing
        ```
