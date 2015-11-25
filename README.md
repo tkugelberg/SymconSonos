@@ -39,6 +39,7 @@ IP-Symcon PHP module for accessing Sonos audio systems
      -  Maximal ping timeout:<br>
         before sending a command to a Sonos box, it is checked if the Box is available via Sys_Ping().<br>
         This Parameter is setting the value after how many milliseconds the IP is considered to be down.
+        If the value is set to 0, the check will not be performed.
      -  Default Volume:<br>
         Volume that will be set when executing
        ```
