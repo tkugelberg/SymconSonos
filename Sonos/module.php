@@ -377,7 +377,7 @@ foreach($allSonosInstances as $key=>$SonosID) {
 $ipAddress = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
 $timeout   = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
 
-if ( !$timeout || Sys_Ping($ipAddress, $timeout)) == true ) {
+if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
 
     $sonos                    = new PHPSonos($ipAddress);
     $sonosZoneGroupAttributes = (new SimpleXMLElement($sonos->GetZoneGroupAttributes()))->children("s",true)->Body->children("u",true)->GetZoneGroupAttributesResponse->children();
