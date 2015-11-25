@@ -208,9 +208,10 @@ class Sonos extends IPSModule
         $updateStatusScript = '<?
 include_once("../modules/SymconSonos/Sonos/sonos.php");
 
-$ip = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
+$ip      = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
+$timeout = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
 
-if (Sys_Ping($ip, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut")) == true) {
+if ( !$timeout || Sys_Ping($ip, $timeout) == true ) {
 
     $sonos = new PHPSonos($ip);
 
@@ -374,8 +375,9 @@ foreach($allSonosInstances as $key=>$SonosID) {
 }
 
 $ipAddress = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
+$timeout   = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
 
-if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut")) == true) {
+if ( !$timeout || Sys_Ping($ipAddress, $timeout)) == true ) {
 
     $sonos                    = new PHPSonos($ipAddress);
     $sonosZoneGroupAttributes = (new SimpleXMLElement($sonos->GetZoneGroupAttributes()))->children("s",true)->Body->children("u",true)->GetZoneGroupAttributesResponse->children();
@@ -446,8 +448,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     {
         if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
  
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         include_once(__DIR__ . "/sonos.php");
@@ -456,8 +459,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     
     public function Next()
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         include_once(__DIR__ . "/sonos.php");
@@ -466,8 +470,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     
     public function Pause()
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Status"), 2);
@@ -477,8 +482,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
 
     public function Play()
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Status"), 1);
@@ -488,8 +494,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
 
     public function PlayFiles(array $files)
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         include_once(__DIR__ . "/sonos.php");
@@ -528,8 +535,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
 
     public function Previous()
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         include_once(__DIR__ . "/sonos.php");
@@ -538,8 +546,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     
     public function SetAnalogInput($input_instance)
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         include_once(__DIR__ . "/sonos.php");
@@ -555,8 +564,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
 
         SetValue($this->GetIDForIdent("Balance"), $balance);
 
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         $leftVolume  = 100;
@@ -577,8 +587,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     {
         if (!$this->ReadPropertyBoolean("BassControl")) die("This function is not enabled for this instance");
  
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Bass"), $bass);
@@ -612,8 +623,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     
     public function SetGroup($groupCoordinator)
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         // get variable of coordinator members to be updated
@@ -664,8 +676,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     {
         if (!$this->ReadPropertyBoolean("LoudnessControl")) die("This function is not enabled for this instance");
 
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
  
         include_once(__DIR__ . "/sonos.php");
@@ -677,8 +690,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     {
         if (!$this->ReadPropertyBoolean("MuteControl")) die("This function is not enabled for this instance");
 
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Mute"), $mute);
@@ -687,8 +701,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     }
     
     public function SetPlaylist($name){
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         include_once(__DIR__ . "/sonos.php");
@@ -728,8 +743,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     
     public function SetRadio($radio)
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         include_once(__DIR__ . "/sonos.php");
@@ -743,8 +759,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     {
         if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
 
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         $hours = 0;
@@ -760,8 +777,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
 
     public function SetSpdifInput($input_instance)
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         include_once(__DIR__ . "/sonos.php");
@@ -775,8 +793,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     {
         if (!$this->ReadPropertyBoolean("TrebleControl")) die("This function is not enabled for this instance");
 
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true)
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Treble"), $treble);
@@ -786,8 +805,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
     
     public function SetVolume($volume)
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true) 
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Volume"), $volume);
@@ -797,8 +817,9 @@ if (Sys_Ping($ipAddress, IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut"
 
     public function Stop()
     {
-        $ip = $this->ReadPropertyString("IPAddress");
-        if (Sys_Ping($ip, $this->ReadPropertyString("TimeOut")) != true) 
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Status"), 3);
