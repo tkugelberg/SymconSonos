@@ -244,11 +244,16 @@ if ( !$timeout || Sys_Ping($ip, $timeout) == true ) {
     }
 
     if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "SleeptimerControl")){
-        $SleeptimerArray = explode(":",$sonos->GetSleeptimer());
+        $sleeptimer = $sonos->GetSleeptimer();
+        if($sleeptimer){
+            $SleeptimerArray = explode(":",$sonos->GetSleeptimer());
 
-        $SleeptimerMinutes = $SleeptimerArray[0]*60+$SleeptimerArray[1];
-        if($SleeptimerArray[2])
-            $SleeptimerMinutes = $SleeptimerMinutes + 1;
+            $SleeptimerMinutes = $SleeptimerArray[0]*60+$SleeptimerArray[1];
+            if($SleeptimerArray[2])
+                $SleeptimerMinutes = $SleeptimerMinutes + 1;
+        }else{
+            $SleeptimerMinutes = 0;
+        }
 
         SetValueInteger(IPS_GetObjectIDByName("Sleeptimer", IPS_GetParent($_IPS["SELF"])), $SleeptimerMinutes);
     }
