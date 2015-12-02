@@ -340,7 +340,7 @@ if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")){
 include_once("../modules/SymconSonos/Sonos/sonos.php");
 
 // Nothing to do if Instance is Group Coordinator
-if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")) exit;
+if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")) return;
 
 $groupForcing      = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupForcing");
 $rinconMapping     = Array();
