@@ -126,7 +126,7 @@ Resumes or starts playing.
 ---  
 
 ```php
-SNS_PlayFiles(integer $InstanceID, array $files)
+SNS_PlayFiles(integer $InstanceID, array $files, string $volumeChange)
 ```
 All files provided in the array $files have to be located on a Samba Share (CIFS).
 They have to be provided with complete path (e.g. "//server.local.domain/share/file.mp3").
@@ -140,8 +140,16 @@ Playing several files could look like this:
 
 ```php
 SNS_PlayFiles(17265, Array( "//ipsymcon.fritz.box/sonos/bla.mp3",
-                            "//ipsymcon.fritz.box/sonos/blubb.mp3"));  
+                            "//ipsymcon.fritz.box/sonos/blubb.mp3"), 0);  
 ```
+
+The parameter $changeVolume can be provided with the following syntax:
+"+10" -> Increase volume by 10% before playing the file(s)
+"-10" -> Descrease volume by 10% before playing the file(s)
+"0"   -> do not change volume
+"10"  -> will set the volume to 10% before playing the file(s)
+
+After playing the files, the volume will be set back to the source value
 
 ---  
 

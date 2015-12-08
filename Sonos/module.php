@@ -206,14 +206,14 @@ class Sonos extends IPSModule
         // Start add scripts for regular status and grouping updates
         // 1) _updateStatus 
         $updateStatusScript = '<?
-include_once("../modules/SymconSonos/Sonos/sonos.php");
+include_once("../modules/SymconSonos/Sonos/sonosAccess.php");
 
 $ip      = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
 $timeout = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
 
 if ( !$timeout || Sys_Ping($ip, $timeout) == true ) {
 
-    $sonos = new PHPSonos($ip);
+    $sonos = new SonosAccess($ip);
 
     $status = $sonos->GetTransportInfo();
     SetValueInteger(IPS_GetObjectIDByName("Volume", IPS_GetParent($_IPS["SELF"])), $sonos->GetVolume());
@@ -337,7 +337,7 @@ if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")){
 
         // 2) _updateGrouping
         $updateGroupingScript = '<?
-include_once("../modules/SymconSonos/Sonos/sonos.php");
+include_once("../modules/SymconSonos/Sonos/sonosAccess.php");
 
 // Nothing to do if Instance is Group Coordinator
 if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")) return;
@@ -384,10 +384,8 @@ $timeout   = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
 
 if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
 
-    $sonos                    = new PHPSonos($ipAddress);
-    $sonosZoneGroupAttributes = (new SimpleXMLElement($sonos->GetZoneGroupAttributes()))->children("s",true)->Body->children("u",true)->GetZoneGroupAttributesResponse->children();
-    $sonosGroupCoordinator    = explode(":",$sonosZoneGroupAttributes->CurrentZoneGroupID)[0];
-    //  $sonosGroupMembers        = explode(",",$sonosZoneGroupAttributes->CurrentZonePlayerUUIDsInGroup);
+    $sonos                    = new SonosAccess($ipAddress);
+    $sonosGroupCoordinator    = explode(":",$sonos->GetZoneGroupAttributes()["CurrentZoneGroupID"])[0];
 
     foreach($rinconMapping as $key=>$value) {
         if($value["RINCON"] === $sonosGroupCoordinator ){
@@ -449,6 +447,13 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         }
     }
 
+    public function ChangeVolume($increment){
+        $newVolume = (GetValueInteger($this->GetIDForIdent("Volume")) + $increment);
+        try{
+          $this->SetVolume($newVolume);
+        }catch (Exception $e){throw $e;}
+    }
+
     public function DeleteSleepTimer()
     {
         if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
@@ -458,8 +463,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->SetSleeptimer(0,0,0);
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->SetSleeptimer(0,0,0);
     }
     
     public function Next()
@@ -469,8 +474,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->Next();
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->Next();
     }
     
     public function Pause()
@@ -481,8 +486,9 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Status"), 2);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->Pause();
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos = new SonosAccess($ip);
+        if($sonos->GetTransportInfo() == 1) $sonos->Pause();
     }
 
     public function Play()
@@ -493,23 +499,48 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Status"), 1);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->Play();
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->Play();
     }
 
-    public function PlayFiles(array $files)
+    public function PlayFiles(array $files, $volumeChange)
     {
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        include_once(__DIR__ . "/sonos.php");
-        $sonos = new PHPSonos($ip);
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos = new SonosAccess($ip);
     
         $positionInfo  = $sonos->GetPositionInfo();
         $mediaInfo     = $sonos->GetMediaInfo();
         $transportInfo = $sonos->GetTransportInfo();
+        $volume        = $sonos->GetVolume();
+
+        //adjust volume if needed
+        if($volumeChange != 0){
+          // check for group coordinator
+          $isGroupCoordinator = $this->ReadPropertyBoolean("GroupCoordinator");
+          // pause if playing
+          if($transportInfo==1) $sonos->Pause(); 
+          
+          // volume request absolte or relative?
+          if($volumeChange[0] == "+" || $volumeChange[0] == "-"){
+            if($isGroupCoordinator){
+              $this->chnageGroupVolume($volumeChange);
+            }else{
+              $this->ChangeVolume($volumeChange);
+            }
+          }else{
+            if($isGroupCoordinator){
+              $this->SetGroupVolume($volumeChange);
+            }else{
+              $this->SetVolume($volumeChange); 
+            }
+          }
+
+        }
 
         foreach ($files as $key => $file) {
           // only files on SMB share can be used
@@ -533,6 +564,15 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
  
         }
 
+        if($volumeChange != 0){
+          // set back volume
+          if($isGroupCoordinator){
+            $this->SetGroupVolume($volume);
+          }else{
+            $this->SetVolume($volume); 
+          }
+        }
+
         if ($transportInfo==1){
           $sonos->Play();
         }
@@ -545,8 +585,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->Previous();
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->Previous();
     }
     
     public function SetAnalogInput($input_instance)
@@ -556,8 +596,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        include_once(__DIR__ . "/sonos.php");
-        $sonos = new PHPSonos($ip);
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos = new SonosAccess($ip);
         
         $sonos->SetAVTransportURI("x-rincon-stream:".IPS_GetProperty($input_instance ,"RINCON"));
         $sonos->Play();
@@ -582,8 +622,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
           $leftVolume  = 100 - $balance;
         }
 
-        include_once(__DIR__ . "/sonos.php");
-        $sonos = (new PHPSonos($ip));
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos = (new SonosAccess($ip));
         $sonos->SetVolume($leftVolume,'LF');
         $sonos->SetVolume($rightVolume,'RF');
     }
@@ -598,8 +638,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Bass"), $bass);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->SetBass($bass);
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->SetBass($bass);
     }
 
     public function SetDefaultGroupVolume()
@@ -665,8 +705,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         IPS_SetHidden($this->GetIDForIdent("Radio"),$hidden);
         IPS_SetHidden($this->GetIDForIdent("Status"),$hidden);
         
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->SetAVTransportURI($uri);
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->SetAVTransportURI($uri);
     }
 
     public function SetGroupVolume($volume)
@@ -686,8 +726,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
  
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->SetLoudness($loudness);
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->SetLoudness($loudness);
         SetValue($this->GetIDForIdent("Loudness"), $loudness);
     }
 
@@ -701,8 +741,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Mute"), $mute);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->SetMute($mute);
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->SetMute($mute);
     }
     
     public function SetPlaylist($name){
@@ -711,8 +751,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        include_once(__DIR__ . "/sonos.php");
-        $sonos = new PHPSonos($ip);
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos = new SonosAccess($ip);
 
         $browseResult = $sonos->BrowseContentDirectory('SQ:');
 
@@ -753,9 +793,9 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        include_once(__DIR__ . "/sonos.php");
+        include_once(__DIR__ . "/sonosAccess.php");
         include_once(__DIR__ . "/radio_stations.php");
-        $sonos = new PHPSonos($ip);
+        $sonos = new SonosAccess($ip);
         $sonos->SetRadio( get_station_url($radio), $radio);
         $sonos->Play();
     }
@@ -776,8 +816,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
           $minutes = $minutes - 60;
         }
 
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->SetSleeptimer($hours,$minutes,0);
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->SetSleeptimer($hours,$minutes,0);
     }
 
     public function SetSpdifInput($input_instance)
@@ -787,8 +827,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        include_once(__DIR__ . "/sonos.php");
-        $sonos = new PHPSonos($ip);
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos = new SonosAccess($ip);
         
         $sonos->SetAVTransportURI("x-sonos-htastream:".IPS_GetProperty($input_instance ,"RINCON").":spdif");
         $sonos->Play();
@@ -804,8 +844,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Treble"), $treble);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->SetTreble($treble);
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->SetTreble($treble);
     }
     
     public function SetVolume($volume)
@@ -816,8 +856,8 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Volume"), $volume);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->SetVolume($volume);
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->SetVolume($volume);
     }
 
     public function Stop()
@@ -828,8 +868,9 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
            throw new Exception("Sonos Box ".$ip." is not available");
 
         SetValue($this->GetIDForIdent("Status"), 3);
-        include_once(__DIR__ . "/sonos.php");
-        (new PHPSonos($ip))->Stop();
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos = new SonosAccess($ip);
+        if($sonos->GetTransportInfo() == 1) $sonos->Stop();
     }
     
     /**
