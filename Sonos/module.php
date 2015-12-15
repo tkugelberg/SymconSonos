@@ -528,7 +528,7 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
           // volume request absolte or relative?
           if($volumeChange[0] == "+" || $volumeChange[0] == "-"){
             if($isGroupCoordinator){
-              $this->chnageGroupVolume($volumeChange);
+              $this->changeGroupVolume($volumeChange);
             }else{
               $this->ChangeVolume($volumeChange);
             }
