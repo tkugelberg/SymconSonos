@@ -553,16 +553,13 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
           while ($sonos->GetTransportInfo()==1){ IPS_Sleep(200);}
         }
 
-        if (strpos($mediaInfo["CurrentURI"],"x-sonosapi-stream:") === 0 || strpos($mediaInfo["CurrentURI"],"x-rincon-mp3radio:") === 0 ){
-          $sonos->SetRadio($mediaInfo["CurrentURI"]);
-        }else{
-          $sonos->SetAVTransportURI($mediaInfo["CurrentURI"],$mediaInfo["CurrentURIMetaData"]);
-          try{
-            $sonos->Seek("TRACK_NR",$positionInfo["Track"]);
-            $sonos->Seek("REL_TIME",$positionInfo["RelTime"]);
-          }catch(Exception $e){}
+        // reset to what was playing before
+        $sonos->SetAVTransportURI($mediaInfo["CurrentURI"],$mediaInfo["CurrentURIMetaData"]);
+        if($positionInfo["Track"] != 1 )
+          $sonos->Seek("TRACK_NR",$positionInfo["Track"]);
+        if($positionInfo["TrackDuration"] != "0:00:00" )
+          $sonos->Seek("REL_TIME",$positionInfo["RelTime"]);
  
-        }
 
         if($volumeChange != 0){
           // set back volume
