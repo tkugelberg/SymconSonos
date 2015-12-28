@@ -189,8 +189,6 @@ class SonosAccess{
       default:
         throw new Exception("Unknown Transport State: ".$returnContent["CurrentTransportState"]); 
     }
-    
-    return $returnContent;
   }
 
   public function GetTreble()
