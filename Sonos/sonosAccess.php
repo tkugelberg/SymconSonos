@@ -186,6 +186,8 @@ class SonosAccess{
         return 2;
       case "STOPPED":
         return 3;
+      default:
+        throw new Exception("Unknown Transport State: ".$returnContent["CurrentTransportState"]); 
     }
     
     return $returnContent;
