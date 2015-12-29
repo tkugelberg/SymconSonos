@@ -254,6 +254,13 @@ class Sonos extends IPSModule
             SNS_SetVolume($ID, $newVolume );
           }catch (Exception $e){}
         }
+
+        $GroupVolume = 0;
+        foreach($groupMembersArray as $key=>$ID) {
+          $GroupVolume += GetValueInteger(IPS_GetObjectIDByName("Volume", $ID));
+        }
+
+        SetValueInteger(IPS_GetObjectIDByName("GroupVolume", $this->InstanceID), intval(round($GroupVolume / sizeof($groupMembersArray))));
     }
 
     public function ChangeVolume($increment){
@@ -466,6 +473,13 @@ class Sonos extends IPSModule
             SNS_SetDefaultVolume($ID);
           }catch (Exception $e) {}
         }
+        
+        $GroupVolume = 0;
+        foreach($groupMembersArray as $key=>$ID) {
+          $GroupVolume += GetValueInteger(IPS_GetObjectIDByName("Volume", $ID));
+        }
+
+        SetValueInteger(IPS_GetObjectIDByName("GroupVolume", $this->InstanceID), intval(round($GroupVolume / sizeof($groupMembersArray))));
     }
 
     public function SetDefaultVolume()
@@ -523,7 +537,6 @@ class Sonos extends IPSModule
         if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
 
         $this->ChangeGroupVolume($volume - GetValue($this->GetIDForIdent("GroupVolume")));
-        SetValue($this->GetIDForIdent("GroupVolume"), $volume);
     }
 
     public function SetLoudness($loudness)
