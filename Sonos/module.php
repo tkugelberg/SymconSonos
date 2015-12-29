@@ -205,129 +205,9 @@ class Sonos extends IPSModule
         
         // Start add scripts for regular status and grouping updates
         // 1) _updateStatus 
-        $updateStatusScript = '<?
-include_once("../modules/SymconSonos/Sonos/sonosAccess.php");
-
-$ip      = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
-$timeout = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
-
-if ( !$timeout || Sys_Ping($ip, $timeout) == true ) {
-
-    $sonos = new SonosAccess($ip);
-
-    $status = $sonos->GetTransportInfo();
-    SetValueInteger(IPS_GetObjectIDByName("Volume", IPS_GetParent($_IPS["SELF"])), $sonos->GetVolume());
-
-    if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "MuteControl"))
-        SetValueInteger(IPS_GetObjectIDByName("Mute", IPS_GetParent($_IPS["SELF"])), $sonos->GetMute());
-
-    if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "LoudnessControl"))
-        SetValueInteger(IPS_GetObjectIDByName("Loudness", IPS_GetParent($_IPS["SELF"])), $sonos->GetLoudness());
-
-    if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "BassControl"))
-        SetValueInteger(IPS_GetObjectIDByName("Bass", IPS_GetParent($_IPS["SELF"])), $sonos->GetBass());
-
-    if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TrebleControl"))
-        SetValueInteger(IPS_GetObjectIDByName("Treble", IPS_GetParent($_IPS["SELF"])), $sonos->GetTreble());
-
-    if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "BalanceControl")){
-        $leftVolume  = $sonos->GetVolume("LF");
-        $rightVolume = $sonos->GetVolume("RF");
-
-        if ( $leftVolume == $rightVolume ){
-          SetValueInteger(IPS_GetObjectIDByName("Balance", IPS_GetParent($_IPS["SELF"])), 0);
-        }elseif ( $leftVolume > $rightVolume ){
-          SetValueInteger(IPS_GetObjectIDByName("Balance", IPS_GetParent($_IPS["SELF"])), $rightVolume - 100 );
-        }else{
-          SetValueInteger(IPS_GetObjectIDByName("Balance", IPS_GetParent($_IPS["SELF"])), 100 - $leftVolume );
-        }
-    }
-
-    if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "SleeptimerControl")){
-        $sleeptimer = $sonos->GetSleeptimer();
-        if($sleeptimer){
-            $SleeptimerArray = explode(":",$sonos->GetSleeptimer());
-
-            $SleeptimerMinutes = $SleeptimerArray[0]*60+$SleeptimerArray[1];
-            if($SleeptimerArray[2])
-                $SleeptimerMinutes = $SleeptimerMinutes + 1;
-        }else{
-            $SleeptimerMinutes = 0;
-        }
-
-        SetValueInteger(IPS_GetObjectIDByName("Sleeptimer", IPS_GetParent($_IPS["SELF"])), $SleeptimerMinutes);
-    }
-
-    $MemberOfGroupID = @IPS_GetObjectIDByName("MemberOfGroup", IPS_GetParent($_IPS["SELF"]));
-    $MemberOfGroup = 0;
-    if ($MemberOfGroupID)
-    $MemberOfGroup = GetValueInteger($MemberOfGroupID);
-
-    if ($MemberOfGroup){
-        // If Sonos is member of a group, use values of Group Coordinator
-        SetValueInteger(IPS_GetObjectIDByName("Status", IPS_GetParent($_IPS["SELF"])), GetValueInteger(IPS_GetObjectIDByName("Status", $MemberOfGroup)));
-        $actuallyPlaying = GetValueString(IPS_GetObjectIDByName("nowPlaying", $MemberOfGroup));
-        SetValueInteger(IPS_GetObjectIDByName("Radio", IPS_GetParent($_IPS["SELF"])), GetValueInteger(IPS_GetObjectIDByName("Radio", $MemberOfGroup)));
-    }else{
-        SetValueInteger(IPS_GetObjectIDByName("Status", IPS_GetParent($_IPS["SELF"])), $status);
-        // Titelanzeige
-        $currentStation = 0;
-
-        if ( $status <> 1 ){
-            // No title if not playing
-            $actuallyPlaying = "";
-        }else{
-            $positionInfo = $sonos->GetPositionInfo();
-            $mediaInfo    = $sonos->GetMediaInfo();
-
-            if (strlen($positionInfo["streamContent"]) <> 0){
-                $title = $mediaInfo["title"];
-                $actuallyPlaying = $positionInfo["streamContent"];
-            } else {
-                $actuallyPlaying = utf8_decode($positionInfo["title"]." | ".$positionInfo["artist"]);
-            }
-            // start find current Radio in VariableProfile
-            $Associations = IPS_GetVariableProfile("Radio.SONOS")["Associations"];
-
-            if(isset($mediaInfo["title"])){
-              foreach($Associations as $key=>$station) {
-                  if( $station["Name"] == $mediaInfo["title"] ){
-                      $currentStation = $Associations[$key]["Value"];
-                  }
-              }
-            }
-            // end find current Radio in VariableProfile
-        }
-        SetValueInteger(IPS_GetObjectIDByName("Radio", IPS_GetParent($_IPS["SELF"])), $currentStation);
-    }
-
-    $nowPlaying   = GetValueString(IPS_GetObjectIDByName("nowPlaying", IPS_GetParent($_IPS["SELF"])));
-
-    if ($actuallyPlaying <> $nowPlaying) {
-        SetValueString(IPS_GetObjectIDByName("nowPlaying", IPS_GetParent($_IPS["SELF"])), $actuallyPlaying);
-    }
-}
-
-// Set Group Volume
-if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")){
-  $groupMembers        = GetValueString(IPS_GetObjectIDByName("GroupMembers", IPS_GetParent($_IPS["SELF"])));
-  $groupMembersArray   = Array();
-  if($groupMembers)
-    $groupMembersArray = array_map("intval", explode(",",$groupMembers));
-  $groupMembersArray[] = IPS_GetParent($_IPS["SELF"]);
-
-  $GroupVolume = 0;
-  foreach($groupMembersArray as $key=>$ID) {
-    $GroupVolume += GetValueInteger(IPS_GetObjectIDByName("Volume", $ID));
-  }
-  
-  SetValueInteger(IPS_GetObjectIDByName("GroupVolume", IPS_GetParent($_IPS["SELF"])), intval(round($GroupVolume / sizeof($groupMembersArray))));
-}
-?>';
-
         $statusScriptID = @$this->GetIDForIdent("_updateStatus");
         if ( $statusScriptID === false ){
-          $statusScriptID = $this->RegisterScript("_updateStatus", "_updateStatus", $updateStatusScript, 98);
+          $statusScriptID = $this->RegisterScript("_updateStatus", "_updateStatus", file_get_contents(__DIR__ . "/_updateStatus.php"), 98);
         }else{
           IPS_SetScriptContent($statusScriptID, $updateStatusScript);
         }
@@ -336,80 +216,9 @@ if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")){
         IPS_SetScriptTimer($statusScriptID, 5); 
 
         // 2) _updateGrouping
-        $updateGroupingScript = '<?
-include_once("../modules/SymconSonos/Sonos/sonosAccess.php");
-
-// Nothing to do if Instance is Group Coordinator
-if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")) return;
-
-$groupForcing      = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupForcing");
-$rinconMapping     = Array();
-$allSonosInstances = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
-$MemberOfGroupID   = @IPS_GetObjectIDByName("MemberOfGroup", IPS_GetParent($_IPS["SELF"]));
-$MemberOfGroup     = 0;
-if ($MemberOfGroupID)  $MemberOfGroup = GetValueInteger($MemberOfGroupID);
-
-//ensure that all rincons are known
-foreach($allSonosInstances as $key=>$SonosID) {
-    $rincon = IPS_GetProperty($SonosID ,"RINCON");
-    if (!$rincon){
-        // Get RINCON
-        // Not sure why, but when executed in ApplyChanges of module.php RINCON is not alway set
-        $ipAddress = IPS_GetProperty($SonosID, "IPAddress");
-        if ($ipAddress){
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => "http://".$ipAddress.":1400/xml/device_description.xml"
-            ));
-
-            $result = curl_exec($curl);
-
-            if(!curl_exec($curl)){
-                continue;
-            }
-
-            $xmlr = new SimpleXMLElement($result);
-            $rincon = str_replace ( "uuid:" , "" , $xmlr->device->UDN );
-            IPS_SetProperty($SonosID, "RINCON", $rincon );
-            IPS_ApplyChanges($SonosID);
-        }
-    }
-    $rinconMapping[] = Array( ("ID") => $SonosID, ("RINCON") => $rincon );
-    if ($SonosID === IPS_GetParent($_IPS["SELF"])) $ownRincon = $rincon;
-}
-
-$ipAddress = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
-$timeout   = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
-
-if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
-
-    $sonos                    = new SonosAccess($ipAddress);
-    $sonosGroupCoordinator    = explode(":",$sonos->GetZoneGroupAttributes()["CurrentZoneGroupID"])[0];
-
-    foreach($rinconMapping as $key=>$value) {
-        if($value["RINCON"] === $sonosGroupCoordinator ){
-            $sonosGroupCoordinatorID = $value["ID"] ;
-            break;
-        }
-    }
-
-    // If groupCoordinator in Sonos = this instance --> set ID to 0 (does not belong to group)
-    if ($sonosGroupCoordinatorID === IPS_GetParent($_IPS["SELF"]))  $sonosGroupCoordinatorID = 0;
-
-    if ( $sonosGroupCoordinatorID !== $MemberOfGroup ){
-        if($groupForcing){
-            SNS_SetGroup(IPS_GetParent($_IPS["SELF"]),$MemberOfGroup);
-            }else{
-            SNS_SetGroup(IPS_GetParent($_IPS["SELF"]),$sonosGroupCoordinatorID);
-        }
-    }
-}
-?>';
-
         $groupingScriptID = @$this->GetIDForIdent("_updateGrouping");
         if ( $groupingScriptID === false ){
-          $groupingScriptID = $this->RegisterScript("_updateGrouping", "_updateGrouping", $updateGroupingScript, 99);
+          $groupingScriptID = $this->RegisterScript("_updateGrouping", "_updateGrouping", file_get_contents(__DIR__ . "/_updateGrouping.php"), 99);
         }else{
           IPS_SetScriptContent($groupingScriptID, $updateGroupingScript);
         }
@@ -513,15 +322,18 @@ if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
         include_once(__DIR__ . "/sonosAccess.php");
         $sonos = new SonosAccess($ip);
     
-        $positionInfo  = $sonos->GetPositionInfo();
-        $mediaInfo     = $sonos->GetMediaInfo();
-        $transportInfo = $sonos->GetTransportInfo();
-        $volume        = $sonos->GetVolume();
+        $positionInfo       = $sonos->GetPositionInfo();
+        $mediaInfo          = $sonos->GetMediaInfo();
+        $transportInfo      = $sonos->GetTransportInfo();
+        $isGroupCoordinator = $this->ReadPropertyBoolean("GroupCoordinator");
+        if($isGroupCoordinator){
+          $volume = GetValueInteger($this->GetIDForIdent("GroupVolume")); 
+        }else{
+          $volume = GetValueInteger($this->GetIDForIdent("Volume")); 
+        }
 
         //adjust volume if needed
         if($volumeChange != 0){
-          // check for group coordinator
-          $isGroupCoordinator = $this->ReadPropertyBoolean("GroupCoordinator");
           // pause if playing
           if($transportInfo==1) $sonos->Pause(); 
           
