@@ -209,7 +209,7 @@ class Sonos extends IPSModule
         if ( $statusScriptID === false ){
           $statusScriptID = $this->RegisterScript("_updateStatus", "_updateStatus", file_get_contents(__DIR__ . "/_updateStatus.php"), 98);
         }else{
-          IPS_SetScriptContent($statusScriptID, $updateStatusScript);
+          IPS_SetScriptContent($statusScriptID, file_get_contents(__DIR__ . "/_updateStatus.php"));
         }
 
         IPS_SetHidden($statusScriptID,true);
@@ -220,7 +220,7 @@ class Sonos extends IPSModule
         if ( $groupingScriptID === false ){
           $groupingScriptID = $this->RegisterScript("_updateGrouping", "_updateGrouping", file_get_contents(__DIR__ . "/_updateGrouping.php"), 99);
         }else{
-          IPS_SetScriptContent($groupingScriptID, $updateGroupingScript);
+          IPS_SetScriptContent($groupingScriptID, file_get_contents(__DIR__ . "/_updateGrouping.php"));
         }
 
         IPS_SetHidden($groupingScriptID,true);
