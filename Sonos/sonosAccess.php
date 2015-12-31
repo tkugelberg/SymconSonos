@@ -183,10 +183,11 @@ class SonosAccess{
       case "PLAYING":
         return 1;
       case "PAUSED_PLAYBACK":
-      case "TRANSITIONING":
         return 2;
       case "STOPPED":
         return 3;
+      case "TRANSITIONING":
+        return 5;
       default:
         throw new Exception("Unknown Transport State: ".$returnContent["CurrentTransportState"]); 
     }

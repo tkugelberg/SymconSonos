@@ -46,11 +46,12 @@ class Sonos extends IPSModule
         
         // Start create profiles
         $this->RegisterProfileIntegerEx("Status.SONOS", "Information", "", "", Array(
-                                             Array(0, "Prev",  "", -1),
-                                             Array(1, "Play",  "", -1),
-                                             Array(2, "Pause", "", -1),
-                                             Array(3, "Stop",  "", -1),
-                                             Array(4, "Next",  "", -1)
+                                             Array(0, "Prev",       "", -1),
+                                             Array(1, "Play",       "", -1),
+                                             Array(2, "Pause",      "", -1),
+                                             Array(3, "Stop",       "", -1),
+                                             Array(4, "Next",       "", -1),
+                                             Array(5, "Transition", "", -1)
         ));
         $this->RegisterProfileInteger("Volume.SONOS", "Intensity", "", " %",   0, 100, 1);
         $this->RegisterProfileInteger("Tone.SONOS",   "Intensity", "", " %", -10,  10, 1);
@@ -374,7 +375,11 @@ class Sonos extends IPSModule
           $sonos->SetAVTransportURI($uri);
           $sonos->Play();
           IPS_Sleep(500);
-          while ($sonos->GetTransportInfo()==1){ IPS_Sleep(200);}
+          $fileTransportInfo = $sonos->GetTransportInfo();
+          while ($fileTransportInfo==1 || $fileTransportInfo==5){ 
+            IPS_Sleep(200);
+            $fileTransportInfo = $sonos->GetTransportInfo();
+          }
         }
 
         // reset to what was playing before
