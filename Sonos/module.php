@@ -362,11 +362,16 @@ class Sonos extends IPSModule
         }
 
         foreach ($files as $key => $file) {
-          // only files on SMB share can be used
-          if (preg_match('/^\/\/[\w,.,\d,-]*\/\S*/',$file) == 0)
-            throw new Exception("File (".$file.") has to be located on a Samba share (e.g. //ipsymcon.fritz.box/tts/text.mp3)");
+          // only files on SMB share or http server can be used
+          if (preg_match('/^\/\/[\w,.,\d,-]*\/\S*/',$file) == 1){
+            $uri = "x-file-cifs:".$file;
+          }elseif (preg_match('/^http:\/\/[\w,.,\d,-]*\/\S*/',$file) == 1){
+            $uri = $file;
+          }else{
+            throw new Exception("File (".$file.") has to be located on a Samba share (e.g. //ipsymcon.fritz.box/tts/text.mp3) or a HTTP server (e.g. http://ipsymcon.fritz.box/tts/text.mp3)");
+          }
 
-          $sonos->SetAVTransportURI("x-file-cifs:".$file);
+          $sonos->SetAVTransportURI($uri);
           $sonos->Play();
           IPS_Sleep(500);
           while ($sonos->GetTransportInfo()==1){ IPS_Sleep(200);}
