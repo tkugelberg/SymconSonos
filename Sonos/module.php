@@ -586,22 +586,13 @@ class Sonos extends IPSModule
         include_once(__DIR__ . "/sonosAccess.php");
         $sonos = new SonosAccess($ip);
 
-        $browseResult = $sonos->BrowseContentDirectory('SQ:');
-
-        $list = Array();
-        foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')))->container as $container) {
-            $list[] = Array( ('id')    => (string)$container->attributes()['id'],
-                             ('title') => (string)$container->xpath('dc:title')[0],
-                             ('uri')   => (string)$container->res );
-        }  
-
         $uri = '';
-        foreach ($list as $key => $value) {
-            if ($value['title'] == $name) {
-                $uri = $value['uri'];
-                break;
+        foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')['Result']))->container as $container) {
+            if ($container->xpath('dc:title')[0] == $name){
+              $uri = (string)$container->res;
+              break;
             }
-        }
+        }  
 
         if($uri === '')
             throw new Exception('Playlist \''.$name.'\' not found');
