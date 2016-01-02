@@ -422,7 +422,7 @@ class Sonos extends IPSModule
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        if(GetValue($this->GetIDForIdent("MemberOfGroup")))
+        if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
         include_once(__DIR__ . "/sonosAccess.php");
@@ -588,7 +588,7 @@ class Sonos extends IPSModule
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        if(GetValue($this->GetIDForIdent("MemberOfGroup")))
+        if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
         include_once(__DIR__ . "/sonosAccess.php");
@@ -624,7 +624,7 @@ class Sonos extends IPSModule
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        if(GetValue($this->GetIDForIdent("MemberOfGroup")))
+        if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
         include_once(__DIR__ . "/sonosAccess.php");
@@ -661,7 +661,7 @@ class Sonos extends IPSModule
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        if(GetValue($this->GetIDForIdent("MemberOfGroup")))
+        if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
         include_once(__DIR__ . "/sonosAccess.php");
