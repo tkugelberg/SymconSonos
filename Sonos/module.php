@@ -94,7 +94,7 @@ class Sonos extends IPSModule
         $GroupAssociations = Array(Array(0, "none", "", -1));
         
         foreach($allSonosInstances as $key=>$SonosID) {
-            if (IPS_GetProperty($SonosID, "GroupCoordinator"))
+            if (@IPS_GetProperty($SonosID, "GroupCoordinator"))
                 $GroupAssociations[] = Array($SonosID, IPS_GetName($SonosID), "", -1);
         }
         
@@ -422,6 +422,9 @@ class Sonos extends IPSModule
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
+        if(GetValue($this->GetIDForIdent("MemberOfGroup")))
+          $this->SetGroup(0);
+
         include_once(__DIR__ . "/sonosAccess.php");
         $sonos = new SonosAccess($ip);
         
@@ -501,6 +504,8 @@ class Sonos extends IPSModule
     
     public function SetGroup($groupCoordinator)
     {
+        if ($this->ReadPropertyBoolean("GroupCoordinator")) return;
+
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
@@ -583,6 +588,9 @@ class Sonos extends IPSModule
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
+        if(GetValue($this->GetIDForIdent("MemberOfGroup")))
+          $this->SetGroup(0);
+
         include_once(__DIR__ . "/sonosAccess.php");
         $sonos = new SonosAccess($ip);
 
@@ -615,6 +623,9 @@ class Sonos extends IPSModule
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
+
+        if(GetValue($this->GetIDForIdent("MemberOfGroup")))
+          $this->SetGroup(0);
 
         include_once(__DIR__ . "/sonosAccess.php");
         include_once(__DIR__ . "/radio_stations.php");
@@ -649,6 +660,9 @@ class Sonos extends IPSModule
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
+
+        if(GetValue($this->GetIDForIdent("MemberOfGroup")))
+          $this->SetGroup(0);
 
         include_once(__DIR__ . "/sonosAccess.php");
         $sonos = new SonosAccess($ip);
