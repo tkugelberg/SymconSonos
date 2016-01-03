@@ -33,7 +33,7 @@ IP-Symcon PHP module for accessing Sonos audio systems
         add the following URL to 'Modul Control':  
         `git://github.com/tkugelberg/SymconSonos.git`  
    - configuration  
-     <img src="http://www.kugelberg.de/SymconSonos/instance_config.png">
+     ![Instance Configuration](docu/instance_config.png?raw=true "Instance Config")
      -  IP-Address/Host: <br>
         address the Sonos component can be reached under. When applying the settings a connection test is performed.
      -  Maximal ping timeout:<br>
