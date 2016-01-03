@@ -75,15 +75,8 @@ IP-Symcon PHP module for accessing Sonos audio systems
       
 ## 4. background scripts
 When settig up a Sonos instance, two scripts are automatically created and started with a timer.<br>
-1. _updateStatus<br>
-This script is executed every 5 seconds.<br>
-It updates teh variables Voume, Mute, Loudness, Bass, Treble, Balance and Sleeptimer from the settings in Sonos, if the corresponding activation switches are set.<br>
-In addition the Parameters Status, Radio and NowPlaying are filled.
-For Group Coordinators the group volume is set.
-2. _updateGrouping<br>
-This script is executed every 300 seconds.<br>
-It ensures that all RINCON values are set.
-It updates the group settings either in Sonos or in IP-Symcon.
+1. _updateStatus<br>This script is executed every 5 seconds.<br>It updates teh variables Voume, Mute, Loudness, Bass, Treble, Balance and Sleeptimer from the settings in Sonos, if the corresponding activation switches are set.<br>In addition the Parameters Status, Radio and NowPlaying are filled.<br>For Group Coordinators the group volume is set.
+2. _updateGrouping<br> This script is executed every 300 seconds.<br>It ensures that all RINCON values are set.<br>It updates the group settings either in Sonos or in IP-Symcon.
 
 ## 5. functional reference
 
