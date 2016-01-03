@@ -56,5 +56,6 @@
 	"actions":
 	[
 		{ "type": "Button", "label": "Play",  "onClick": "SNS_Play($id);" },
-		{ "type": "Button", "label": "Pause", "onClick": "SNS_Pause($id);" },
+		{ "type": "Button", "label": "Pause", "onClick": "SNS_Pause($id);" }
+        ]
 }

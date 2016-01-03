@@ -1,16 +1,16 @@
-# Sonos PHP Modules for IP-Symcon
+# Sonos PHP Module for IP-Symcon
 
 IP-Symcon PHP module for accessing Sonos audio systems
-
-## Documentation
 
 **Content**
 
 1. [functional range](#1-functional--range) 
 2. [requirements](#2-requirements)
 3. [installation & configuration](#3-installation--configuration)
-4. [background scripts](#4-background--scripts)
-5. [functional reference](#4-functional--reference) 
+4. [variables](#4-variables)
+5. [background scripts](#5-background--scripts)
+6. [functional reference](#6-functional--reference) 
+7. [change log](#7-change-log)
 
 ## 1. functional range
 
@@ -73,28 +73,52 @@ IP-Symcon PHP module for accessing Sonos audio systems
      - Stations in WebFront:<br>
        This is a comma separated list of Radio Stations which should appear as Buttion in WebFront. If it is set to "<all>", all are being displayed.
       
-## 4. background scripts
+## 4. variables
+- GroupMembers<br>only exists if the Flag "Group Coordinator" in Instance configuration was slected.<br>Contains a list of all instances attached to this group coordinator.<br>If the Flag "Force Grouping in Sonos" is set, this will only be updated if the SNS_SetGroup function  is called on a Sonos Instance. If the Flag ist not set, it will also be updated by the _updateGrouping script if the grouping is changed in Sonos App.
+- GroupVolume<br>only exists if the Flag "Group Coordinator" in Instance configuration was slected.<br>This value is calculated on the basis od the volume of all Sonos Instances of belonging to this group.<br>It is updated by the functions SNS_ChangeGroupVolume, SNS_SetDefaultGroupVolume, SNS_SetGroupVolume and by the _updateStatus script on the Group Coordinator itself.
+- MemberOfGroup<br>only exists if the Flag "Group Coordinator" in Instance configuration was __not__ slected.<br>If the Instance belongs to a group, it contains the Instance ID of the Group Coordinator.
+- nowPlaying<br>This variable is updated by the _updateStatus script. It contains information about what is currently being played.<br>If the Instance belongs to a group, the value is taken from the Group Coordinator. If not 
+- Radio
+- Status
+- Volume
+- Mute
+- Loudness
+- Bass
+- Treble
+- Balance
+- Sleeptimer
+
+## 5. background scripts
 When settig up a Sonos instance, two scripts are automatically created and started with a timer.<br>
 1. _updateStatus<br>This script is executed every 5 seconds.<br>It updates teh variables Voume, Mute, Loudness, Bass, Treble, Balance and Sleeptimer from the settings in Sonos, if the corresponding activation switches are set.<br>In addition the Parameters Status, Radio and NowPlaying are filled.<br>For Group Coordinators the group volume is set.
 2. _updateGrouping<br> This script is executed every 300 seconds.<br>It ensures that all RINCON values are set.<br>It updates the group settings either in Sonos or in IP-Symcon.
 
-## 5. functional reference
-
-```php
-SNS_DeleteSleepTimer(integer $InstanceID, integer $minutes)
-```
-Cancels the active Sleeptimer
-
----
+## 6. functional reference
 
 ```php
 SNS_ChangeGroupVolume(integer $InstanceID, integer $increment)
+```
+Changes the Volume of each member of a group by the value provided in $increment.
+Can be positive or negative.
+If the volume becomes bigger than 100 or less than 0, the volume will be set to these values.
+
+---  
+
+```php
+SNS_ChangeVolume(integer $InstanceID, integer $increment)
 ```
 Changes the Volume by the value provided in $increment.
 Can be positive or negative.
 If the volume becomes bigger than 100 or less than 0, the volume will be set to these values.
 
----  
+---
+
+```php
+SNS_DeleteSleepTimer(integer $InstanceID)
+```
+Cancels the active Sleeptimer
+
+---
 
 ```php
 SNS_Next(integer $InstanceID)

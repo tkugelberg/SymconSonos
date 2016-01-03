@@ -264,7 +264,8 @@ class Sonos extends IPSModule
         SetValueInteger(IPS_GetObjectIDByName("GroupVolume", $this->InstanceID), intval(round($GroupVolume / sizeof($groupMembersArray))));
     }
 
-    public function ChangeVolume($increment){
+    public function ChangeVolume($increment)
+    {
         $newVolume = (GetValueInteger($this->GetIDForIdent("Volume")) + $increment);
         try{
           $this->SetVolume($newVolume);
