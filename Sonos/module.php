@@ -385,7 +385,7 @@ class Sonos extends IPSModule
 
         // reset to what was playing before
         $sonos->SetAVTransportURI($mediaInfo["CurrentURI"],$mediaInfo["CurrentURIMetaData"]);
-        if($positionInfo["Track"] != 1 && $positionInfo["Track"] != 0 )
+        if($positionInfo["Track"] > 1 )
           $sonos->Seek("TRACK_NR",$positionInfo["Track"]);
         if($positionInfo["TrackDuration"] != "0:00:00" )
           $sonos->Seek("REL_TIME",$positionInfo["RelTime"]);
