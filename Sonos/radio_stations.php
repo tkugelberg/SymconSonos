@@ -20,6 +20,7 @@ function get_available_stations(){
             Array( ('name') => "NDR2",                     ('url') => "x-rincon-mp3radio://www.ndr.de/resources/metadaten/audio/m3u/ndr2.m3u" ),
             Array( ('name') => "N-JOY",                    ('url') => "x-rincon-mp3radio://www.ndr.de/resources/metadaten/audio/m3u/n-joy.m3u" ),
             Array( ('name') => "OE3",                      ('url') => "x-rincon-mp3radio://mp3stream7.apasf.apa.at:8000" ),
+            Array( ('name') => "Radio 91.2",               ('url') => "x-rincon-mp3radio://lokalradiostream.de:8004" ),
             Array( ('name') => "Radio Duisburg",           ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radioduisburg/livestream.mp3.m3u" ),
             Array( ('name') => "Radio Essen",              ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radioessen/livestream.mp3.m3u" ),
             Array( ('name') => "Radio K.W.",               ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radiokw/livestream.mp3" ),
