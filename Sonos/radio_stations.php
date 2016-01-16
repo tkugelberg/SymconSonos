@@ -2,7 +2,9 @@
 function get_available_stations(){
   //Taken URLs from  http://wiki.ubuntuusers.de/internetradio/stationen 
   $RadioStations =  Array(
+            Array( ('name') => "917xfm",                   ('url') => "x-rincon-mp3radio://live96.917xfm.de" ),
             Array( ('name') => "1LIVE",                    ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/einslive.m3u" ),
+            Array( ('name') => "1LIVE DIGGI",              ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/mp3/1live-diggi.m3u" ),
             Array( ('name') => "Antenne 1",                ('url') => "x-rincon-mp3radio://stream.antenne1.de/stream1/livestream.mp3" ),
             Array( ('name') => "Antenne Bayern",           ('url') => "x-rincon-mp3radio://mp3channels.webradio.antenne.de/antenne" ),
             Array( ('name') => "Antenne MV",               ('url') => "x-rincon-mp3radio://streams.antennemv.de/antennemv-live/mp3-192/amv" ),
@@ -10,7 +12,6 @@ function get_available_stations(){
             Array( ('name') => "Bayern 3",                 ('url') => "x-rincon-mp3radio://streams.br.de/bayern3_2.m3u" ),
             Array( ('name') => "bigFM",                    ('url') => "x-rincon-mp3radio://srv05.bigstreams.de/bigfm-mp3-96.m3u" ),
             Array( ('name') => "Bremen Vier",              ('url') => "x-rincon-mp3radio://httpmedia.radiobremen.de/bremenvier.m3u" ),
-            Array( ('name') => "Deutschlandfunk",          ('url') => "x-rincon-mp3radio://www.dradio.de/streaming/dlf.m3u " ),
             Array( ('name') => "Energy",                   ('url') => "x-rincon-mp3radio://energyradio.de/nuernberg" ),
             Array( ('name') => "FFH",                      ('url') => "x-rincon-mp3radio://streams.ffh.de/radioffh/mp3/hqlivestream.m3u" ),
             Array( ('name') => "FFN",                      ('url') => "x-rincon-mp3radio://player.ffn.de/ffn.mp3" ),
@@ -21,7 +22,6 @@ function get_available_stations(){
             Array( ('name') => "MDR Jump",                 ('url') => "x-rincon-mp3radio://www.jumpradio.de/static/webchannel/jump_live_channel_high.m3u"),
             Array( ('name') => "NDR2",                     ('url') => "x-rincon-mp3radio://www.ndr.de/resources/metadaten/audio/m3u/ndr2.m3u" ),
             Array( ('name') => "N-JOY",                    ('url') => "x-rincon-mp3radio://www.ndr.de/resources/metadaten/audio/m3u/n-joy.m3u" ),
-            Array( ('name') => "OE3",                      ('url') => "x-rincon-mp3radio://mp3stream7.apasf.apa.at:8000" ),
             Array( ('name') => "Radio 91.2",               ('url') => "x-rincon-mp3radio://lokalradiostream.de:8004" ),
             Array( ('name') => "Radio Duisburg",           ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radioduisburg/livestream.mp3.m3u" ),
             Array( ('name') => "Radio Essen",              ('url') => "x-rincon-mp3radio://edge.live.mp3.mdn.newmedia.nacamar.net/ps-radioessen/livestream.mp3.m3u" ),
@@ -33,6 +33,8 @@ function get_available_stations(){
             Array( ('name') => "SWR1 RP",                  ('url') => "x-rincon-mp3radio://mp3-live.swr.de/swr1rp_m.m3u" ),
             Array( ('name') => "SWR3",                     ('url') => "x-rincon-mp3radio://mp3-live.swr3.de/swr3_m.m3u" ),
             Array( ('name') => "WDR2",                     ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/wdr2.m3u" ),
+            Array( ('name') => "Deutschlandfunk",          ('url') => "x-rincon-mp3radio://www.dradio.de/streaming/dlf.m3u " ),
+            Array( ('name') => "OE3",                      ('url') => "x-rincon-mp3radio://mp3stream7.apasf.apa.at:8000" ),
             Array( ('name') => "Sunshine Live",            ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshinelive-mp3-128" ),
             Array( ('name') => "Sunshine Live - classics", ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshine-classics-mp3-128" ),
             Array( ('name') => "Sunshine Live - trance",   ('url') => "x-rincon-mp3radio://stream.hoerradar.de/sunshine-trance-mp3-128" ),

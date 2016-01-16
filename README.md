@@ -265,16 +265,21 @@ SNS_SetRadio(integer $InstanceID, string $radio)
 Switches on the provided radio station in $radio.
 Currently available are:
 - 1LIVE
-- A State Of Trance
+- 1LIVE DIGGI
+- 917xfm
 - Antenne 1
 - Antenne Bayern
 - Antenne MV
 - Antenne Thueringen
+- A State Of Trance
 - Bayern 3
 - bigFM
+- Bremen Vier
 - Deutschlandfunk
+- Energy
 - FFH
 - FFN
+- Hitradio N1
 - HR3
 - KiRaKa
 - MDR1
@@ -282,6 +287,7 @@ Currently available are:
 - NDR2
 - N-JOY
 - OE3
+- Radio 91.2
 - Radio Duisburg
 - Radio Essen
 - Radio K.W.
@@ -290,8 +296,8 @@ Currently available are:
 - RevivalKult
 - RPR1
 - Sunshine Live
-- Sunshine Live (classic)
-- Sunshine Live (trance)
+- Sunshine Live - classics
+- Sunshine Live - trance
 - SWR1 BW
 - SWR1 RP
 - SWR3
