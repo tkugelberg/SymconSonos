@@ -2,9 +2,9 @@
 function get_available_stations(){
   //Taken URLs from  http://wiki.ubuntuusers.de/internetradio/stationen 
   $RadioStations =  Array(
-            Array( ('name') => "917xfm",                   ('url') => "x-rincon-mp3radio://live96.917xfm.de" ),
             Array( ('name') => "1LIVE",                    ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/einslive.m3u" ),
             Array( ('name') => "1LIVE DIGGI",              ('url') => "x-rincon-mp3radio://www.wdr.de/wdrlive/media/mp3/1live-diggi.m3u" ),
+            Array( ('name') => "917xfm",                   ('url') => "x-rincon-mp3radio://live96.917xfm.de" ),
             Array( ('name') => "Antenne 1",                ('url') => "x-rincon-mp3radio://stream.antenne1.de/stream1/livestream.mp3" ),
             Array( ('name') => "Antenne Bayern",           ('url') => "x-rincon-mp3radio://mp3channels.webradio.antenne.de/antenne" ),
             Array( ('name') => "Antenne MV",               ('url') => "x-rincon-mp3radio://streams.antennemv.de/antennemv-live/mp3-192/amv" ),
