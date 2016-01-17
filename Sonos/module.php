@@ -555,6 +555,7 @@ class Sonos extends IPSModule
         IPS_SetHidden($this->GetIDForIdent("nowPlaying"),$hidden);
         IPS_SetHidden($this->GetIDForIdent("Radio"),$hidden);
         IPS_SetHidden($this->GetIDForIdent("Status"),$hidden);
+        IPS_SetHidden($this->GetIDForIdent("Sleeptimer"),$hidden);
         
         include_once(__DIR__ . "/sonosAccess.php");
         (new SonosAccess($ip))->SetAVTransportURI($uri);
