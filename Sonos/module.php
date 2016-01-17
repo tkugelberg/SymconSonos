@@ -738,7 +738,7 @@ class Sonos extends IPSModule
 
         foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')['Result']))->container as $container) {
 
-            $Associations[] = Array($Value++, $container->xpath('dc:title')[0], "", -1);
+            $Associations[] = Array($Value++, (string)$container->xpath('dc:title')[0], "", -1);
             // associations only support up to 32 variables
             if( $Value === 33 ) break;
             
