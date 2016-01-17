@@ -35,6 +35,7 @@
                                  { "label": "FFN",                      "value": "FFN" },
                                  { "label": "Hitradio N1",              "value": "Hitradio N1" },
                                  { "label": "HR3",                      "value": "HR3" },
+                                 { "label": "HR-Info",                  "value": "HR-Info" },
                                  { "label": "KiRaKa",                   "value": "KiRaKa" },
                                  { "label": "MDR1",                     "value": "MDR1" },
                                  { "label": "MDR Jump",                 "value": "MDR Jump" },
@@ -55,7 +56,8 @@
                                  { "label": "SWR1 BW",                  "value": "SWR1 BW" },
                                  { "label": "SWR1 RP",                  "value": "SWR1 RP" },
                                  { "label": "SWR3",                     "value": "SWR3" },
-                                 { "label": "WDR2",                     "value": "WDR2" }
+                                 { "label": "WDR2",                     "value": "WDR2" },
+                                 { "label": "YouFM",                    "value": "YouFM" }
                   ] },
 		{ "name": "WebFrontStations",  "type": "ValidationTextBox", "caption": "Stations in WebFront" }
 	],
