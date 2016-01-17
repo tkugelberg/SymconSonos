@@ -37,21 +37,6 @@ if ( !$timeout || Sys_Ping($ip, $timeout) == true ) {
         }
     }
 
-    if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "SleeptimerControl")){
-        $sleeptimer = $sonos->GetSleeptimer();
-        if($sleeptimer){
-            $SleeptimerArray = explode(":",$sonos->GetSleeptimer());
-
-            $SleeptimerMinutes = $SleeptimerArray[0]*60+$SleeptimerArray[1];
-            if($SleeptimerArray[2])
-                $SleeptimerMinutes = $SleeptimerMinutes + 1;
-        }else{
-            $SleeptimerMinutes = 0;
-        }
-
-        SetValueInteger(IPS_GetObjectIDByName("Sleeptimer", IPS_GetParent($_IPS["SELF"])), $SleeptimerMinutes);
-    }
-
     $MemberOfGroupID = @IPS_GetObjectIDByName("MemberOfGroup", IPS_GetParent($_IPS["SELF"]));
     $MemberOfGroup = 0;
     if ($MemberOfGroupID)
@@ -62,6 +47,9 @@ if ( !$timeout || Sys_Ping($ip, $timeout) == true ) {
         SetValueInteger(IPS_GetObjectIDByName("Status", IPS_GetParent($_IPS["SELF"])), GetValueInteger(IPS_GetObjectIDByName("Status", $MemberOfGroup)));
         $actuallyPlaying = GetValueString(IPS_GetObjectIDByName("nowPlaying", $MemberOfGroup));
         SetValueInteger(IPS_GetObjectIDByName("Radio", IPS_GetParent($_IPS["SELF"])), GetValueInteger(IPS_GetObjectIDByName("Radio", $MemberOfGroup)));
+        if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "SleeptimerControl")){
+          SetValueInteger(IPS_GetObjectIDByName("Sleeptimer", IPS_GetParent($_IPS["SELF"])), @GetValueInteger(IPS_GetObjectIDByName("Sleeptimer", $MemberOfGroup)));
+        }
     }else{
         SetValueInteger(IPS_GetObjectIDByName("Status", IPS_GetParent($_IPS["SELF"])), $status);
         // Titelanzeige
@@ -101,6 +89,23 @@ if ( !$timeout || Sys_Ping($ip, $timeout) == true ) {
             // end find current Radio in VariableProfile
         }
         SetValueInteger(IPS_GetObjectIDByName("Radio", IPS_GetParent($_IPS["SELF"])), $currentStation);
+
+        // Sleeptimer
+        if (IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "SleeptimerControl")){
+            $sleeptimer = $sonos->GetSleeptimer();
+            if($sleeptimer){
+                $SleeptimerArray = explode(":",$sonos->GetSleeptimer());
+
+                $SleeptimerMinutes = $SleeptimerArray[0]*60+$SleeptimerArray[1];
+                if($SleeptimerArray[2])
+                    $SleeptimerMinutes = $SleeptimerMinutes + 1;
+            }else{
+                $SleeptimerMinutes = 0;
+            }
+
+            SetValueInteger(IPS_GetObjectIDByName("Sleeptimer", IPS_GetParent($_IPS["SELF"])), $SleeptimerMinutes);
+        }
+        
     }
 
     $nowPlaying   = GetValueString(IPS_GetObjectIDByName("nowPlaying", IPS_GetParent($_IPS["SELF"])));
