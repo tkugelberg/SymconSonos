@@ -20,6 +20,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyBoolean("TrebleControl", false);
         $this->RegisterPropertyBoolean("BalanceControl", false);
         $this->RegisterPropertyBoolean("SleeptimerControl", false);
+        $this->RegisterPropertyBoolean("PlaylistControl", false);
         $this->RegisterPropertyString("FavoriteStation", "");
         $this->RegisterPropertyString("WebFrontStations", "<all>");
         $this->RegisterPropertyString("RINCON", "");
@@ -78,7 +79,7 @@ class Sonos extends IPSModule
                     $Color = -1;
                 }
                 $Associations[] = Array($Value++, $val['name'], "", $Color);
-                // associations only support ip to 32 variables
+                // associations only support up to 32 variables
                 if( $Value === 33 )
                         break;
             }
@@ -169,9 +170,20 @@ class Sonos extends IPSModule
         }else{
             $this->removeVariable("Sleeptimer", $links);
         }
+     
+        // 2g Playlists
+        if ($this->ReadPropertyBoolean("PlaylistControl")){
+            if(!IPS_VariableProfileExists("Playlist.SONOS"))
+                $this->RegisterProfileIntegerEx("Playlist.SONOS", "Database", "", "", Array());
+            $this->RegisterVariableInteger("Playlist", "Playlist", "Playlist.SONOS", 22);
+            $this->EnableAction("Playlist");
+        }else{
+            $this->removeVariable("Playlist", $links);
+        }
 
 
-        // 2g) GroupVolume, GroupMembers, MemberOfGroup
+
+        // 2h) GroupVolume, GroupMembers, MemberOfGroup
         if ( $this->ReadPropertyBoolean("GroupCoordinator")){
             IPS_SetHidden( $this->RegisterVariableString("GroupMembers", "GroupMembers", "", 10), true);
             $this->RegisterVariableInteger("GroupVolume", "GroupVolume", "Volume.SONOS", 11);
@@ -184,7 +196,7 @@ class Sonos extends IPSModule
             $this->removeVariable(      "GroupMembers", $links);
         }
         
-        // 2h) Hide/unhide MemberOfGroup depending on presence of GroupCoordinators
+        // 2i) Hide/unhide MemberOfGroup depending on presence of GroupCoordinators
         if (sizeof($GroupAssociations) === 1){
             // hide MemberOfGroup
             foreach($allSonosInstances as $key=>$SonosID) {
@@ -710,6 +722,35 @@ class Sonos extends IPSModule
         $sonos = new SonosAccess($ip);
         if($sonos->GetTransportInfo() == 1) $sonos->Stop();
     }
+
+    public function UpdatePlaylists()
+    {
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos = new SonosAccess($ip);
+
+        $Associations          = Array();
+        $Value                 = 1;
+
+        foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')['Result']))->container as $container) {
+
+            $Associations[] = Array($Value++, $container->xpath('dc:title')[0], "", -1);
+            // associations only support up to 32 variables
+            if( $Value === 33 ) break;
+            
+        }
+
+
+        if(IPS_VariableProfileExists("Playlist.SONOS"))
+            IPS_DeleteVariableProfile("Playlist.SONOS");
+
+        $this->RegisterProfileIntegerEx("Playlist.SONOS", "Database", "", "", $Associations);
+      
+    }
     
     /**
     * End of Module functions
@@ -735,6 +776,9 @@ class Sonos extends IPSModule
                 break;
             case "Mute":
                 $this->SetMute($Value);
+                break;
+            case "Playlist":
+                $this->SetPlaylist(IPS_GetVariableProfile("Playlist.SONOS")['Associations'][$Value-1]['Name']);
                 break;
             case "Radio":
                 $this->SetRadio(IPS_GetVariableProfile("Radio.SONOS")['Associations'][$Value-1]['Name']);
