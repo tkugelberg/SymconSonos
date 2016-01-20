@@ -56,7 +56,6 @@ function get_station_url($name, $RadioStations = null){
           return $RadioStations[$key]['url'];
       }
   }
-   throw new Exception("Radio station " . $name . " is unknown" );
 }
 
 ?>

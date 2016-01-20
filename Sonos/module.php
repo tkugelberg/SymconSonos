@@ -21,6 +21,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyBoolean("BalanceControl", false);
         $this->RegisterPropertyBoolean("SleeptimerControl", false);
         $this->RegisterPropertyBoolean("PlaylistControl", false);
+        $this->RegisterPropertyBoolean("IncludeTunein", "");
         $this->RegisterPropertyString("FavoriteStation", "");
         $this->RegisterPropertyString("WebFrontStations", "<all>");
         $this->RegisterPropertyString("RINCON", "");
@@ -63,33 +64,9 @@ class Sonos extends IPSModule
         ));
         
         //Build Radio Station Associations according to user settings
-        include_once(__DIR__ . "/radio_stations.php");
-        $Associations          = Array();
-        $AvailableStations     = get_available_stations();
-        $WebFrontStations      = $this->ReadPropertyString("WebFrontStations");
-        $WebFrontStationsArray = array_map("trim", explode(",", $WebFrontStations));
-        $FavoriteStation       = $this->ReadPropertyString("FavoriteStation");
-        $Value                 = 1;
-        
-        foreach ( $AvailableStations as $key => $val ) {
-            if (in_array( $val['name'], $WebFrontStationsArray) || $WebFrontStations === "<alle>" || $WebFrontStations === "<all>" ) {
-                if  ( $val['name'] === $FavoriteStation ){
-                    $Color = 0xFCEC00;
-                } else {
-                    $Color = -1;
-                }
-                $Associations[] = Array($Value++, $val['name'], "", $Color);
-                // associations only support up to 32 variables
-                if( $Value === 33 )
-                        break;
-            }
-        }
-        
-        if(IPS_VariableProfileExists("Radio.SONOS"))
-            IPS_DeleteVariableProfile("Radio.SONOS");
-        
-        $this->RegisterProfileIntegerEx("Radio.SONOS", "Speaker", "", "", $Associations);
-        
+        if(!IPS_VariableProfileExists("Radio.SONOS"))
+            $this->UpdateRadioStations();
+
         // Build Group Associations according Sonos Instance settings
         $allSonosInstances = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
         $GroupAssociations = Array(Array(0, "none", "", -1));
@@ -554,6 +531,7 @@ class Sonos extends IPSModule
         }
         IPS_SetHidden($this->GetIDForIdent("nowPlaying"),$hidden);
         IPS_SetHidden($this->GetIDForIdent("Radio"),$hidden);
+        IPS_SetHidden($this->GetIDForIdent("Playlist"),$hidden);
         IPS_SetHidden($this->GetIDForIdent("Status"),$hidden);
         IPS_SetHidden($this->GetIDForIdent("Sleeptimer"),$hidden);
         
@@ -644,7 +622,24 @@ class Sonos extends IPSModule
         include_once(__DIR__ . "/sonosAccess.php");
         include_once(__DIR__ . "/radio_stations.php");
         $sonos = new SonosAccess($ip);
-        $sonos->SetRadio( get_station_url($radio), $radio);
+
+        // try to find Radio Station URL
+        $uri = get_station_url($radio);
+
+        if( $uri == ""){
+            // check in TuneIn Favorites
+            foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('R:0/0')['Result']))->item as $item) {
+                if ($item->xpath('dc:title')[0] == $radio){
+                  $uri = (string)$item->res;
+                  break;
+                }
+            }
+        }
+  
+        if( $uri == "")
+         throw new Exception("Radio station " . $radio . " is unknown" ); 
+
+        $sonos->SetRadio($uri, $radio);
         $sonos->Play();
     }
     
@@ -738,19 +733,70 @@ class Sonos extends IPSModule
         $Value                 = 1;
 
         foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')['Result']))->container as $container) {
-
             $Associations[] = Array($Value++, (string)$container->xpath('dc:title')[0], "", -1);
             // associations only support up to 32 variables
             if( $Value === 33 ) break;
-            
         }
-
 
         if(IPS_VariableProfileExists("Playlist.SONOS"))
             IPS_DeleteVariableProfile("Playlist.SONOS");
 
         $this->RegisterProfileIntegerEx("Playlist.SONOS", "Database", "", "", $Associations);
       
+    }
+
+    public function UpdateRadioStations()
+    {
+        include_once(__DIR__ . "/radio_stations.php");
+        $Associations          = Array();
+        $AvailableStations     = get_available_stations();
+        $WebFrontStations      = $this->ReadPropertyString("WebFrontStations");
+        $WebFrontStationsArray = array_map("trim", explode(",", $WebFrontStations));
+        $FavoriteStation       = $this->ReadPropertyString("FavoriteStation");
+        $Value                 = 1;
+
+        foreach ( $AvailableStations as $key => $val ) {
+            if (in_array( $val['name'], $WebFrontStationsArray) || $WebFrontStations === "<alle>" || $WebFrontStations === "<all>" ) {
+                if  ( $val['name'] === $FavoriteStation ){
+                    $Color = 0xFCEC00;
+                } else {
+                    $Color = -1;
+                }
+                $Associations[] = Array($Value++, $val['name'], "", $Color);
+                // associations only support up to 32 variables
+                if( $Value === 33 )
+                        break;
+            }
+        }
+       
+        if ($this->ReadPropertyString("IncludeTunein")){
+            $ip      = $this->ReadPropertyString("IPAddress");
+            $timeout = $this->ReadPropertyString("TimeOut");
+            if ($timeout && Sys_Ping($ip, $timeout) != true)
+               throw new Exception("Sonos Box ".$ip." is not available");
+
+            include_once(__DIR__ . "/sonosAccess.php");
+            $sonos = new SonosAccess($ip);
+
+            foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('R:0/0')['Result']))->item as $item) {
+                $Associations[] = Array($Value++, (string)$item->xpath('dc:title')[0], "", 0x539DE1);
+                // associations only support up to 32 variables
+                if( $Value === 33 ) break;
+            }
+        }
+
+        usort($Associations, function($a,$b){return strnatcmp($a[1], $b[1]);});
+
+        $Value = 1;
+        foreach($Associations as $Association) {
+            $Associations[$Value-1][0] = $Value++ ;
+        }
+
+        if(IPS_VariableProfileExists("Radio.SONOS"))
+            IPS_DeleteVariableProfile("Radio.SONOS");
+
+        $this->RegisterProfileIntegerEx("Radio.SONOS", "Speaker", "", "", $Associations);
+    
     }
     
     /**
@@ -839,7 +885,7 @@ class Sonos extends IPSModule
             $this->UnregisterVariable($name);
         }
     }
- 
+
     //Remove on next Symcon update
     protected function RegisterProfileInteger($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, $StepSize) {
         
@@ -856,6 +902,11 @@ class Sonos extends IPSModule
         IPS_SetVariableProfileValues($Name, $MinValue, $MaxValue, $StepSize);
         
     }
+
+        static function compare_association_name($a, $b)
+        {
+            return strnatcmp($a[1], $b[1]);
+        }
     
     protected function RegisterProfileIntegerEx($Name, $Icon, $Prefix, $Suffix, $Associations) {
         if ( sizeof($Associations) === 0 ){

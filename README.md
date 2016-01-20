@@ -68,6 +68,11 @@ IP-Symcon PHP module for accessing Sonos audio systems
        If this flag is set, the function SNS_SetBalance(InstanceID, balance)  is enabled and a variable "Balance" is added.
      - Enable Sleeptimer Contorl:<br>
        If this flag is set, the function SNS_SetSleepTimer(InstanceID, minuites)  is enabled and a variable "Sleeptimer" is added.
+     - Enable Playlist Control:<br>
+       If this flag is set, a variable "Playlist" is added.
+       This makes it possible to start a playlist from Web Front.
+     - Include TuneIn favorites:<br>
+       If this flag is selected, the Radio Stations from TuneIn favorites in Sonos are also added to the WebFront.
      - Favorite Radio Station:<br>
        This selection defines which radio station is started when function SNS_SetRadioFavorite(<InstranceID>) is executed.
      - Stations in WebFront:<br>
@@ -87,6 +92,7 @@ IP-Symcon PHP module for accessing Sonos audio systems
 - Treble
 - Balance
 - Sleeptimer
+- Playlist
 
 ## 5. background scripts
 When settig up a Sonos instance, two scripts are automatically created and started with a timer.<br>
@@ -281,6 +287,7 @@ Currently available are:
 - FFN
 - Hitradio N1
 - HR3
+- HR-Info
 - KiRaKa
 - MDR1
 - MDR Jump
@@ -302,6 +309,7 @@ Currently available are:
 - SWR1 RP
 - SWR3
 - WDR2
+- YouFM
 
 ---  
 
@@ -338,4 +346,22 @@ Allowed values are between 0 and 100.
 SNS_Stop(integer $InstanceID)
 ```
 Stops playing
+
+---  
+
+```php
+SNS_UpdatePlaylists(integer $InstanceID)
+```
+Reads Playlists from Sonos and makes them available in WebFront
+
+---  
+
+```php
+SNS_UpdateRadioStations(integer $InstanceID)
+```
+Updates the available Radio stations in WebFront.
+All configured Radiostations are taken from the instance configuration parameter "Stations in WebFront" (komma separated list).
+If the Flag "Include TuneIn favorited" is selected also the "My Radio" Stations from Sonos are read and added to WebFront.
+Attention: Only 32 Radio Stations can be added. If the function would find more than 32 Stations, only the first 32 are added.
+Hint: In only stations from Sonos should be added, clear the parmeter "Stations in WebFront".
 

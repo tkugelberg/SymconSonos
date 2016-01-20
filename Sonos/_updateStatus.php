@@ -69,13 +69,23 @@ if ( !$timeout || Sys_Ping($ip, $timeout) == true ) {
             }
 
             // start find current Radio in VariableProfile
-            $radioStations = get_available_stations();
+            $radioStations       = get_available_stations();
+            $playingRadioStation = '';
             foreach ($radioStations as $radioStation) {
-              if($radioStation["url"] == $mediaInfo["CurrentURI"]){
+              if($radioStation["url"] == htmlspecialchars_decode($mediaInfo["CurrentURI"])){
             	 $playingRadioStation = $radioStation["name"];
             	 break;
               }
             }
+            
+            if( $playingRadioStation == ''){
+              foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('R:0/0')['Result']))->item as $item) {
+					if ($item->res == htmlspecialchars_decode($mediaInfo["CurrentURI"])){
+                  $playingRadioStation = (string)$item->xpath('dc:title')[0];
+                  break;
+                }
+              }
+				}
 
             $Associations = IPS_GetVariableProfile("Radio.SONOS")["Associations"];
             if(isset($playingRadioStation)){

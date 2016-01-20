@@ -16,6 +16,7 @@
                 { "name": "SleeptimerControl", "type": "CheckBox",          "caption": "Enable Sleeptimer Control" },
                 { "name": "PlaylistControl",   "type": "CheckBox",          "caption": "Enable Playlist Control" },
                 { "type": "Label", "label": "Settings for radio stations:"},
+                { "name": "IncludeTunein",     "type": "CheckBox",          "caption": "Include TuneIn favorites" },
 		{ "name": "FavoriteStation",   "type": "Select",            "caption": "Favorite radio station", 
                     "options": [ 
                                  { "label": "1LIVE",                    "value": "1LIVE" },
@@ -63,6 +64,7 @@
 	],
 	"actions":
 	[
-		{ "type": "Button", "label": "Update Playlists", "onClick": "SNS_UpdatePlaylists($id);" }
+		{ "type": "Button", "label": "Update Radio Stations", "onClick": "SNS_UpdateRadioStations($id);" },
+		{ "type": "Button", "label": "Update Playlists",      "onClick": "SNS_UpdatePlaylists($id);" }
         ]
 }
