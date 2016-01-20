@@ -359,9 +359,9 @@ Reads Playlists from Sonos and makes them available in WebFront
 ```php
 SNS_UpdateRadioStations(integer $InstanceID)
 ```
-Updates the available Radio stations in WebFront.
-All configured Radiostations are taken from the instance configuration parameter "Stations in WebFront" (komma separated list).
-If the Flag "Include TuneIn favorited" is selected also the "My Radio" Stations from Sonos are read and added to WebFront.
-Attention: Only 32 Radio Stations can be added. If the function would find more than 32 Stations, only the first 32 are added.
-Hint: In only stations from Sonos should be added, clear the parmeter "Stations in WebFront".
+Updates the available Radio stations in WebFront.<br>
+All configured Radiostations are taken from the instance configuration parameter "Stations in WebFront" (komma separated list).<br>
+If the Flag "Include TuneIn favorited" is selected also the "My Radio" Stations from Sonos are read and added to WebFront.<br>
+Attention: Only 32 Radio Stations can be added. If the function would find more than 32 Stations, only the first 32 are added.<br>
+Hint: In only stations from Sonos should be added, clear the parmeter "Stations in WebFront".<br>
 
