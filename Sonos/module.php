@@ -764,12 +764,11 @@ class Sonos extends IPSModule
                 }
                 $Associations[] = Array($Value++, $val['name'], "", $Color);
                 // associations only support up to 32 variables
-                if( $Value === 33 )
-                        break;
+                if( $Value === 33 ) break;
             }
         }
        
-        if ($this->ReadPropertyString("IncludeTunein")){
+        if ($this->ReadPropertyString("IncludeTunein") && $Value < 33){
             $ip      = $this->ReadPropertyString("IPAddress");
             $timeout = $this->ReadPropertyString("TimeOut");
             if ($timeout && Sys_Ping($ip, $timeout) != true)
