@@ -446,7 +446,6 @@ class Sonos extends IPSModule
     
     public function SetBass($bass)
     {
- 
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
