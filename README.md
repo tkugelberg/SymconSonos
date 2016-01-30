@@ -3,12 +3,12 @@ IP-Symcon PHP module for accessing Sonos audio systems
 
 **Content**
 
-1. [Funktionsumfang](#1-Funktionsumfang)
-2. [Anforderungen](#2-Anforderungen)
-3. [Installation & Konfiguration](#3-Installation--Konfiguration)
-4. [Variablen](#4-Variablen)
-5. [Hintergrung Skripte](#5-Hintergrund--Skripte)
-6. [Funktionen](#6-Funktionen)
+1. [Funktionsumfang](#1-funktionsumfang)
+2. [Anforderungen](#2-anforderungen)
+3. [Installation & Konfiguration](#3-installation--konfiguration)
+4. [Variablen](#4-variablen)
+5. [Hintergrung Skripte](#5-hintergrund--skripte)
+6. [Funktionen](#6-funktionen)
 
 ## 1. Funktionsumfang
 Dieses Modul is dazu gedacht um allgemeine Funktionalitäten in Sonso aus IP-Symcon heraus auszulösen.  
