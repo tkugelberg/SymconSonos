@@ -424,10 +424,6 @@ class Sonos extends IPSModule
 
     public function SetBalance($balance)	
     {
-        if (!$this->ReadPropertyBoolean("BalanceControl")) die("This function is not enabled for this instance");
-
-        SetValue($this->GetIDForIdent("Balance"), $balance);
-
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
@@ -445,20 +441,20 @@ class Sonos extends IPSModule
         $sonos = (new SonosAccess($ip));
         $sonos->SetVolume($leftVolume,'LF');
         $sonos->SetVolume($rightVolume,'RF');
+        if (!$this->ReadPropertyBoolean("BalanceControl")) SetValue($this->GetIDForIdent("Balance"), $balance);
     }
     
     public function SetBass($bass)
     {
-        if (!$this->ReadPropertyBoolean("BassControl")) die("This function is not enabled for this instance");
  
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        SetValue($this->GetIDForIdent("Bass"), $bass);
         include_once(__DIR__ . "/sonosAccess.php");
         (new SonosAccess($ip))->SetBass($bass);
+        if (!$this->ReadPropertyBoolean("BassControl")) SetValue($this->GetIDForIdent("Bass"), $bass);
     }
 
     public function SetDefaultGroupVolume()
@@ -548,8 +544,6 @@ class Sonos extends IPSModule
 
     public function SetLoudness($loudness)
     {
-        if (!$this->ReadPropertyBoolean("LoudnessControl")) die("This function is not enabled for this instance");
-
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
@@ -557,21 +551,19 @@ class Sonos extends IPSModule
  
         include_once(__DIR__ . "/sonosAccess.php");
         (new SonosAccess($ip))->SetLoudness($loudness);
-        SetValue($this->GetIDForIdent("Loudness"), $loudness);
+        if ($this->ReadPropertyBoolean("LoudnessControl")) SetValue($this->GetIDForIdent("Loudness"), $loudness);
     }
 
     public function SetMute($mute)
     {
-        if (!$this->ReadPropertyBoolean("MuteControl")) die("This function is not enabled for this instance");
-
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        SetValue($this->GetIDForIdent("Mute"), $mute);
         include_once(__DIR__ . "/sonosAccess.php");
         (new SonosAccess($ip))->SetMute($mute);
+        if ($this->ReadPropertyBoolean("MuteControl")) SetValue($this->GetIDForIdent("Mute"), $mute);
     }
     
     public function SetPlaylist($name){
@@ -645,8 +637,6 @@ class Sonos extends IPSModule
     
     public function SetSleepTimer($minutes)
     {
-        if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
-
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
@@ -682,16 +672,14 @@ class Sonos extends IPSModule
 
     public function SetTreble($treble)	
     {
-        if (!$this->ReadPropertyBoolean("TrebleControl")) die("This function is not enabled for this instance");
-
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        SetValue($this->GetIDForIdent("Treble"), $treble);
         include_once(__DIR__ . "/sonosAccess.php");
         (new SonosAccess($ip))->SetTreble($treble);
+        if (!$this->ReadPropertyBoolean("TrebleControl")) SetValue($this->GetIDForIdent("Treble"), $treble);
     }
     
     public function SetVolume($volume)

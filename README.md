@@ -1,367 +1,442 @@
-# Sonos PHP Module for IP-Symcon
-
+onos PHP Module for IP-Symcon
 IP-Symcon PHP module for accessing Sonos audio systems
 
 **Content**
 
-1. [functional range](#1-functional--range) 
-2. [requirements](#2-requirements)
-3. [installation & configuration](#3-installation--configuration)
-4. [variables](#4-variables)
-5. [background scripts](#5-background--scripts)
-6. [functional reference](#6-functional--reference) 
-7. [change log](#7-change-log)
+1. [Funktionsumfang](#1-Funktionsumfang)
+2. [Anforderungen](#2-Anforderungen)
+3. [Installation & Konfiguration](#3-Installation--Konfiguration)
+4. [Variablen](#4-Variablen)
+5. [Hintergrung Skripte](#5-Hintergrund--Skripte)
+6. [Funktionen](#6-Funktionen)
 
-## 1. functional range
+## 1. Funktionsumfang
+Dieses Modul is dazu gedacht um allgemeine Funktionalitäten in Sonso aus IP-Symcon heraus auszulösen.  
+Die folgenden Funktionalitäten sind implementiert:
+- verschiedene Quellen festlegen
+  - Radiosender
+    - ausgelieferte Sender
+    - importierte Sonos TuneIn Favoriten
+  - Playlisten
+  - Analogen Eingang
+  - SPDIF Eingang
+- Gruppenhandling
+- Play/Pause/Stop/Previous/Next
+- Lautstärke anpassen (inkl. default volume)
+- Mute, Loudness, Bass, Treble
+- Balance
+- Sleeptimer
+- Ansagen  
+Audiodateien von einem Samba-Share (z.B. Synology) oder HTTP Server abspielen und danach den vorherigen zustand wieder herstellen
 
- This module is meant to handle common actions in Sonos from IP-Symcon.
-
- The folowing functions are implemented:
- - Selection of pre-defined radio stations (incl. default radio station)
- - Group Handling
- - Volume control (incl. default volume) 
- - Mute, Loudness, Bass, Treble
-
-## 2. requirements
+## 2. Anforderungen
 
  - IPS 4.x
  - Sonos audio system
- 
-## 3. installation & configuration
 
-   - installation in IPS 4.x  
-        add the following URL to 'Modul Control':  
-        `git://github.com/tkugelberg/SymconSonos.git`  
-   - configuration  
-     ![Instance Configuration](docu/instance_config.png?raw=true "Instance Config")
-     -  IP-Address/Host: <br>
-        address the Sonos component can be reached under. When applying the settings a connection test is performed.
-     -  Maximal ping timeout:<br>
-        before sending a command to a Sonos box, it is checked if the Box is available via Sys_Ping().<br>
-        This Parameter is setting the value after how many milliseconds the IP is considered to be down.
-        If the value is set to 0, the check will not be performed.
-     -  Default Volume:<br>
-        Volume that will be set when executing
-       ```
-       SNS_SetDefaultVolume(<InstanceID>);
-       ```
-       or
-       ```
-       SNS_SetDefaultGroupVolume(<InstanceID>);
-       ```
-     - RINCON:<br>
-       Not to be set in configuration. Will be set when automatic script "_updateGrouping" is executed  is executed the first time.
-     - Group Coordinator:<br>
-       If this flag is set, the instance can be used as leading member of a group.
-     - Force Grouping in Sonos:<br>
-       If this flag is set, the grouping settings from IP-Symcon will be set in Sonos, if they differ.
-       If this Flag is not set, the grouping information in IP-Symcon will be updated if Sonos settings differ.
-     - Enable Mute Control:<br>
-       If this flag is set, the function SNS_SetMute(InstanceID, mute) is enabled and a variable "Mute" is added.
-     - Enable Loudness Control:<br>
-       If this flag is set, the function SNS_SetLoudness(InstanceID, loudness) is enabled and a variable "Loudness" is added.
-     - Enable Bass Control:<br>
-       If this flag is set, the function SNS_SetBass(InstanceID, bass) is enabled and a variable "Bass" is added.
-     - Enable Treble Control:<br>
-       If this flag is set, the function SNS_SetTreble(InstanceID, treble) is enabled and a variable "Treble" is added.
-     - Enable Balance Control:<br>
-       If this flag is set, the function SNS_SetBalance(InstanceID, balance)  is enabled and a variable "Balance" is added.
-     - Enable Sleeptimer Contorl:<br>
-       If this flag is set, the function SNS_SetSleepTimer(InstanceID, minuites)  is enabled and a variable "Sleeptimer" is added.
-     - Enable Playlist Control:<br>
-       If this flag is set, a variable "Playlist" is added.
-       This makes it possible to start a playlist from Web Front.
-     - Include TuneIn favorites:<br>
-       If this flag is selected, the Radio Stations from TuneIn favorites in Sonos are also added to the WebFront.
-     - Favorite Radio Station:<br>
-       This selection defines which radio station is started when function SNS_SetRadioFavorite(<InstranceID>) is executed.
-     - Stations in WebFront:<br>
-       This is a comma separated list of Radio Stations which should appear as Buttion in WebFront. If it is set to "<all>", all are being displayed.
-      
-## 4. variables
-- GroupMembers<br>only exists if the Flag "Group Coordinator" in Instance configuration was slected.<br>Contains a list of all instances attached to this group coordinator.<br>If the Flag "Force Grouping in Sonos" is set, this will only be updated if the SNS_SetGroup function  is called on a Sonos Instance. If the Flag ist not set, it will also be updated by the _updateGrouping script if the grouping is changed in Sonos App.
-- GroupVolume<br>only exists if the Flag "Group Coordinator" in Instance configuration was slected.<br>This value is calculated on the basis od the volume of all Sonos Instances of belonging to this group.<br>It is updated by the functions SNS_ChangeGroupVolume, SNS_SetDefaultGroupVolume, SNS_SetGroupVolume and by the _updateStatus script on the Group Coordinator itself.
-- MemberOfGroup<br>only exists if the Flag "Group Coordinator" in Instance configuration was __not__ slected.<br>If the Instance belongs to a group, it contains the Instance ID of the Group Coordinator.
-- nowPlaying<br>This variable is updated by the _updateStatus script. It contains information about what is currently being played.<br>If the Instance belongs to a group, the value is taken from the Group Coordinator. If not 
-- Radio
-- Status
-- Volume
-- Mute
-- Loudness
-- Bass
-- Treble
-- Balance
-- Sleeptimer
-- Playlist
+## 3. Installation & Konfiguration
 
-## 5. background scripts
-When settig up a Sonos instance, two scripts are automatically created and started with a timer.<br>
-1. _updateStatus<br>This script is executed every 5 seconds.<br>It updates teh variables Voume, Mute, Loudness, Bass, Treble, Balance and Sleeptimer from the settings in Sonos, if the corresponding activation switches are set.<br>In addition the Parameters Status, Radio and NowPlaying are filled.<br>For Group Coordinators the group volume is set.
-2. _updateGrouping<br> This script is executed every 300 seconds.<br>It ensures that all RINCON values are set.<br>It updates the group settings either in Sonos or in IP-Symcon.
+### Installation in IPS 4.x
+Füge im "Module Control" (Kern Instanzen->Modules) die URL "git://github.com/tkugelberg/SymconSonos.git" hinzu.  
+Danach ist es möglich eine neue Sonos Instanz zu erstellen:
+![Instanz erstellen](docu/create_instance.png?raw=true "Instanz erstellen")
+### Konfiguration
+![Instanz konfigurieren](docu/instance_config.png?raw=true "Instanz konfigurieren")
+-  IP-Address/Host:  
+Adresse unter der die Sonos Instanz erreichbar ist.Hierbei kann es sich um eine IP oder einen Hostnamen handeln.  
+Wenn die Einstellungen gespeichert werden wird überprüft ob die Adresse erreichbar ist.
+- Maximal ping timeout:  
+Bevor ein Kommando an eine Sonos Instanz gecshickt wird, wird per Sys_Ping() überprüft ob diese erreichbar ist.  
+Dieser Parameter steuert nach wie vielen Millisekunden angenommen wird, dass die Box nicht verfügbar ist.  
+Wenn der Parameter auf 0 gesetzt wird, wird die Erreichbarkeit nicht überprüft.
+-  Default Volume:  
+Die Lautstärke die eingestellt wird, wenn die Funktionen   
+   ```php 
+    SNS_SetDefaultVolume(<InstanceID>);
+   ```
+   oder
+   ```php
+   SNS_SetDefaultGroupVolume(<InstanceID>);
+   ```
+   aufgerufen wird.
+- RINCON:  
+Enthält die RINCON der Sonos Instanz. Dabei handelt es sich um einen weltweit eindeutigen Identifier in dem Format "RINCON_<MAC-Adresse>1400", wobei die "<MAC-Adresse>" nur die Ziffern und Buchstaben ohne Bindestriche enthält.  
+Wenn dieser Wert nicht gepflegt wird, wird er automatisch ermittelt.
+- Group Coordinator:  
+Sonos Boxen werden in diesem Modul in 2 Typen unterteilt:
+  1. Gruppen Koordinatoren (Group Coordinator) --> Haken gesetzt
+  2. Gruppen Mitglieder (Group Member) --> Haken nicht gesetzt
 
-## 6. functional reference
+  Mitglieder können mit der Funktion 
+  ```php
+  SNS_SetGroup(<InstanceID>,<CoordinatorInstanceID>);
+  ```
+  einer Gruppe zugeordnet werden. Wenn man für die "<CoordinatorInstanceID>" die Instanz ID "0" wählt wird die Gruppenzugehörigkeit aufgelöst.  
+Stand 30.1.2016: es hat sich gezeigt, dass es zu Problemen kommt, wenn man im Sonos die Gruppierung anpasst, und der real aktive Gruppenkoordinator in IPS nicht als solcher markiert ist. Dieses Verhalten wird wohl zeitnah überarbeitet werden.
+- Force Grouping in Sonos:  
+Bezüglich des Verhaltens was passieren soll, wenn ein Unterschied zwischen Sonos und IPS vorgefunden wird, gibt es auch 2 Alternativen:
+  1. IPS übernimmt die Einstellungen aus Sonos --> Haken nicht gesetzt  
+Diese Alternative hat den Vorteil, dass die Einstellungen die man über die Sonos APP getroffen hat sich im IPS wiederspiegeln. Dies hat aber zur Folge, dass man in der APP aufassen muss, welche Box man beim bilden einer Gruppe zuerst auswählt. Es sollte dann nur auf der/einer in IPS als GroupCoordinator konfigurierten Instanz weitere Boxen hinzufügen.
+  2. Die Einstellungen aus IPS werden in Sonos gesetz --> Haken gesetzt  
+Dies ist dafür gedacht, dass eine Box die stromlos geschaltet wurde automatisch wieder der richtigen Gruppe hinzugefügt wird.  
+Hat aber leider den Nebeneffekt, dass eine Änderung in der Sonos APP wieder verworfen wird, wenn das _updateGrouping Script läuft.
+- Enable Mute Control:  
+Diese Option legt eine Variable "Mute" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch eine Konpf auf dem WebFront auf, über den man dies Steuern kann.
+- Enable Loudness Control:  
+Diese Option legt eine Variable "Loudness" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch eine Konpf auf dem WebFront auf, über den man dies Steuern kann.
+- Enable Bass Control:  
+Diese Option legt eine Variable "Bass" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
+- Enable Treble Control:  
+Diese Option legt eine Variable "Treble" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
+- Enable Balance Control:  
+Diese Option legt eine Variable "Balance" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
+- Enable Sleeptimer Contorl:  
+Diese Option legt eine Variable "Sleeptimer" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird.
+- Enable Playlist Control:  
+Diese Option legt eine Variable "Playlist" an. Dadurch wird für jede Playlist die aus dem Sonos System importiert wurde ein Knopf auf dem WebFront angezeigt. Die Variable Playlist ist allerdings niemals gefüllt, da dies nicht der Logik in Sonos entspricht.  
+Wenn eine Playliste gestartet wird, werden lediglich alle Titel der Liste der Queue hinzugefügt.  
+Falls die Box einer Gruppe zugeordnet wird, wird diese Variable ausgeblendet.
+- Include TuneIn favorites:  
+Wenn dieser Haken gesetzt ist, werden neben den mitgelieferten Radio sendern auch die TuneIn Favoriten (Meine Radiosender) aus dem Sonos System ausgelesen und gespeichert. Sie werden im WebFront als blaue Köpfe angelegt.  
+Dies Gesamtzahl der verfügbaren Radiosender kann allerdings 32 nicht übersteigen. Da die ausgelieferten Sender zuerst ausgelesen werden müssen diese evtl begrenzt werden, damit die TuneIn Sender hinzugefügt werden.
+- Favorite Radio Station:  
+Der hier ausgewählte Sender aus der ausgelieferten Sender Liste wird gestartet, wenn die Funktion
+  ```php
+  SNS_SetRadioFavorite(<InstranceID>);
+  ```
+  ausgeführt wird.
+- Stations in WebFront:  
+Dies ist eine Liste der Ausgelieferten Sender, die im WebFront als transparenter Knopf angezeigt werden sollen. Falls es sich um die "Favorite Station" handelt ist der Knopf gelb.  
+Wenn alle angezeigt werden sollen ist <all> zu pflegen, wenn keiner angezeigt werden soll, ist dieser Parameter leer zu lassen.  
+Diese Sender stehen zur Verfügung:
+  - 1LIVE
+  - 1LIVE DIGGI 
+  - 917xfm
+  - Antenne 1
+  - Antenne Bayern
+  - Antenne MV
+  - Antenne Thueringen
+  - A State Of Trance
+  - Bayern 3
+  - bigFM
+  - Bremen Vier
+  - Deutschlandfunk
+  - Energy
+  - FFH
+  - FFN
+  - Hitradio N1
+  - HR3
+  - HR-Info
+  - KiRaKa
+  - MDR1
+  - MDR Jump
+  - NDR2
+  - N-JOY
+  - OE3
+  - Radio 91.2
+  - Radio Duisburg
+  - Radio Essen
+  - Radio K.W.
+  - Radio Lippe
+  - Radio Top40
+  - RevivalKult
+  - RPR1
+  - Sunshine Live
+  - Sunshine Live - classics
+  - Sunshine Live - trance
+  - SWR1 BW
+  - SWR1 RP
+  - SWR3
+  - WDR2
+  - YouFM
+### Testumgebung
+- Update Radio Stations  
+Dieser Knopf aktualisiert das Profil, in dem die im Webfront verfügbaren Radiosender hinterlegt sind, entsprechend der Parameter "Include TuneIn favorites", "Favorite Radio Station" und "Stations in WebFront".  
+Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
+- Update Playlists  
+Dieser Knopf aktualisiert das Profil, in dem die im Webfront verfügbaren Playlisten hinterlegt sind.  
+Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
+## 4. Variablen
+- GroupMembers  
+Diese Variable wird erstellt, wenn die Option "Group Coordinator" aktiviert ist.  
+Sie enthält eine Liste von Sonos Instanz IDs, die diesem Gruppen Koordinator zugewiesen sind.  
+Wenn die Option "Force grouping in Sonos" aktiviert ist, wird diese Variable lediglich durch die Funktion
+  ```php
+  SNS_SetGroup(<InstanceID>,<CoordinatorInstanceID>);
+  ```
+  gesetzt.  
+  Falls die Option "Force grouping in Sonos" nicht aktiviert ist, wird diese Variable zusätzlich von dem Skript _updateGrouping aktualisiert.
+- GroupVolume  
+Diese Variable wird erstellt, wenn die Option "Group Coordinator" aktiviert ist.  
+Ihr Wert wird anhand der Lautstärke der einzelnen Gruppenmitglieder (Durchnittswert) berechnet.  
+Er wird durch die Fuktionen
+  ```php
+  SNS_ChangeGroupVolume(<InstanceID>,<Increment>);
+  SNS_SetDefaultGroupVolume(<InstanceID>);
+  SNS_SetGroupVolume(<InstanceID>,<Volume>);
+  ``` 
+  und das Skript "_updateStatus" des Gruppenkoordinators aktualisiert.
+- MemberOfGroup  
+Diese Variable wird erstellt, wenn die Option "Group Coordinator" __nicht__ aktiviert ist.  
+Sie enthält die InstanzID des Gruppenkoordinators der die Instanz zugeordnet ist.
+- nowPlaying  
+Diese Variable wird durch das Skript _updateStatus aktuell gehalten.  
+Sie enthält Informationen über das was momentan gespielt wird.  
+Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
+Wenn nicht kann sich der Wert auf 2 Arten zusammensetzen:
+  1. Wenn das Feld "StreamContent" gefüllt ist, wird dieser übernommen (z.B.: bei Radiosendern)
+  2. Ansonsten wird sie mit "<Titel>|<Artist>" gefüllt
+- Radio  
+Diese Variable enthält den aktuell laufenden Radiosender, sofern er in der Liste im WebFront verfügbaren Radiosender auftaucht (siehe Konfiguration).  
+Eine Aktualisierung erfolgt durch das Skript _updateStatus.  
+Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
+- Status  
+Diese Variable enthält Informationen, in welchem Zustand sich die Sonos Instanz gerade befindet und wird von dem Script _updateStatus aktualisiert.  
+Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
+Mögliche Werte sind:
+  0. Prev
+  1. Play
+  2. Pause
+  3. Stop
+  4. Next
+  5. Transition
 
+  0 und 4 werden nur dazu genutzt um über das WebFront den Player zu steuern. 5 ist ein Wert der nur kurzfristig angenommen wird, wenn die Audioquelle gewechselt wird.
+- Volume  
+Diese Variable enthält die Aktuelle Lautstärke der Instanz und wird von dem Script _updateStatus aktualisiert.
+- Mute  
+Diese Variable wird nur erstellt, wenn die Option "Enable Mute Control" aktiviert ist.
+Sie enthält den aktuelle Zustand ob die Instanz genuted ist und wird von dem Script _updateStatus aktualisiert.
+- Loudness  
+Diese Variable wird nur erstellt, wenn die Option "Enable Mute Control" aktiviert ist.  
+Sie enthält den aktuellen Zustand ob die Instanz gemuted ist und wird von dem Script _updateStatus aktualisiert.
+- Bass  
+Diese Variable wird nur erstellt, wenn die Option "Enable Bass Control" aktiviert ist.  
+Sie enthält die aktuellen Equalizer Einstellungen der Instanz und wird von dem Script _updateStatus aktualisiert.
+- Treble  
+Diese Variable wird nur erstellt, wenn die Option "Enable Treble Control" aktiviert ist.  
+Sie enthält die aktuellen Equalizer Einstellungen der Instanz und wird von dem Script _updateStatus aktualisiert.
+- Balance  
+Diese Variable wird nur erstellt, wenn die Option "Enable Balance Control" aktiviert ist.  
+Sie enthält die aktuellen Equalizer Einstellungen der Instanz und wird von dem Script _updateStatus aktualisiert.
+- Sleeptimer  
+Diese Variable wird nur erstellt, wenn die Option "Enable Sleeptimer Control" aktiviert ist.  
+Sie enthält die aktuellen Wert des Sleeptimers der Instanz und wird von dem Script _updateStatus aktualisiert.  
+Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
+- Playlist  
+Diese Variable hat normalerweise keinen Wert gepflegt. Sie dient nur dazu vom WebFront aus eine Playliste anstarten zu können.
+## 5. Hintergrund Skripte
+Wenn eine Sonos Instanz erstellt wird, werden 2 Skripte angelegt und mit einem Timer gestartet.
+1. _updateStatus  
+Dieses Skript wird alle 5 Sekunden ausgeführt.  
+Es aktualisiert die Variablen Voume, Mute, Loudness, Bass, Treble, Balance and Sleeptimer baserend auf den Werten in Sonos, sofern die relevanten Konfigurationsschalter dies erfordern.  
+Weiterhin werden die Parameter Status, Radio and NowPlaying aktualisiert.  
+Bei Gruppenkoordinatoren wird die Gruppenlautstärke (GroupVolume) berechnet.
+2. _updateGrouping  
+Dieses Skript wird alle 300 Sekunden ausgeführt.  
+Es stellt sicher, dass für alle Sonos Instanzen die RINCON gesetzt ist.  
+Die Gruppeneinstellungen werden entweder in Sonos oder in IP-Symcon aktualisiert.
+## 6. Funktionen
 ```php
 SNS_ChangeGroupVolume(integer $InstanceID, integer $increment)
 ```
-Changes the Volume of each member of a group by the value provided in $increment.
-Can be positive or negative.
-If the volume becomes bigger than 100 or less than 0, the volume will be set to these values.
+Ändert die Lautstärke jedes Mitglieds einer Gruppe um den mitgelieferten Wert in $increment.  
+Kann positiv oder negativ sein.  
+Falls die Lautstärke 100 übersteigen oder 0 unterschreiten würde, wird die Lautstärke auf diese Werte gesetzt.
 
----  
-
+---
 ```php
 SNS_ChangeVolume(integer $InstanceID, integer $increment)
 ```
-Changes the Volume by the value provided in $increment.
-Can be positive or negative.
-If the volume becomes bigger than 100 or less than 0, the volume will be set to these values.
+Ändert die Lautstärke einer Sonos Instanz um den mitgelieferten Wert in $increment.  
+Kann positiv oder negativ sein.  
+Falls die Lautstärke 100 übersteigen oder 0 unterschreiten würde, wird die Lautstärke auf diese Werte gesetzt.
 
 ---
-
 ```php
 SNS_DeleteSleepTimer(integer $InstanceID)
 ```
-Cancels the active Sleeptimer
+Bricht den Sleeptimer ab.
 
 ---
-
 ```php
 SNS_Next(integer $InstanceID)
 ```
-Jumps to next song in Playlist.
+Springt zum nächsten Titel.
 
----  
-
+---
 ```php
 SNS_Pause(integer $InstanceID)
 ```
-Pauses playing.
+Pausiert die Wiedergabe.
 
----  
-
+---
 ```php
 SNS_Play(integer $InstanceID)
 ```
-Resumes or starts playing.
+Setzt die Wiedergabe fort.
 
----  
-
+---
 ```php
 SNS_PlayFiles(integer $InstanceID, array $files, string $volumeChange)
 ```
-All files provided in the array $files have to be located on a Samba Share (CIFS).
-They have to be provided with complete path (e.g. "//server.local.domain/share/file.mp3").
-Current playing will be stopped and all provided files will be played.
-After the files have been played, the previous list/radio will be resumed. 
+1. Falls gerade etwas wiedergegeben wird, wird die Wiedergabe pausiert
+2. Die Lautstärke wird entsprechend $volumeChange angepasst  
+   - "0" würde die Lautstärke nicht ändern  
+   - "17" würde die Lautstärke auf 17 setzen  
+   - "+8" würde die Lautstärke um 8 anheben  
+   - "-8" würde die Lautstärke um 8 absenken
+3. Alle Dateien, die in dem Array $filesangegeben wurden werden abgespielt.  
+Entweder von einem Samba Share (CIFS) (z.B. "//server.local.domain/share/file.mp3") oder von einem HTTP Server (z.B.: "http://ipsymcon.fritz.box:3777/user/ansage/hallo.mp3")
+4. Die Ausgangslautstärke wird wieder hergestellt
+5. Die Audioquelle wird wieder hergestellt
+6. Falls eine Wiedergabe aktiv war, wird sie wieder gestartet
 
-If the Box is part of a group, it will be removed for playing the files and added again, once done.
-If the playback was inside a playlist, it will continue playing at the very same position.
-If nothing was being played, silence will return.
-Playing several files could look like this:
-
+Falls die Instanz einer Gruppe zugeordnet ist, wird sie für die Wiedergabe der Dateien aus der Gruppe genommen und danach wieder hinzugefügt.  
+Mehrere Dateien anzuspielen könnte so aussehen:
 ```php
 SNS_PlayFiles(17265, Array( "//ipsymcon.fritz.box/sonos/bla.mp3",
-                            "//ipsymcon.fritz.box/sonos/blubb.mp3"), 0);  
+                            "http://www.sounds.com/blubb.mp3"), 0);
 ```
 
-The parameter $changeVolume can be provided with the following syntax:
-"+10" -> Increase volume by 10% before playing the file(s)
-"-10" -> Descrease volume by 10% before playing the file(s)
-"0"   -> do not change volume
-"10"  -> will set the volume to 10% before playing the file(s)
-
-After playing the files, the volume will be set back to the source value
-
----  
-
+---
 ```php
 SNS_Previous(integer $InstanceID)
 ```
-Will jump one track back in Playlist (or to the beginning of the track).
+Startet den vorhergehenden Titel in der Liste.
 
----  
-
+---
 ```php
 SNS_SetAnalogInput(integer $InstanceID, integer $InputInstanceID)
 ```
-This will start playing the analog input of the provided instance.
+Selektiert den Analogen Input einer Instanz als Audioquelle.
 
 ---
-
 ```php
-SNS_SetBalance(integer $InstanceID, integer $bass)
+SNS_SetBalance(integer $InstanceID, integer $balance)
 ```
-Will modify the balance settings in the equlizer of the selected box. Only makes sence for stereo pairs and amps
-Possible entry is between -100 and 100.
+Passt die Balance Einstellungen im Equalizer der Sonos Instanz an. Nur Sinnvoll bei Setreopaaren oder AMPS.  
+Mögliche Werte liegen zwischen -100 (ganz links) und 100 (gnaz rechts).
 
 ---
-
 ```php
 SNS_SetBass(integer $InstanceID, integer $bass)
 ```
-Will modify the bass settings in the equlizer of the selected box.
-Possible entry is between -10 and 10.
+Passt die Bass Einstellungen im Equalizer der Sonos Instanz an.  
+Mögliche Werte liegen zwischen -10 und 10.
 
----  
-
+---
 ```php
 SNS_SetDefaultGroupVolume(integer $InstanceID)
 ```
-Executes function SNS_SetDefaultVolume( ) for each member of a group.
+Führt die Funktion SNS_SetDefaultVolume( ) für jeden Mitglied einer Gruppe aus.
 
----  
-
+---
 ```php
 SNS_SetDefaultVolume(integer $InstanceID)
 ```
-Sets the volume of a box to the value defined in instance settings.
+Ändert die Lautstärke einer Instanz auf die Default Lautstärke.
 
----  
-
+---
 ```php
 SNS_SetGroup(integer $InstanceID, integer $groupCoordinator)
 ```
-Adds or removes a Box to or from a group.
-If an instance ID of a GroupCoordinator is provided, the box will be added to this group.
-If 0 is provided, the Box will be removed from all groups.
+Fügt die Instanz zu einer Gruppe hinzu oder entfernt es aus einer Gruppe.  
+Wenn die InstanzID eines Gruppenkoordinators mitgegeben wird, wird die instanz dieser Gruppe hinzugefügt.  
+Wenn 0 mitgegeben wird, wird die Instanz aus allen Gruppen entfernt.
 
----  
-
+---
 ```php
 SNS_SetGroupVolume(integer $InstanceID, integer $volume)
 ```
-Executes SNS_ChangeGroupVolume($volume - "current Volume" ).
+Führt die Funktion SNS_ChangeGroupVolume($volume - "aktuelle Lautstärke" ) aus.
 
----  
-
+---
 ```php
 SNS_SetLoudness(integer $InstanceID, boolean $loudness)
 ```
-Switched the Loudness Flag in Equilizer settings of a box.
-Accepts 0,1, true and false as input.
+Setzt das Loundess Flag an einer Instanz.  
+0,1, true und false sind gültige Werte für $loudness.
 
----  
-
+---
 ```php
 SNS_SetMute(integer $InstanceID, boolean $mute)
 ```
-Mutes or unmutes a box.
-Accepts 0,1, true and false as input.
+Mutet or unmutet eine Instanz.
+0,1, true und false sind gültige Werte für $mute.
 
----  
-
+---
 ```php
-SNS_SetPlaylist(integer $InstanceID, strin $name)
+SNS_SetPlaylist(integer $InstanceID, string $name)
 ```
-Clears the queue of selected Box and adds all files of the requested playlist.
+Entfernt alle Titel aus einer Queue und fügt alle Titel einer Playliste hinzu.  
+Der name der Playliste muss in Sonos bekannt sein.
 
----  
-
+---
 ```php
 SNS_SetRadioFavorite(integer $InstanceID)
 ```
-Switches on the favorite Radio, that is set in instance settings.
+Startet die Wiedergabe der "Favorite Radio Station".
 
----  
-
+---
 ```php
 SNS_SetRadio(integer $InstanceID, string $radio)
 ```
-Switches on the provided radio station in $radio.
-Currently available are:
-- 1LIVE
-- 1LIVE DIGGI
-- 917xfm
-- Antenne 1
-- Antenne Bayern
-- Antenne MV
-- Antenne Thueringen
-- A State Of Trance
-- Bayern 3
-- bigFM
-- Bremen Vier
-- Deutschlandfunk
-- Energy
-- FFH
-- FFN
-- Hitradio N1
-- HR3
-- HR-Info
-- KiRaKa
-- MDR1
-- MDR Jump
-- NDR2
-- N-JOY
-- OE3
-- Radio 91.2
-- Radio Duisburg
-- Radio Essen
-- Radio K.W.
-- Radio Lippe
-- Radio Top40
-- RevivalKult
-- RPR1
-- Sunshine Live
-- Sunshine Live - classics
-- Sunshine Live - trance
-- SWR1 BW
-- SWR1 RP
-- SWR3
-- WDR2
-- YouFM
+Startet die Wiedergabe des in $radio mitgegebenen Radiosenders.  
+Zunächst wird gesucht, ob der Sender in den ausgelieferten Sendern gefunden wird. Wenn er dort nicht gefunden wird, wird in den TuneIn Favoriten (Meine Radiosneder) gesucht.
 
----  
-
+---
 ```php
 SNS_SetSleepTimer(integer $InstanceID, integer $minutes)
 ```
-This will set the Sleeptimer to the provided minutes.
+Setzt den Sleeptimer auf die angegebene Anzahl an Minuten.
 
----  
+---
 
 ```php
 SNS_SetSpdifInput(integer $InstanceID, integer $InputInstanceID)
 ```
-This will start playing the SPDIF input of the provided instance.
+Selektiert den SPDIF Input einer Instanz als Audioquelle.
 
 ---
-
 ```php
 SNS_SetTreble(integer $InstanceID, integer $treble)
 ```
-Will modify the treble settings in the equlizer of the selected box.
-Possible entry is between -10 and 10.
+Passt die Treble Einstellungen im Equalizer der Sonos Instanz an.
+Mögliche Werte liegen zwischen -10 und 10.
 
----  
+---
 ```php
 SNS_SetVolume(integer $InstanceID, integer $volume)
 ```
-Sets the volme of a box
-Allowed values are between 0 and 100.
+Passt die Lautstärke einer Instanz an.
+Mögliche Werte liegen zwischen 0 and 100.
 
----  
-
+---
 ```php
 SNS_Stop(integer $InstanceID)
 ```
-Stops playing
+Hält die Wiedergabe an.
 
----  
-
+---
 ```php
 SNS_UpdatePlaylists(integer $InstanceID)
 ```
-Reads Playlists from Sonos and makes them available in WebFront
+Liest alle Playlisten aus Sonos aus und legt diese in einem Variablenprofil in IPS ab.  
+Hierdurch wird es möglich eine Playliste im WebFront anzustarten.  
+Dies hat Auswirkung auf alle Sonos Instanzen.  
+Die Maximale anzahl an Einträgen in einem Variablenprofil beträgt 32. Daher werden auch nur die ersten 32 Playlisten gespeichert.  
+Diese Funktion wird auch durch den Knopf "Update Playlists" in der Instanzkonfiguration ausgeführt.
 
----  
-
+---
 ```php
 SNS_UpdateRadioStations(integer $InstanceID)
 ```
-Updates the available Radio stations in WebFront.<br>
-All configured Radiostations are taken from the instance configuration parameter "Stations in WebFront" (komma separated list).<br>
-If the Flag "Include TuneIn favorited" is selected also the "My Radio" Stations from Sonos are read and added to WebFront.<br>
-Attention: Only 32 Radio Stations can be added. If the function would find more than 32 Stations, only the first 32 are added.<br>
-Hint: In only stations from Sonos should be added, clear the parmeter "Stations in WebFront".<br>
+Aktualisiert das Variablenprofil für die Radiosender in IPS.  
+Hierdurch ergeben sich z.B. die Knöpfe im WebFront mit denen man einen Radiosender anstarten kann.  
+- Zunächst werden alle ausgelieferten Radiosender, die sich aus der Konfiguration "Stations in WebFront" ergeben, der Liste hinzugefügt. Im Webfront derden diese Sender in "transparent", der Favorit in "gelb" angezeigt.
+- Falls die Konfigurationsoption "Include TuneIn favorites" gewählt ist, werden alle TuneIn Favoriten (Meine Radiosender) ebenfalls der Liste hinzugefügt. Im Webfront derden diese Sender in "blau" angezeigt.
+- Wenn zu irgendeinem Zeitpunkt 32 Sender erreicht sind, ist die Liste voll. Dies liegt an der Beschränkung von IPS, dass Variabalenprofile maximal 32 Einträge haben dürfen.
+
+Hinweis: Wenn nur Sender aus Sonos enthalten sein sollen, ist der Konfigurationsparameter "Stations in WebFront" __leer__ zu speichern!
 
