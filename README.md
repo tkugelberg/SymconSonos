@@ -196,12 +196,12 @@ Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden
 Diese Variable enthält Informationen, in welchem Zustand sich die Sonos Instanz gerade befindet und wird von dem Script _updateStatus aktualisiert.  
 Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
 Mögliche Werte sind:
-  0. Prev
-  1. Play
-  2. Pause
-  3. Stop
-  4. Next
-  5. Transition
+  - 0 - Prev
+  - 1 - Play
+  - 2 - Pause
+  - 3 - Stop
+  - 4 - Next
+  - 5 - Transition
 
   0 und 4 werden nur dazu genutzt um über das WebFront den Player zu steuern. 5 ist ein Wert der nur kurzfristig angenommen wird, wenn die Audioquelle gewechselt wird.
 - Volume  
