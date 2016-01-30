@@ -227,6 +227,7 @@ Sie enthält die aktuellen Wert des Sleeptimers der Instanz und wird von dem Scr
 Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
 - Playlist  
 Diese Variable hat normalerweise keinen Wert gepflegt. Sie dient nur dazu vom WebFront aus eine Playliste anstarten zu können.
+
 ## 5. Hintergrund Skripte
 Wenn eine Sonos Instanz erstellt wird, werden 2 Skripte angelegt und mit einem Timer gestartet.
 1. _updateStatus  
@@ -238,6 +239,7 @@ Bei Gruppenkoordinatoren wird die Gruppenlautstärke (GroupVolume) berechnet.
 Dieses Skript wird alle 300 Sekunden ausgeführt.  
 Es stellt sicher, dass für alle Sonos Instanzen die RINCON gesetzt ist.  
 Die Gruppeneinstellungen werden entweder in Sonos oder in IP-Symcon aktualisiert.
+
 ## 6. Funktionen
 ```php
 SNS_ChangeGroupVolume(integer $InstanceID, integer $increment)
