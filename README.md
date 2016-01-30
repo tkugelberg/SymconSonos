@@ -149,6 +149,7 @@ Diese Sender stehen zur Verfügung:
   - SWR3
   - WDR2
   - YouFM
+
 ### Testumgebung
 - Update Radio Stations  
 Dieser Knopf aktualisiert das Profil, in dem die im Webfront verfügbaren Radiosender hinterlegt sind, entsprechend der Parameter "Include TuneIn favorites", "Favorite Radio Station" und "Stations in WebFront".  
@@ -156,6 +157,7 @@ Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
 - Update Playlists  
 Dieser Knopf aktualisiert das Profil, in dem die im Webfront verfügbaren Playlisten hinterlegt sind.  
 Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
+
 ## 4. Variablen
 - GroupMembers  
 Diese Variable wird erstellt, wenn die Option "Group Coordinator" aktiviert ist.  
