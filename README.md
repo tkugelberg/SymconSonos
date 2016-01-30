@@ -7,7 +7,7 @@ IP-Symcon PHP module for accessing Sonos audio systems
 2. [Anforderungen](#2-anforderungen)
 3. [Installation & Konfiguration](#3-installation--konfiguration)
 4. [Variablen](#4-variablen)
-5. [Hintergrung Skripte](#5-hintergrund--skripte)
+5. [Hintergrund Skripte](#5-hintergrund--skripte)
 6. [Funktionen](#6-funktionen)
 
 ## 1. Funktionsumfang
