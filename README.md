@@ -1,4 +1,5 @@
-onos PHP Module for IP-Symcon
+Sonos PHP Module for IP-Symcon
+===
 IP-Symcon PHP module for accessing Sonos audio systems
 
 **Content**
