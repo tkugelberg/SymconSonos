@@ -1,70 +1,72 @@
 <?
-include_once("../modules/SymconSonos/Sonos/sonosAccess.php");
 
-// Nothing to do if Instance is Group Coordinator
-if(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupCoordinator")) return;
-
-$groupForcing      = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "GroupForcing");
+$sonosInstanceID   = IPS_GetParent($_IPS["SELF"]);
+$memberOfGoup      = GetValueInteger(IPS_GetObjectIDByName("MemberOfGroup", $sonosInstanceID));
+$coordinatorInIPS  = GetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID));
+$forceGrouping     = IPS_GetProperty($sonosInstanceID, "GroupForcing");
+$ipAddress         = IPS_GetProperty($sonosInstanceID, "IPAddress");
+$timeout           = IPS_GetProperty($sonosInstanceID, "TimeOut");
 $rinconMapping     = Array();
 $allSonosInstances = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
-$MemberOfGroupID   = @IPS_GetObjectIDByName("MemberOfGroup", IPS_GetParent($_IPS["SELF"]));
-$MemberOfGroup     = 0;
-if ($MemberOfGroupID)  $MemberOfGroup = GetValueInteger($MemberOfGroupID);
 
-//ensure that all rincons are known
+// If the Sonos instance is not available update of grouping makes no sense
+if ( $timeout && Sys_Ping($ipAddress, $timeout) == false )
+    die('Sonos instance '.$ipAddress.' is not available');
+
+$topology = new SimpleXMLElement(file_get_contents('http://'.$ipAddress.':1400/status/topology'));
+
 foreach($allSonosInstances as $key=>$SonosID) {
     $rincon = IPS_GetProperty($SonosID ,"RINCON");
-    if (!$rincon){
-        // Get RINCON
-        // Not sure why, but when executed in ApplyChanges of module.php RINCON is not alway set
-        $ipAddress = IPS_GetProperty($SonosID, "IPAddress");
-        if ($ipAddress){
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => "http://".$ipAddress.":1400/xml/device_description.xml"
-            ));
-
-            $result = curl_exec($curl);
-
-            if(!curl_exec($curl)){
-                continue;
+    foreach ($topology->ZonePlayers->ZonePlayer as $zonePlayer){
+        if($zonePlayer->attributes()['uuid'] == $rincon){
+            $group       = (string)$zonePlayer->attributes()['group'];
+            if((string)$zonePlayer->attributes()['coordinator'] === "true"){
+                $coordinatorInSonos = true;
+            }else{
+                $coordinatorInSonos = false;
             }
-
-            $xmlr = new SimpleXMLElement($result);
-            $rincon = str_replace ( "uuid:" , "" , $xmlr->device->UDN );
-            IPS_SetProperty($SonosID, "RINCON", $rincon );
-            IPS_ApplyChanges($SonosID);
-        }
-    }
-    $rinconMapping[] = Array( ("ID") => $SonosID, ("RINCON") => $rincon );
-    if ($SonosID === IPS_GetParent($_IPS["SELF"])) $ownRincon = $rincon;
-}
-
-$ipAddress = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
-$timeout   = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
-
-if ( !$timeout || Sys_Ping($ipAddress, $timeout) == true ) {
-
-    $sonos                    = new SonosAccess($ipAddress);
-    $sonosGroupCoordinator    = explode(":",$sonos->GetZoneGroupAttributes()["CurrentZoneGroupID"])[0];
-
-    foreach($rinconMapping as $key=>$value) {
-        if($value["RINCON"] === $sonosGroupCoordinator ){
-            $sonosGroupCoordinatorID = $value["ID"] ;
             break;
         }
     }
-
-    // If groupCoordinator in Sonos = this instance --> set ID to 0 (does not belong to group)
-    if ($sonosGroupCoordinatorID === IPS_GetParent($_IPS["SELF"]))  $sonosGroupCoordinatorID = 0;
-
-    if ( $sonosGroupCoordinatorID !== $MemberOfGroup ){
-        if($groupForcing){
-            SNS_SetGroup(IPS_GetParent($_IPS["SELF"]),$MemberOfGroup);
-            }else{
-            SNS_SetGroup(IPS_GetParent($_IPS["SELF"]),$sonosGroupCoordinatorID);
-        }
+    $instance = Array( ("ID")          => $SonosID,
+                       ("RINCON")      => $rincon,
+                       ("COORDINATOR") => $coordinatorInSonos,
+                       ("GROUP")       => $group  );
+    $rinconMapping[] = $instance;
+    if($SonosID === $sonosInstanceID){
+        $mySettings       = $instance;
+        if($memberOfGoup === 0) $MemberOfGroupIPS = $instance;
+    }
+    if($SonosID === $memberOfGoup){
+        $MemberOfGroupIPS = $instance;
     }
 }
+
+foreach($rinconMapping as $key=>$instance){
+    if( $instance['GROUP'] === $mySettings['GROUP'] && $instance['COORDINATOR'] == true){
+        $MemberOfGroupSonos = $instance;
+        break;
+    }
+}
+
+if(!isset($MemberOfGroupSonos))
+    die ("Coordinator Instance for Group of Sonos Instance ".$sonosInstanceID." not found");
+
+if($MemberOfGroupIPS['ID'] != $MemberOfGroupSonos['ID']){
+    if($forceGrouping){
+        $groupToSet = $MemberOfGroupIPS['ID'];
+    }else{
+        $groupToSet = $MemberOfGroupSonos['ID'];
+    }
+    SNS_SetGroup($sonosInstanceID,$groupToSet);
+}elseif($mySettings['COORDINATOR'] != $coordinatorInIPS){
+    if(!$mySettings['COORDINATOR']){
+        SetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID),false);
+        @IPS_SetVariableProfileAssociation("Groups.SONOS", $sonosInstanceID, "", "", -1);
+    }else{
+        SetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID),true);
+        @IPS_SetVariableProfileAssociation("Groups.SONOS", $sonosInstanceID, IPS_GetName($sonosInstanceID), "", -1);
+    }
+} 
+
 ?>

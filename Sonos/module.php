@@ -12,7 +12,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyString("IPAddress", "");
         $this->RegisterPropertyInteger("TimeOut", 500);
         $this->RegisterPropertyInteger("DefaultVolume", 15);
-        $this->RegisterPropertyBoolean("GroupCoordinator", false);
+        $this->RegisterPropertyInteger("UpdateGroupingFrequency", 120);
         $this->RegisterPropertyBoolean("GroupForcing", false);
         $this->RegisterPropertyBoolean("MuteControl", false);
         $this->RegisterPropertyBoolean("LoudnessControl", false);
@@ -23,7 +23,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyBoolean("PlaylistControl", false);
         $this->RegisterPropertyBoolean("IncludeTunein", "");
         $this->RegisterPropertyString("FavoriteStation", "");
-        $this->RegisterPropertyString("WebFrontStations", "<all>");
+        $this->RegisterPropertyString("WebFrontStations", "");
         $this->RegisterPropertyString("RINCON", "");
        
     }
@@ -33,53 +33,52 @@ class Sonos extends IPSModule
         $ipAddress = $this->ReadPropertyString("IPAddress");
         if ($ipAddress){
             $curl = curl_init();
-            curl_setopt_array($curl, array(
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => 'http://'.$ipAddress.':1400/xml/device_description.xml'
-            ));
-
-            $result = curl_exec($curl);
+            curl_setopt_array($curl, array( CURLOPT_RETURNTRANSFER => 1,
+                                            CURLOPT_URL => 'http://'.$ipAddress.':1400/xml/device_description.xml' ));
 
             if(!curl_exec($curl))  die('Error: "' . curl_error($curl) . '" - Code: ' . curl_errno($curl));
         }
 
         //Never delete this line!
         parent::ApplyChanges();
+
+        if(!$this->ReadPropertyString("RINCON"))
+        {
+            $this->UpdateRINCON();
+            return true;
+        }
+                        
         
         // Start create profiles
-        $this->RegisterProfileIntegerEx("Status.SONOS", "Information", "", "", Array(
-                                             Array(0, "Prev",       "", -1),
-                                             Array(1, "Play",       "", -1),
-                                             Array(2, "Pause",      "", -1),
-                                             Array(3, "Stop",       "", -1),
-                                             Array(4, "Next",       "", -1),
-                                             Array(5, "Transition", "", -1)
-        ));
-        $this->RegisterProfileInteger("Volume.SONOS", "Intensity", "", " %",   0, 100, 1);
-        $this->RegisterProfileInteger("Tone.SONOS",   "Intensity", "", " %", -10,  10, 1);
-        $this->RegisterProfileInteger("Balance.SONOS",   "Intensity", "", " %", -100,  100, 1);
-        $this->RegisterProfileIntegerEx("Switch.SONOS", "Information", "", "", Array(
-                                             Array(0, "Off", "", 0xFF0000),
-                                             Array(1, "On",  "", 0x00FF00)
-        ));
+        $this->RegisterProfileIntegerEx("Status.SONOS", "Information", "", "",   Array( Array(0, "Prev",       "", -1),
+                                                                                        Array(1, "Play",       "", -1),
+                                                                                        Array(2, "Pause",      "", -1),
+                                                                                        Array(3, "Stop",       "", -1),
+                                                                                        Array(4, "Next",       "", -1),
+                                                                                        Array(5, "Transition", "", -1) ));
+        $this->RegisterProfileInteger("Volume.SONOS",   "Intensity",   "", " %",    0, 100, 1);
+        $this->RegisterProfileInteger("Tone.SONOS",     "Intensity",   "", " %",  -10,  10, 1);
+        $this->RegisterProfileInteger("Balance.SONOS",  "Intensity",   "", " %", -100, 100, 1);
+        $this->RegisterProfileIntegerEx("Switch.SONOS", "Information", "",   "", Array( Array(0, "Off", "", 0xFF0000),
+                                                                                        Array(1, "On",  "", 0x00FF00) ));
         
         //Build Radio Station Associations according to user settings
         if(!IPS_VariableProfileExists("Radio.SONOS"))
             $this->UpdateRadioStations();
 
         // Build Group Associations according Sonos Instance settings
-        $allSonosInstances = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
-        $GroupAssociations = Array(Array(0, "none", "", -1));
-        
-        foreach($allSonosInstances as $key=>$SonosID) {
-            if (@IPS_GetProperty($SonosID, "GroupCoordinator"))
-                $GroupAssociations[] = Array($SonosID, IPS_GetName($SonosID), "", -1);
+        if(!IPS_VariableProfileExists("Groups.SONOS"))
+        {
+            $allSonosInstances = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
+            $GroupAssociations = Array(Array(0, "none", "", -1));
+
+            foreach($allSonosInstances as $key=>$SonosID) {
+                if (@GetValueBoolean(IPS_GetVariableIDByName("Coordinator",$SonosID)))
+                   $GroupAssociations[] = Array($SonosID, IPS_GetName($SonosID), "", -1);
+            }
+
+            $this->RegisterProfileIntegerEx("Groups.SONOS", "Network", "", "", $GroupAssociations);
         }
-        
-        if(IPS_VariableProfileExists("Groups.SONOS")) 
-            IPS_DeleteVariableProfile("Groups.SONOS");
-        
-        $this->RegisterProfileIntegerEx("Groups.SONOS", "Network", "", "", $GroupAssociations);
         // End Create Profiles     
    
         // Start Register variables and Actions
@@ -161,36 +160,13 @@ class Sonos extends IPSModule
 
 
         // 2h) GroupVolume, GroupMembers, MemberOfGroup
-        if ( $this->ReadPropertyBoolean("GroupCoordinator")){
-            IPS_SetHidden( $this->RegisterVariableString("GroupMembers", "GroupMembers", "", 10), true);
-            $this->RegisterVariableInteger("GroupVolume", "GroupVolume", "Volume.SONOS", 11);
-            $this->EnableAction("GroupVolume");
-            $this->removeVariableAction("MemberOfGroup", $links);
-        }else{
-            $this->RegisterVariableInteger("MemberOfGroup", "MemberOfGroup", "Groups.SONOS", 12);
-            $this->EnableAction("MemberOfGroup");
-            $this->removeVariableAction("GroupVolume",  $links);
-            $this->removeVariable(      "GroupMembers", $links);
-        }
+        IPS_SetHidden( $this->RegisterVariableString("GroupMembers", "GroupMembers", "", 10), true);
+        IPS_SetHidden( $this->RegisterVariableBoolean("Coordinator", "Coordinator", "", 10), true);
+        $this->RegisterVariableInteger("GroupVolume", "GroupVolume", "Volume.SONOS", 11);
+        $this->EnableAction("GroupVolume");
+        $this->RegisterVariableInteger("MemberOfGroup", "MemberOfGroup", "Groups.SONOS", 12);
+        $this->EnableAction("MemberOfGroup");
         
-        // 2i) Hide/unhide MemberOfGroup depending on presence of GroupCoordinators
-        if (sizeof($GroupAssociations) === 1){
-            // hide MemberOfGroup
-            foreach($allSonosInstances as $key=>$SonosID) {
-                $GroupingID = @IPS_GetVariableIDByName("MemberOfGroup",$SonosID);
-                if ($GroupingID){
-                    IPS_SetHidden($GroupingID,true);
-                }
-            }
-        }else{
-            // unhide MemberOfGroup
-            foreach($allSonosInstances as $key=>$SonosID) {
-                $GroupingID = @IPS_GetVariableIDByName("MemberOfGroup",$SonosID);
-                if ($GroupingID){
-                    IPS_SetHidden($GroupingID,false);
-                }
-            }
-        }
         // End Register variables and Actions
         
         // Start add scripts for regular status and grouping updates
@@ -214,7 +190,7 @@ class Sonos extends IPSModule
         }
 
         IPS_SetHidden($groupingScriptID,true);
-        IPS_SetScriptTimer($groupingScriptID, 300); 
+        IPS_SetScriptTimer($groupingScriptID, $this->ReadPropertyString("UpdateGroupingFrequency")); 
 
         // End add scripts for regular status and grouping updates
     }
@@ -225,7 +201,7 @@ class Sonos extends IPSModule
 
     public function ChangeGroupVolume($increment)
     {
-        if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
+        if (!@GetValueBoolean($this->GetIDForIdent("Coordinator"))) die("This function is only allowed for Coordinators");
 
         $groupMembers        = GetValueString(IPS_GetObjectIDByName("GroupMembers",$this->InstanceID ));
         $groupMembersArray   = Array();
@@ -263,51 +239,73 @@ class Sonos extends IPSModule
 
     public function DeleteSleepTimer()
     {
-        if (!$this->ReadPropertyBoolean("SleeptimerControl")) die("This function is not enabled for this instance");
- 
-        $ip      = $this->ReadPropertyString("IPAddress");
-        $timeout = $this->ReadPropertyString("TimeOut");
-        if ($timeout && Sys_Ping($ip, $timeout) != true)
-           throw new Exception("Sonos Box ".$ip." is not available");
+        $targetInstance = $this->findTarget();
 
-        include_once(__DIR__ . "/sonosAccess.php");
-        (new SonosAccess($ip))->SetSleeptimer(0,0,0);
+        if($targetInstance === $this->InstanceID){
+            $ip      = $this->ReadPropertyString("IPAddress");
+            $timeout = $this->ReadPropertyString("TimeOut");
+            if ($timeout && Sys_Ping($ip, $timeout) != true)
+               throw new Exception("Sonos Box ".$ip." is not available");
+
+            include_once(__DIR__ . "/sonosAccess.php");
+            (new SonosAccess($ip))->SetSleeptimer(0,0,0);
+        }else{
+            SNS_DeleteSleepTimer($targetInstance);
+        }
     }
     
     public function Next()
     {
-        $ip      = $this->ReadPropertyString("IPAddress");
-        $timeout = $this->ReadPropertyString("TimeOut");
-        if ($timeout && Sys_Ping($ip, $timeout) != true)
-           throw new Exception("Sonos Box ".$ip." is not available");
+        $targetInstance = $this->findTarget();
 
-        include_once(__DIR__ . "/sonosAccess.php");
-        (new SonosAccess($ip))->Next();
+        if($targetInstance === $this->InstanceID){
+            $ip      = $this->ReadPropertyString("IPAddress");
+            $timeout = $this->ReadPropertyString("TimeOut");
+            if ($timeout && Sys_Ping($ip, $timeout) != true)
+                throw new Exception("Sonos Box ".$ip." is not available");
+
+            include_once(__DIR__ . "/sonosAccess.php");
+            (new SonosAccess($ip))->Next();
+        }else{
+            SNS_Next($targetInstance);
+        }
     }
     
     public function Pause()
     {
-        $ip      = $this->ReadPropertyString("IPAddress");
-        $timeout = $this->ReadPropertyString("TimeOut");
-        if ($timeout && Sys_Ping($ip, $timeout) != true)
-           throw new Exception("Sonos Box ".$ip." is not available");
+        $targetInstance = $this->findTarget();
 
-        SetValue($this->GetIDForIdent("Status"), 2);
-        include_once(__DIR__ . "/sonosAccess.php");
-        $sonos = new SonosAccess($ip);
-        if($sonos->GetTransportInfo() == 1) $sonos->Pause();
+        if($targetInstance === $this->InstanceID){
+            $ip      = $this->ReadPropertyString("IPAddress");
+            $timeout = $this->ReadPropertyString("TimeOut");
+            if ($timeout && Sys_Ping($ip, $timeout) != true)
+                throw new Exception("Sonos Box ".$ip." is not available");
+
+            SetValue($this->GetIDForIdent("Status"), 2);
+            include_once(__DIR__ . "/sonosAccess.php");
+            $sonos = new SonosAccess($ip);
+            if($sonos->GetTransportInfo() == 1) $sonos->Pause();
+        }else{
+            SNS_Pause($targetInstance);
+        }
     }
 
     public function Play()
     {
-        $ip      = $this->ReadPropertyString("IPAddress");
-        $timeout = $this->ReadPropertyString("TimeOut");
-        if ($timeout && Sys_Ping($ip, $timeout) != true)
-           throw new Exception("Sonos Box ".$ip." is not available");
+        $targetInstance = $this->findTarget();
 
-        SetValue($this->GetIDForIdent("Status"), 1);
-        include_once(__DIR__ . "/sonosAccess.php");
-        (new SonosAccess($ip))->Play();
+        if($targetInstance === $this->InstanceID){
+            $ip      = $this->ReadPropertyString("IPAddress");
+            $timeout = $this->ReadPropertyString("TimeOut");
+            if ($timeout && Sys_Ping($ip, $timeout) != true)
+                throw new Exception("Sonos Box ".$ip." is not available");
+
+            SetValue($this->GetIDForIdent("Status"), 1);
+            include_once(__DIR__ . "/sonosAccess.php");
+            (new SonosAccess($ip))->Play();
+        }else{
+            SNS_Play($targetInstance);
+        }
     }
 
     public function PlayFiles(array $files, $volumeChange)
@@ -323,7 +321,7 @@ class Sonos extends IPSModule
         $positionInfo       = $sonos->GetPositionInfo();
         $mediaInfo          = $sonos->GetMediaInfo();
         $transportInfo      = $sonos->GetTransportInfo();
-        $isGroupCoordinator = $this->ReadPropertyBoolean("GroupCoordinator");
+        $isGroupCoordinator = @GetValueBoolean($this->GetIDForIdent("Coordinator"));
         if($isGroupCoordinator){
           $volume = GetValueInteger($this->GetIDForIdent("GroupVolume")); 
         }else{
@@ -396,13 +394,19 @@ class Sonos extends IPSModule
 
     public function Previous()
     {
-        $ip      = $this->ReadPropertyString("IPAddress");
-        $timeout = $this->ReadPropertyString("TimeOut");
-        if ($timeout && Sys_Ping($ip, $timeout) != true)
-           throw new Exception("Sonos Box ".$ip." is not available");
+        $targetInstance = $this->findTarget();
 
-        include_once(__DIR__ . "/sonosAccess.php");
-        (new SonosAccess($ip))->Previous();
+        if($targetInstance === $this->InstanceID){
+            $ip      = $this->ReadPropertyString("IPAddress");
+            $timeout = $this->ReadPropertyString("TimeOut");
+            if ($timeout && Sys_Ping($ip, $timeout) != true)
+                throw new Exception("Sonos Box ".$ip." is not available");
+
+            include_once(__DIR__ . "/sonosAccess.php");
+            (new SonosAccess($ip))->Previous();
+        }else{
+            SNS_Previous($targetInstance);
+        }
     }
     
     public function SetAnalogInput($input_instance)
@@ -458,7 +462,7 @@ class Sonos extends IPSModule
 
     public function SetDefaultGroupVolume()
     {
-        if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
+        if (!@GetValueBoolean($this->GetIDForIdent("Coordinator"))) die("This function is only allowed for Coordinators");
 
         $groupMembers        = GetValueString(IPS_GetObjectIDByName("GroupMembers",$this->InstanceID ));
         $groupMembersArray   = Array();
@@ -489,54 +493,82 @@ class Sonos extends IPSModule
     
     public function SetGroup($groupCoordinator)
     {
-        if ($this->ReadPropertyBoolean("GroupCoordinator")) return;
+        // Instance has Memners, do nothing
+        if(@GetValueString($this->GetIDForIdent("GroupMembers"))) return;
+        // Do not try to assign to itself
+        if($this->InstanceID === $groupCoordinator) $groupCoordinator = 0;
+
+        $startGroupCoordinator = GetValue($this->GetIDForIdent("MemberOfGroup"));
 
         $ip      = $this->ReadPropertyString("IPAddress");
         $timeout = $this->ReadPropertyString("TimeOut");
-        if ($timeout && Sys_Ping($ip, $timeout) != true)
+        if($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
-        // get variable of coordinator members to be updated
-        if ($groupCoordinator){
-            $groupMembersID = @IPS_GetObjectIDByIdent("GroupMembers",$groupCoordinator);
-            $uri            = "x-rincon:".IPS_GetProperty($groupCoordinator ,"RINCON");
-        }else{
-            $groupMembersID = @IPS_GetObjectIDByIdent("GroupMembers",GetValue($this->GetIDForIdent("MemberOfGroup")));
-            $uri            = "";
+        // cleanup old group
+        if($startGroupCoordinator){
+            $groupMembersID = @IPS_GetObjectIDByIdent("GroupMembers",$startGroupCoordinator);
+            $currentMembers = explode(",",GetValueString($groupMembersID));
+            $currentMembers = array_filter($currentMembers, function($v) { return $v != ""; });
+            $currentMembers = array_filter($currentMembers, function($v) { return $v != $this->InstanceID ; });
+            SetValueString($groupMembersID,implode(",",$currentMembers));
+            if(!count($currentMembers)){
+                IPS_SetHidden(IPS_GetVariableIDByName("GroupVolume",$startGroupCoordinator),true);
+                IPS_SetHidden(IPS_GetVariableIDByName("MemberOfGroup",$startGroupCoordinator),false);
+            }
         }
-        
-        // update coordinator members
-        SetValue($this->GetIDForIdent("MemberOfGroup"), $groupCoordinator);
-        
-        if($groupMembersID){
+
+        // get variable of coordinator members to be updated
+        $currentMembers = Array();
+        if($groupCoordinator){
+            $groupMembersID = @IPS_GetObjectIDByIdent("GroupMembers",$groupCoordinator);
             $currentMembers = explode(",",GetValueString($groupMembersID));
             $currentMembers = array_filter($currentMembers, function($v) { return $v != ""; });
             $currentMembers = array_filter($currentMembers, function($v) { return $v != $this->InstanceID ; });
             if($groupCoordinator)
                 $currentMembers[] = $this->InstanceID;
-            
+
             SetValueString($groupMembersID,implode(",",$currentMembers));
+            $uri            = "x-rincon:".IPS_GetProperty($groupCoordinator ,"RINCON");
+            SetValueBoolean($this->GetIDForIdent("Coordinator"),false);
+            @IPS_SetVariableProfileAssociation("Groups.SONOS", $this->InstanceID, "", "", -1);
+        }else{
+            $uri            = "";
+            SetValueBoolean($this->GetIDForIdent("Coordinator"),true);
+            @IPS_SetVariableProfileAssociation("Groups.SONOS", $this->InstanceID, IPS_GetName($this->InstanceID), "", -1);
         }
+        
+        // update coordinator members
+        SetValue($this->GetIDForIdent("MemberOfGroup"), $groupCoordinator);
+  
+
+       
+        
         
         // Set relevant variables to hidden/unhidden
         if ($groupCoordinator){
-            $hidden = true ;
+            $hidden = true;
+            IPS_SetHidden(IPS_GetVariableIDByName("GroupVolume",$groupCoordinator),false);
+            IPS_SetHidden(IPS_GetVariableIDByName("MemberOfGroup",$groupCoordinator),true);
         }else{
-            $hidden = false ;
+            $hidden = false;
         }
-        IPS_SetHidden($this->GetIDForIdent("nowPlaying"),$hidden);
-        IPS_SetHidden($this->GetIDForIdent("Radio"),$hidden);
-        IPS_SetHidden($this->GetIDForIdent("Playlist"),$hidden);
-        IPS_SetHidden($this->GetIDForIdent("Status"),$hidden);
-        IPS_SetHidden($this->GetIDForIdent("Sleeptimer"),$hidden);
-        
+        @IPS_SetHidden($this->GetIDForIdent("nowPlaying"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Radio"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Playlist"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Status"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Sleeptimer"),$hidden);
+        // always hide GroupVolume
+        @IPS_SetHidden(IPS_GetVariableIDByName("GroupVolume",$this->InstanceID),true);
+        @IPS_SetHidden(IPS_GetVariableIDByName("MemberOfGroup",$this->InstanceID),false);
+
         include_once(__DIR__ . "/sonosAccess.php");
         (new SonosAccess($ip))->SetAVTransportURI($uri);
     }
 
     public function SetGroupVolume($volume)
     {
-        if (!$this->ReadPropertyBoolean("GroupCoordinator")) die("This function is only allowed for GroupCoordinators");
+        if (!@GetValueBoolean($this->GetIDForIdent("Coordinator"))) die("This function is only allowed for Coordinators");
 
         $this->ChangeGroupVolume($volume - GetValue($this->GetIDForIdent("GroupVolume")));
     }
@@ -636,20 +668,26 @@ class Sonos extends IPSModule
     
     public function SetSleepTimer($minutes)
     {
-        $ip      = $this->ReadPropertyString("IPAddress");
-        $timeout = $this->ReadPropertyString("TimeOut");
-        if ($timeout && Sys_Ping($ip, $timeout) != true)
-           throw new Exception("Sonos Box ".$ip." is not available");
+        $targetInstance = $this->findTarget();
 
-        $hours = 0;
+        if($targetInstance === $this->InstanceID){
+            $ip      = $this->ReadPropertyString("IPAddress");
+            $timeout = $this->ReadPropertyString("TimeOut");
+            if ($timeout && Sys_Ping($ip, $timeout) != true)
+                throw new Exception("Sonos Box ".$ip." is not available");
 
-        while( $minutes > 59 ){
-          $hours   = $hours + 1;
-          $minutes = $minutes - 60;
+            $hours = 0;
+
+            while( $minutes > 59 ){
+                $hours   = $hours + 1;
+                $minutes = $minutes - 60;
+            }
+
+            include_once(__DIR__ . "/sonosAccess.php");
+            (new SonosAccess($ip))->SetSleeptimer($hours,$minutes,0);
+        }else{
+            SNS_SetSleepTimer($targetInstance,$minutes);
         }
-
-        include_once(__DIR__ . "/sonosAccess.php");
-        (new SonosAccess($ip))->SetSleeptimer($hours,$minutes,0);
     }
 
     public function SetSpdifInput($input_instance)
@@ -695,15 +733,21 @@ class Sonos extends IPSModule
 
     public function Stop()
     {
-        $ip      = $this->ReadPropertyString("IPAddress");
-        $timeout = $this->ReadPropertyString("TimeOut");
-        if ($timeout && Sys_Ping($ip, $timeout) != true)
-           throw new Exception("Sonos Box ".$ip." is not available");
+        $targetInstance = $this->findTarget();
 
-        SetValue($this->GetIDForIdent("Status"), 3);
-        include_once(__DIR__ . "/sonosAccess.php");
-        $sonos = new SonosAccess($ip);
-        if($sonos->GetTransportInfo() == 1) $sonos->Stop();
+        if($targetInstance === $this->InstanceID){
+            $ip      = $this->ReadPropertyString("IPAddress");
+            $timeout = $this->ReadPropertyString("TimeOut");
+            if ($timeout && Sys_Ping($ip, $timeout) != true)
+                throw new Exception("Sonos Box ".$ip." is not available");
+
+            SetValue($this->GetIDForIdent("Status"), 3);
+            include_once(__DIR__ . "/sonosAccess.php");
+            $sonos = new SonosAccess($ip);
+            if($sonos->GetTransportInfo() == 1) $sonos->Stop();
+        }else{
+            SNS_Stop($targetInstance);
+        }
     }
 
     public function UpdatePlaylists()
@@ -784,7 +828,33 @@ class Sonos extends IPSModule
         $this->RegisterProfileIntegerEx("Radio.SONOS", "Speaker", "", "", $Associations);
     
     }
-    
+ 
+    public function UpdateRINCON()
+    {
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array( CURLOPT_RETURNTRANSFER => 1,
+                                        CURLOPT_URL => "http://".$ip.":1400/xml/device_description.xml" ));
+
+        $result = curl_exec($curl);
+
+        if(!$result)
+           throw new Exception("Device description could not be read from ".$ip);
+
+        $xmlr = new SimpleXMLElement($result);
+        $rincon = str_replace ( "uuid:" , "" , $xmlr->device->UDN );
+        if($rincon){
+            IPS_SetProperty($this->InstanceID, "RINCON", $rincon );
+            IPS_ApplyChanges($this->InstanceID);
+        }else{
+            throw new Exception("RINCON could not be read from ".$ip);
+        }
+    }
+
     /**
     * End of Module functions
     */
@@ -847,6 +917,17 @@ class Sonos extends IPSModule
         }
     }
     
+    protected function findTarget(){
+        // instance is a coordinator and can execute command
+        if(GetValueBoolean($this->GetIDForIdent("Coordinator")) === true)
+            return $this->InstanceID;
+
+        $memberOfGroup = GetValueInteger($this->GetIDForIdent("MemberOfGroup"));
+        if($memberOfGroup)
+            return $memberOfGroup;
+        die("Instance is not a coordinator and group coordinator could not be determined");
+    }
+
     protected function removeVariable($name, $links){
         $vid = @$this->GetIDForIdent($name);
         if ($vid){
@@ -888,11 +969,6 @@ class Sonos extends IPSModule
         IPS_SetVariableProfileValues($Name, $MinValue, $MaxValue, $StepSize);
         
     }
-
-        static function compare_association_name($a, $b)
-        {
-            return strnatcmp($a[1], $b[1]);
-        }
     
     protected function RegisterProfileIntegerEx($Name, $Icon, $Prefix, $Suffix, $Associations) {
         if ( sizeof($Associations) === 0 ){

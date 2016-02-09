@@ -81,7 +81,7 @@ class SonosAccess{
                                              ));
 
     $xmlParser = xml_parser_create("UTF-8");
-    xml_parser_set_option($xmlParser, XML_OPTION_TARGET_ENCODING, "ISO-8859-1");
+    xml_parser_set_option($xmlParser, XML_OPTION_TARGET_ENCODING, "UTF-8");
     xml_parse_into_struct($xmlParser, $mediaInfo["CurrentURIMetaData"], $vals, $index);
     xml_parser_free($xmlParser);
 
@@ -115,7 +115,7 @@ class SonosAccess{
                                                  ));
 
     $xmlParser = xml_parser_create("UTF-8");
-    xml_parser_set_option($xmlParser, XML_OPTION_TARGET_ENCODING, "ISO-8859-1");
+    xml_parser_set_option($xmlParser, XML_OPTION_TARGET_ENCODING, "UTF-8");
     xml_parse_into_struct($xmlParser, $positionInfo["TrackMetaData"], $vals, $index);
     xml_parser_free($xmlParser);
 

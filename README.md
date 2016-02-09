@@ -63,21 +63,13 @@ Die Lautstärke die eingestellt wird, wenn die Funktionen
 - RINCON:  
 Enthält die RINCON der Sonos Instanz. Dabei handelt es sich um einen weltweit eindeutigen Identifier in dem Format "RINCON_<MAC-Adresse>1400", wobei die "<MAC-Adresse>" nur die Ziffern und Buchstaben ohne Bindestriche enthält.  
 Wenn dieser Wert nicht gepflegt wird, wird er automatisch ermittelt.
-- Group Coordinator:  
-Sonos Boxen werden in diesem Modul in 2 Typen unterteilt:
-  1. Gruppen Koordinatoren (Group Coordinator) --> Haken gesetzt
-  2. Gruppen Mitglieder (Group Member) --> Haken nicht gesetzt
-
-  Mitglieder können mit der Funktion 
-  ```php
-  SNS_SetGroup(<InstanceID>,<CoordinatorInstanceID>);
-  ```
-  einer Gruppe zugeordnet werden. Wenn man für die "<CoordinatorInstanceID>" die Instanz ID "0" wählt wird die Gruppenzugehörigkeit aufgelöst.  
-Stand 30.1.2016: es hat sich gezeigt, dass es zu Problemen kommt, wenn man im Sonos die Gruppierung anpasst, und der real aktive Gruppenkoordinator in IPS nicht als solcher markiert ist. Dieses Verhalten wird wohl zeitnah überarbeitet werden.
+- Update Grouping Frq:  
+Dieser Parameter enthält die Frequenz in sekunden in der das Script _updateGrouping ausgeführt werden soll.  
+Default: 120
 - Force Grouping in Sonos:  
-Bezüglich des Verhaltens was passieren soll, wenn ein Unterschied zwischen Sonos und IPS vorgefunden wird, gibt es auch 2 Alternativen:
+Bezüglich des Verhaltens was passieren soll, wenn ein Unterschied in der Gruppenzuordnung zwischen Sonos und IPS vorgefunden wird, gibt es 2 Alternativen:
   1. IPS übernimmt die Einstellungen aus Sonos --> Haken nicht gesetzt  
-Diese Alternative hat den Vorteil, dass die Einstellungen die man über die Sonos APP getroffen hat sich im IPS wiederspiegeln. Dies hat aber zur Folge, dass man in der APP aufassen muss, welche Box man beim bilden einer Gruppe zuerst auswählt. Es sollte dann nur auf der/einer in IPS als GroupCoordinator konfigurierten Instanz weitere Boxen hinzufügen.
+Diese Alternative hat den Vorteil, dass die Einstellungen die man über die Sonos APP getroffen hat sich im IPS wiederspiegeln. 
   2. Die Einstellungen aus IPS werden in Sonos gesetz --> Haken gesetzt  
 Dies ist dafür gedacht, dass eine Box die stromlos geschaltet wurde automatisch wieder der richtigen Gruppe hinzugefügt wird.  
 Hat aber leider den Nebeneffekt, dass eine Änderung in der Sonos APP wieder verworfen wird, wenn das _updateGrouping Script läuft.
@@ -158,11 +150,17 @@ Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
 - Update Playlists  
 Dieser Knopf aktualisiert das Profil, in dem die im Webfront verfügbaren Playlisten hinterlegt sind.  
 Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
+- Read RINCON from Sonos  
+Bei betätigen dieses Knopfes wird die RINCON aus der Sonos Box ausgelesen und in der Instazkonfiguration gespeichert.  
+ACHTUNG: Diese Änderung sieht man nicht sofort, sondern erst nach dem nächsten Öffnen der Istanzkonfiguration!
 
 ## 4. Variablen
+- Coordinator  
+Bei dieser versteckten Variable ist hinterlegt, ob es ich bei der Box zu dem aktuellen Zeitpunkt um einen Koordinator handelt.  
+Auf einem Koordinator können z.B. Funktionen wie Play, Pause, Next oder der Sleeptimer verwendet werden.  
+Sollte es sich bei einer Box nixht um einne Koordinator handel und der zuständige Koordinator in IPS verfügbar sein, werden diese Kommandos automatisch an den Gruppenkoordinator weitergeleitet.
 - GroupMembers  
-Diese Variable wird erstellt, wenn die Option "Group Coordinator" aktiviert ist.  
-Sie enthält eine Liste von Sonos Instanz IDs, die diesem Gruppen Koordinator zugewiesen sind.  
+Diese Variable enthält eine Liste von Sonos Instanz IDs, die diesem Gruppen Koordinator zugewiesen sind.  
 Wenn die Option "Force grouping in Sonos" aktiviert ist, wird diese Variable lediglich durch die Funktion
   ```php
   SNS_SetGroup(<InstanceID>,<CoordinatorInstanceID>);
@@ -170,7 +168,7 @@ Wenn die Option "Force grouping in Sonos" aktiviert ist, wird diese Variable led
   gesetzt.  
   Falls die Option "Force grouping in Sonos" nicht aktiviert ist, wird diese Variable zusätzlich von dem Skript _updateGrouping aktualisiert.
 - GroupVolume  
-Diese Variable wird erstellt, wenn die Option "Group Coordinator" aktiviert ist.  
+Diese Variable wird automatisch eingeblendet, wenn eine Box als Gruppenmenber zugeordnet ist.  
 Ihr Wert wird anhand der Lautstärke der einzelnen Gruppenmitglieder (Durchnittswert) berechnet.  
 Er wird durch die Fuktionen
   ```php
@@ -237,8 +235,7 @@ Es aktualisiert die Variablen Voume, Mute, Loudness, Bass, Treble, Balance and S
 Weiterhin werden die Parameter Status, Radio and NowPlaying aktualisiert.  
 Bei Gruppenkoordinatoren wird die Gruppenlautstärke (GroupVolume) berechnet.
 2. _updateGrouping  
-Dieses Skript wird alle 300 Sekunden ausgeführt.  
-Es stellt sicher, dass für alle Sonos Instanzen die RINCON gesetzt ist.  
+Dieses Skript wird alle "Update Grouping Frq" Sekunden ausgeführt. Hierbei handelt es sich um einen Konfigurationsparameter.  
 Die Gruppeneinstellungen werden entweder in Sonos oder in IP-Symcon aktualisiert.
 
 ## 6. Funktionen
@@ -261,25 +258,29 @@ Falls die Lautstärke 100 übersteigen oder 0 unterschreiten würde, wird die La
 ```php
 SNS_DeleteSleepTimer(integer $InstanceID)
 ```
-Bricht den Sleeptimer ab.
+Bricht den Sleeptimer ab.  
+Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automatisch an den zuständigen Koordinator weitergeleitet und gilt somit für die ganze Gruppe.
 
 ---
 ```php
 SNS_Next(integer $InstanceID)
 ```
-Springt zum nächsten Titel.
+Springt zum nächsten Titel.  
+Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automatisch an den zuständigen Koordinator weitergeleitet und gilt somit für die ganze Gruppe.
 
 ---
 ```php
 SNS_Pause(integer $InstanceID)
 ```
-Pausiert die Wiedergabe.
+Pausiert die Wiedergabe.  
+Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automatisch an den zuständigen Koordinator weitergeleitet und gilt somit für die ganze Gruppe.
 
 ---
 ```php
 SNS_Play(integer $InstanceID)
 ```
-Setzt die Wiedergabe fort.
+Setzt die Wiedergabe fort.  
+Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automatisch an den zuständigen Koordinator weitergeleitet und gilt somit für die ganze Gruppe.
 
 ---
 ```php
@@ -308,13 +309,16 @@ SNS_PlayFiles(17265, Array( "//ipsymcon.fritz.box/sonos/bla.mp3",
 ```php
 SNS_Previous(integer $InstanceID)
 ```
-Startet den vorhergehenden Titel in der Liste.
+Startet den vorhergehenden Titel in der Liste.  
+Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automatisch an den zuständigen Koordinator weitergeleitet und gilt somit für die ganze Gruppe.
 
 ---
 ```php
 SNS_SetAnalogInput(integer $InstanceID, integer $InputInstanceID)
 ```
-Selektiert den Analogen Input einer Instanz als Audioquelle.
+Selektiert den Analogen Input einer Instanz als Audioquelle.  
+Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
+Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
 
 ---
 ```php
@@ -375,7 +379,9 @@ Mutet or unmutet eine Instanz.
 SNS_SetPlaylist(integer $InstanceID, string $name)
 ```
 Entfernt alle Titel aus einer Queue und fügt alle Titel einer Playliste hinzu.  
-Der name der Playliste muss in Sonos bekannt sein.
+Der name der Playliste muss in Sonos bekannt sein.  
+Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
+Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
 
 ---
 ```php
@@ -388,20 +394,25 @@ Startet die Wiedergabe der "Favorite Radio Station".
 SNS_SetRadio(integer $InstanceID, string $radio)
 ```
 Startet die Wiedergabe des in $radio mitgegebenen Radiosenders.  
-Zunächst wird gesucht, ob der Sender in den ausgelieferten Sendern gefunden wird. Wenn er dort nicht gefunden wird, wird in den TuneIn Favoriten (Meine Radiosneder) gesucht.
+Zunächst wird gesucht, ob der Sender in den ausgelieferten Sendern gefunden wird. Wenn er dort nicht gefunden wird, wird in den TuneIn Favoriten (Meine Radiosneder) gesucht.  
+Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
+Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
 
 ---
 ```php
 SNS_SetSleepTimer(integer $InstanceID, integer $minutes)
 ```
-Setzt den Sleeptimer auf die angegebene Anzahl an Minuten.
+Setzt den Sleeptimer auf die angegebene Anzahl an Minuten.  
+Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automatisch an den zuständigen Koordinator weitergeleitet und gilt somit für die ganze Gruppe.
 
 ---
 
 ```php
 SNS_SetSpdifInput(integer $InstanceID, integer $InputInstanceID)
 ```
-Selektiert den SPDIF Input einer Instanz als Audioquelle.
+Selektiert den SPDIF Input einer Instanz als Audioquelle.  
+Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
+Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
 
 ---
 ```php
@@ -421,7 +432,8 @@ Mögliche Werte liegen zwischen 0 and 100.
 ```php
 SNS_Stop(integer $InstanceID)
 ```
-Hält die Wiedergabe an.
+Hält die Wiedergabe an.  
+Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automatisch an den zuständigen Koordinator weitergeleitet und gilt somit für die ganze Gruppe.
 
 ---
 ```php
