@@ -4,18 +4,6 @@ Dies ist das priorisierte Backlog für die Weiterentwicklung des SymconSonos Mod
 Je höher etwas in der Liste auftaucht, desto eher wird es gemacht.
 Wenn es noch wünsche oder Anregungen gibt, können diese gerne im IPS-Forum diskutiert werden: https://www.symcon.de/forum/threads/27500-Sonos-Modul
 
-1. Gruppenansatz überarbeiten
-   - Gruppen wie in Sonos dynamisieren
-   - überführen der Property GroupCoordinator in eine Variable
-   - überdenken des _updateGouping Ansatzes, wird das auf jeder Instanz benötigt?
-   - Property für die Frequenz des Update angeben (alle x Sekunden)
-1. Robustheit des _updateGrouping Scriptes
-   - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=280494#post280494
-   - was passiert, wenn die die GroupCoordinatorID nicht gefunden wird?
-1. RINCON-Ermittlung überarbeiten
-   - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=280336#post280336
-   - Wird an zu vielen Stellen benötigt.  
-   - RINCON nicht im _updateGrouping Script füllen, eher in ApplyChanges()
 1. detaillierte "now Playing" Informationen
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=270974#post270974
    - Neue Variablen für
