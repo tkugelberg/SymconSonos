@@ -10,7 +10,7 @@ class Sonos extends IPSModule
         //These lines are parsed on Symcon Startup or Instance creation
         //You cannot use variables here. Just static values.
         $this->RegisterPropertyString("IPAddress", "");
-        $this->RegisterPropertyInteger("TimeOut", 500);
+        $this->RegisterPropertyInteger("TimeOut", 1000);
         $this->RegisterPropertyInteger("DefaultVolume", 15);
         $this->RegisterPropertyInteger("UpdateGroupingFrequency", 120);
         $this->RegisterPropertyBoolean("GroupForcing", false);
