@@ -1,6 +1,7 @@
 # Changelog 
 ### Version 1.2
 - Beheben eines Fehlers, durch den keine neuen Instanzen angelegt werden konnten.
+
 ### Version 1.1
 - Einfürung der Versionierung ;-)
 - Ermittlung der RINCON ins ApplyChanges() verlagert
