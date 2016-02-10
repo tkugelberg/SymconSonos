@@ -37,16 +37,16 @@ class Sonos extends IPSModule
                                             CURLOPT_URL => 'http://'.$ipAddress.':1400/xml/device_description.xml' ));
 
             if(!curl_exec($curl))  die('Error: "' . curl_error($curl) . '" - Code: ' . curl_errno($curl));
+            if(!$this->ReadPropertyString("RINCON"))
+            {
+                $this->UpdateRINCON();
+                return true;
+            }
         }
 
         //Never delete this line!
         parent::ApplyChanges();
 
-        if(!$this->ReadPropertyString("RINCON"))
-        {
-            $this->UpdateRINCON();
-            return true;
-        }
                         
         
         // Start create profiles
