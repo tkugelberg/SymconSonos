@@ -3,10 +3,7 @@
 - Einfürung der Versionierung ;-)
 - Ermittlung der RINCON ins ApplyChanges() verlagert
   -  Wird jetzt automatisch gefüllt, wenn das Feld in der Konfigutration leer ist
-  -  Manuelles Update jetzt möglich mit der Funktion 
-     ```php
-     SNS_UpdateRINCON(<InstanceID>);
-     ```
+  -  Manuelles Update jetzt möglich mit der Funktion "SNS_UpdateRINCON(<InstanceID>);"
 - Fehlerhandling in _updateGrouping
   - exception wenn die RINCON des Gruppen Koordinators nicht bekannt ist
 - Property "Update Grouping Frequency" eingeführt
