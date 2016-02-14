@@ -4,17 +4,6 @@ Dies ist das priorisierte Backlog für die Weiterentwicklung des SymconSonos Mod
 Je höher etwas in der Liste auftaucht, desto eher wird es gemacht.
 Wenn es noch wünsche oder Anregungen gibt, können diese gerne im IPS-Forum diskutiert werden: https://www.symcon.de/forum/threads/27500-Sonos-Modul
 
-1. detaillierte "now Playing" Informationen
-   - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=270974#post270974
-   - Neue Variablen für
-     - Album
-     - Artist
-     - Title
-     - Cover
-     - ...
-1. Play mode
-   - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=270974#post270974
-   - Shuffle, repeat, ...
 1. group Mute
 1. "Volume Factor" einführen 
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=277503#post277503
