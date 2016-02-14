@@ -10,6 +10,7 @@ IP-Symcon PHP module for accessing Sonos audio systems
 4. [Variablen](#4-variablen)
 5. [Hintergrund Skripte](#5-hintergrund-skripte)
 6. [Funktionen](#6-funktionen)
+6. [FAQ](#7-faq)
 
 ## 1. Funktionsumfang
 Dieses Modul is dazu gedacht um allgemeine Funktionalitäten in Sonso aus IP-Symcon heraus auszulösen.  
@@ -85,10 +86,17 @@ Diese Option legt eine Variable "Treble" an und aktiviert dass diese auch über 
 Diese Option legt eine Variable "Balance" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
 - Enable Sleeptimer Contorl:  
 Diese Option legt eine Variable "Sleeptimer" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird.
+- Enable Playmode Control:  
+Diese Option legt die Variablen "Playmode" und "Crossfade" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird.
 - Enable Playlist Control:  
 Diese Option legt eine Variable "Playlist" an. Dadurch wird für jede Playlist die aus dem Sonos System importiert wurde ein Knopf auf dem WebFront angezeigt. Die Variable Playlist ist allerdings niemals gefüllt, da dies nicht der Logik in Sonos entspricht.  
 Wenn eine Playliste gestartet wird, werden lediglich alle Titel der Liste der Queue hinzugefügt.  
 Falls die Box einer Gruppe zugeordnet wird, wird diese Variable ausgeblendet.
+- Enable detaild info:  
+Diese Option legt die Variablen "Details", "CoverURL", "ContentStream", "Artist", "Title", "Album", "TrackDuration" und "Position" an, die dann vom _updateStatus Skript gefüllt werden.  
+In der Variablen "Details" wird eine HTMLBox erzeugt, die am WebFront auch zu sehen ist. Alle anderen Variablen werden versteckt. 
+- Force Variable order:  
+Wenn diese Option gesetzt ist, wird beim Speichern die vom Modul vorgeschlagene Reihenfolge der Vaiablen wieder hergestellt.
 - Include TuneIn favorites:  
 Wenn dieser Haken gesetzt ist, werden neben den mitgelieferten Radio sendern auch die TuneIn Favoriten (Meine Radiosender) aus dem Sonos System ausgelesen und gespeichert. Sie werden im WebFront als blaue Köpfe angelegt.  
 Dies Gesamtzahl der verfügbaren Radiosender kann allerdings 32 nicht übersteigen. Da die ausgelieferten Sender zuerst ausgelesen werden müssen diese evtl begrenzt werden, damit die TuneIn Sender hinzugefügt werden.
@@ -226,6 +234,48 @@ Sie enthält die aktuellen Wert des Sleeptimers der Instanz und wird von dem Scr
 Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
 - Playlist  
 Diese Variable hat normalerweise keinen Wert gepflegt. Sie dient nur dazu vom WebFront aus eine Playliste anstarten zu können.
+- PlayMode
+Diese Variable wird nur erstellt, wenn die Option "Enable Playmode Control" aktiviert ist.  
+In diese Variablen ist der aktuelle Wert des Play Mode abgelegt und wird von dem Script _updateStatus aktualisiert. Die möglichen Werte sind:
+  - 0: "NORMAL"
+  - 1: "REPEAT_ALL"
+  - 2: "REPEAT_ONE"
+  - 3: "SHUFFLE_NOREPEAT"
+  - 4: "SHUFFLE"
+  - 5: "SHUFFLE_REPEAT_ONE"
+- Crossfade
+Diese Variable wird nur erstellt, wenn die Option "Enable Playmode Control" aktiviert ist.  
+Sie enthält den aktuellen Wert der Crossfade instellungen und wird von dem Script _updateStatus aktualisiert.
+- CoverURL
+Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
+Sie enthält die URL zu dem Cover das gerade in Sonos angezeigt wird. Dies gilt aber nur für Titel, nicht für Streams.  
+Die Variable wird von dem Script _updateStatus aktualisiert.
+- ContentStream
+Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
+Sie enthält den Conten Stram bei bei gestreamten Sender (z.B. aktuelle Informationen) und wird von dem Script _updateStatus aktualisiert.
+- Artist
+Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
+Sie enthält den Künster des aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
+- Album
+Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
+Sie enthält das Album des aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
+- TrackDuration
+Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
+Sie enthält die länge des aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
+- Position
+Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
+Sie enthält die aktuelle Position in dem aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
+- Title
+Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
+Sie enthält den Titel des aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
+- Details
+Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
+Dies ist eine HTMLBox die das Cover, den Titel den Künster, das Album und Positionsinfos anzeigt:  
+![Details Song](docu/details_song.png?raw=true "Details song")
+Wenn gerade ein Sender gestreamt wird, sind nur ContenStram und Titel enthalten:  
+![Details Radio](docu/details_radio.png?raw=true "Details Radio")
+
+
 
 ## 5. Hintergrund Skripte
 Wenn eine Sonos Instanz erstellt wird, werden 2 Skripte angelegt und mit einem Timer gestartet.
@@ -457,3 +507,36 @@ Hierdurch ergeben sich z.B. die Knöpfe im WebFront mit denen man einen Radiosen
 
 Hinweis: Wenn nur Sender aus Sonos enthalten sein sollen, ist der Konfigurationsparameter "Stations in WebFront" __leer__ zu speichern!
 
+## 7. FAQ
+### 7.1. Wie viele Variablen werden für das Modul benötigt?  
+Jede Instanz (also eingebundene Sonos Box) benötigt zwischen 13 und 30 Variablen.  
+- Instanz selber
+- GroupMembers
+- Coordinator
+- GroupVolume
+- MemberOfGroup
+- nowPlaying
+- Radio
+- Status
+- Volume
+- _updateStatus Skript
+- Timer für _updateStatus Skript
+- _updateGrouping Skript
+- Timer _updateGrouping Skript
+- Bass (falls "Bass Control" aktiviert ist)
+- Treble (falls "Treble Control" aktiviert ist)
+- Mute (falls "Mute Control" aktiviert ist)
+- Loudness (falls "Loudness Control" aktiviert ist)
+- Balance (falls "Balance Control" aktiviert ist)
+- Sleeptimer (falls "Sleeptimer Control" aktiviert ist)
+- Playlist (falls "Playlist Control" aktiviert ist)
+- PlayMode (falls "Playmode Control" aktiviert ist)
+- Crossfade (falls "Playmode Control" aktiviert ist)
+- CoverURL (falls "Endable detailed info" aktiviert ist)
+- ContentStream (falls "Endable detailed info" aktiviert ist)
+- Artist (falls "Endable detailed info" aktiviert ist)
+- Album (falls "Endable detailed info" aktiviert ist)
+- TrackDuration (falls "Endable detailed info" aktiviert ist)
+- Position (falls "Endable detailed info" aktiviert ist)
+- Title (falls "Endable detailed info" aktiviert ist)
+- Details (falls "Endable detailed info" aktiviert ist)

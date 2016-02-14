@@ -60,6 +60,16 @@ class SonosAccess{
                                             ));
   }
 
+  public function GetCrossfade()
+  {
+    return (int)$this->processSoapCall("/MediaRenderer/AVTransport/Control",
+                                       "urn:schemas-upnp-org:service:AVTransport:1",
+                                       "GetCrossfadeMode",
+                                       array(
+                                              new SoapParam("0","InstanceID")
+                                            ));
+  }
+
   public function GetLoudness()
   {
     return (int)$this->processSoapCall("/MediaRenderer/RenderingControl/Control",
@@ -193,6 +203,33 @@ class SonosAccess{
     }
   }
 
+  public function GetTransportSettings()
+  {
+    $returnContent = $this->processSoapCall("/MediaRenderer/AVTransport/Control",
+                                            "urn:schemas-upnp-org:service:AVTransport:1",
+                                            "GetTransportSettings",
+                                            array(
+                                                   new SoapParam("0","InstanceID")
+                                                 ));
+
+    switch ($returnContent["PlayMode"]){
+      case "NORMAL":
+        return 0;
+      case "REPEAT_ALL":
+        return 1;
+      case "REPEAT_ONE":
+        return 2;
+      case "SHUFFLE_NOREPEAT":
+        return 3;
+      case "SHUFFLE":
+        return 4;
+      case "SHUFFLE_REPEAT_ONE":
+        return 5;
+      default:
+        throw new Exception("Unknown Play Mode: ".$returnContent["CurrentTransportState"]);
+    }
+  }
+
   public function GetTreble()
   {
     return (int)$this->processSoapCall("/MediaRenderer/RenderingControl/Control",
@@ -317,6 +354,23 @@ class SonosAccess{
                                 ));
   }
 
+  public function SetCrossfade($crossfade)
+  {
+    if($crossfade){
+      $crossfade = "1";
+    }else{
+      $crossfade = "0";
+    }
+
+    $this->processSoapCall("/MediaRenderer/AVTransport/Control",
+                           "urn:schemas-upnp-org:service:AVTransport:1",
+                           "SetCrossfadeMode",
+                           array(
+                                  new SoapParam("0"       ,"InstanceID"   ),
+                                  new SoapParam($crossfade,"CrossfadeMode")
+                                ));
+  }
+
   public function SetLoudness($loud)
   {
     if($loud){
@@ -350,6 +404,40 @@ class SonosAccess{
                                   new SoapParam("0"     ,"InstanceID" ),
                                   new SoapParam("Master","Channel"    ),
                                   new SoapParam($mute   ,"DesiredMute")
+                                ));
+  }
+
+  public function SetPlayMode($PlayMode)
+  {
+    switch ($PlayMode){
+      case 0:
+        $PlayMode = "NORMAL";
+        break;
+      case 1:
+        $PlayMode = "REPEAT_ALL";
+        break;
+      case 2:
+        $PlayMode = "REPEAT_ONE";
+        break;
+      case 3:
+        $PlayMode = "SHUFFLE_NOREPEAT";
+        break;
+      case 4:
+        $PlayMode = "SHUFFLE";
+        break;
+      case 5:
+        $PlayMode = "SHUFFLE_REPEAT_ONE";
+        break;
+      default:
+        throw new Exception("Unknown Play Mode: ".$PlayMode);
+    }
+  
+    $this->processSoapCall("/MediaRenderer/AVTransport/Control",
+                           "urn:schemas-upnp-org:service:AVTransport:1",
+                           "SetPlayMode",
+                           array(
+                                  new SoapParam("0"      ,"InstanceID"  ),
+                                  new SoapParam($PlayMode,"NewPlayMode" )
                                 ));
   }
 

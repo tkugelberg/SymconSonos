@@ -1,4 +1,33 @@
 # Changelog 
+### Version 1.3
+- Das Profil für Gruppen wird nun bei jedem speichern der Konfiguration einer Instanz neu erzeugt.
+  - dies hilft beim aufräumen von fragmenten bereits gelöschter Instanzen
+  - Potentielle Fehler/Hickups werden bereiningt.
+- PlayMode hinzugefügt, umfasst auch Crossfade
+  - 0: "NORMAL"
+  - 1: "REPEAT_ALL"
+  - 2: "REPEAT_ONE"
+  - 3: "SHUFFLE_NOREPEAT"
+  - 4: "SHUFFLE"
+  - 5: "SHUFFLE_REPEAT_ONE"
+- Die Option "Enable detailed info" hinzugefügt
+  - Beinhaltet die Variablen
+    - Details
+    - CoverURL
+    - ContentStream
+    - Artist
+    - Title
+    - Album
+    - TrackDuration
+    - Position
+  - automatisches Füllen der Variablen
+  - ersatellen einer HTML-Box in der Details Vaiablen
+
+- Die Option "Force Variable order"
+  - Diese Option bewirkt, dass die Sortiertreihenfolge auf jeden Fall so eingerichtet wird, wie von dem Modul vorgesehen.
+  - Weiterhin wurde die vorgeschlagene Reihenfolge angepasst, um die Detaillierten Infos besser anzeigen/einsortieren zu können
+  - wenn aktiviert, wird bei jedem ApplyChanges (also auch beim update und starten von IPS) sichergestellt, dass die Sortierreihenfolge stimmt.
+
 ### Version 1.2
 - Beheben eines Fehlers, durch den keine neuen Instanzen angelegt werden konnten.
 
