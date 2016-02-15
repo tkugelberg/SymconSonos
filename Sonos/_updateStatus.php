@@ -166,7 +166,8 @@ if ($MemberOfGroup){
           $currentPositionArray   = explode(":",$positionInfo['RelTime']);
           $durationSeconds        = $durationArray[0]*3600+$durationArray[1]*60+$durationArray[2];
           $currentPositionSeconds = $currentPositionArray[0]*3600+$currentPositionArray[1]*60+$currentPositionArray[2];
-          $progrss                = $currentPositionSeconds/$durationSeconds*100;
+          if($durationSeconds > 0)
+            $progress = $currentPositionSeconds/$durationSeconds*100;
         }
         $detailHTML = "<div align=\"right\">
                        <table>
@@ -178,7 +179,7 @@ if ($MemberOfGroup){
                                <tr><td align=\"right\">".$positionInfo['artist']."</td></tr>
                                <tr><td align=\"right\">".$positionInfo['album']."</td></tr>
                                <tr><td align=\"right\">".$positionInfo['RelTime']." / ".$positionInfo['TrackDuration']."</td></tr>
-                               <tr><td align=\"right\"><progress value=\"".$progrss."\" max=\"100\">Stand der Abarbeitung: 65%</progress></td></tr>
+                               <tr><td align=\"right\"><progress value=\"".$progress."\" max=\"100\">Stand der Abarbeitung: 65%</progress></td></tr>
                              </table>
                            </td>
                            <td><img src=\"".@$positionInfo['albumArtURI']."\" height=\"150\"></td>

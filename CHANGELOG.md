@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.31
+- Fix für "devision by zero" wenn SPDIF (und wohl auch Analog) als input gewählt ist.
+
 ### Version 1.3
 - Das Profil für Gruppen wird nun bei jedem speichern der Konfiguration einer Instanz neu erzeugt.
   - dies hilft beim aufräumen von fragmenten bereits gelöschter Instanzen
