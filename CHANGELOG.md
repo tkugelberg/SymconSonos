@@ -1,4 +1,9 @@
 # Changelog 
+### Version 1.3.2
+- Fixi wenn TrackDuration keine Zeit enhält, sondern "NOT_IMPLEMETED"
+  - Tritt auf z.B., wenn als Input ANAOLG oder SPDIF ausgewählt ist
+
+
 ### Version 1.31
 - Fix für "devision by zero" wenn SPDIF (und wohl auch Analog) als input gewählt ist.
 

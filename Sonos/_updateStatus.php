@@ -162,7 +162,7 @@ if ($MemberOfGroup){
       }else{
         $durationSeconds        = 0;
         $currentPositionSeconds = 0;
-        if($positionInfo['TrackDuration']){
+        if($positionInfo['TrackDuration'] && preg_match('/\d+:\d+:\d+/', $positionInfo['TrackDuration']) ){
           $durationArray          = explode(":",$positionInfo['TrackDuration']);
           $currentPositionArray   = explode(":",$positionInfo['RelTime']);
           $durationSeconds        = $durationArray[0]*3600+$durationArray[1]*60+$durationArray[2];
