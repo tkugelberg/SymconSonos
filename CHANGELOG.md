@@ -1,6 +1,9 @@
 # Changelog 
+### Version 1.3.3
+- Fix bei PlayFiles wenn ANAOLG oder SPDIF ausgewählt --> "NOT_IMPLEMETED", schon wieder!
+
 ### Version 1.3.2
-- Fixi wenn TrackDuration keine Zeit enhält, sondern "NOT_IMPLEMETED"
+- Fix wenn TrackDuration keine Zeit enhält, sondern "NOT_IMPLEMETED"
   - Tritt auf z.B., wenn als Input ANAOLG oder SPDIF ausgewählt ist
 
 
