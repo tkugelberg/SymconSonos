@@ -138,7 +138,11 @@ if ($MemberOfGroup){
   }
   if($vidDetails){
     if(isset($positionInfo)){
-      if($mediaInfo['title']){
+      // SPDIF and analog 
+      if(preg_match('/^RINCON_/', $mediaInfo['title']) ){
+        $detailHTML = "";
+      // Radio or stream(?)
+      }elseif($mediaInfo['title']){
         // get stationID if playing via TuneIn
         $stationID = preg_replace("#(.*)x-sonosapi-stream:(.*?)\?sid(.*)#is",'$2',$mediaInfo['CurrentURI']);
         if($stationID && $stationID[0]=="s"){
@@ -159,6 +163,7 @@ if ($MemberOfGroup){
                          </tr>
                        </table>
                        </div>";
+      // normal files
       }else{
         $durationSeconds        = 0;
         $currentPositionSeconds = 0;
