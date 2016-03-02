@@ -145,6 +145,7 @@ if ($MemberOfGroup){
       }elseif($mediaInfo['title']){
         // get stationID if playing via TuneIn
         $stationID = preg_replace("#(.*)x-sonosapi-stream:(.*?)\?sid(.*)#is",'$2',$mediaInfo['CurrentURI']);
+        $image = "";
         if($stationID && $stationID[0]=="s"){
           $serial = substr(IPS_GetProperty($vidInstance ,"RINCON"), 7,12);
           $image = preg_replace('#(.*)<LOGO>(.*?)\</LOGO>(.*)#is','$2',@file_get_contents("http://opml.radiotime.com/Describe.ashx?c=nowplaying&id=".$stationID."&partnerId=IAeIhU42&serial=".$serial));
