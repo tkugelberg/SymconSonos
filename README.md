@@ -108,7 +108,7 @@ Der hier ausgewählte Sender aus der ausgelieferten Sender Liste wird gestartet,
   ausgeführt wird.
 - Stations in WebFront:  
 Dies ist eine Liste der Ausgelieferten Sender, die im WebFront als transparenter Knopf angezeigt werden sollen. Falls es sich um die "Favorite Station" handelt ist der Knopf gelb.  
-Wenn alle angezeigt werden sollen ist <all> zu pflegen, wenn keiner angezeigt werden soll, ist dieser Parameter leer zu lassen.  
+Wenn alle angezeigt werden sollen ist $lt;all$gt; zu pflegen, wenn keiner angezeigt werden soll, ist dieser Parameter leer zu lassen.  
 Diese Sender stehen zur Verfügung:
   - 1LIVE
   - 1LIVE DIGGI 
