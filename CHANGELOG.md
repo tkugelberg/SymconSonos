@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.3.5
+- WDR2 BI hinzugefügt
+- Radio Hochstift hinzugefügt
 ### Version 1.3.4
 - Fix bei Detailed Status wenn ANAOLG oder SPDIF ausgewählt --> kein HTML erzeugen
 

@@ -5,10 +5,6 @@ Je höher etwas in der Liste auftaucht, desto eher wird es gemacht.
 Wenn es noch wünsche oder Anregungen gibt, können diese gerne im IPS-Forum diskutiert werden: https://www.symcon.de/forum/threads/27500-Sonos-Modul
 
 1. Doku Crossfade
-1. Radiosender
-   - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=285681#post285681
-   - WDR 2 BI
-   - Radio Hochstift
 1. Verbessern der HTMLBox
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=285722#post285722
 1. PlayFiles mir Gruppenbildung

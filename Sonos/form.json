@@ -49,6 +49,7 @@
                                  { "label": "Radio 91.2",               "value": "Radio 91.2" },
                                  { "label": "Radio Duisburg",           "value": "Radio Duisburg" },
                                  { "label": "Radio Essen",              "value": "Radio Essen" },
+                                 { "label": "Radio Hochstift",          "value": "Radio Hochstift" },
                                  { "label": "Radio K.W.",               "value": "Radio K.W." },
                                  { "label": "Radio Lippe",              "value": "Radio Lippe" },
                                  { "label": "Radio Top40",              "value": "Radio Top40" },
@@ -61,6 +62,7 @@
                                  { "label": "SWR1 RP",                  "value": "SWR1 RP" },
                                  { "label": "SWR3",                     "value": "SWR3" },
                                  { "label": "WDR2",                     "value": "WDR2" },
+                                 { "label": "WDR2 BI",                  "value": "WDR2 BI" },
                                  { "label": "YouFM",                    "value": "YouFM" }
                   ] },
 		{ "name": "WebFrontStations",         "type": "ValidationTextBox", "caption": "Stations in WebFront" }
