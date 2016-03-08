@@ -11,6 +11,12 @@ Wenn es noch wünsche oder Anregungen gibt, können diese gerne im IPS-Forum dis
    - Radio Hochstift
 1. Verbessern der HTMLBox
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=285722#post285722
+1. PlayFiles mir Gruppenbildung
+   - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=286309#post286309
+   - Einstellungen aus allen Instanzen speichern
+   - Gruppe bilden
+   - Dateien abspielen
+   - Alten Zustand wieder herstellen
 1. PositionPercent
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=286101#post286101
    - Variable als Fortschrittsbalken mit der Möglichkeit zum Spulen
