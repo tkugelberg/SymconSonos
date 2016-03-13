@@ -46,6 +46,7 @@
                                  { "label": "NDR2",                     "value": "NDR2" },
                                  { "label": "N-JOY",                    "value": "N-JOY" },
                                  { "label": "OE3",                      "value": "OE3" },
+                                 { "label": "planet radio",             "value": "planet radio" },
                                  { "label": "Radio 91.2",               "value": "Radio 91.2" },
                                  { "label": "Radio Duisburg",           "value": "Radio Duisburg" },
                                  { "label": "Radio Essen",              "value": "Radio Essen" },

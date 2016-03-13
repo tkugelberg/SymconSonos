@@ -303,6 +303,33 @@ class SonosAccess{
                                  ));
   }
 
+  public function RampToVolume($rampType, $volume)
+  {
+    switch($rampType){
+      case 1:
+        $rampType = 'SLEEP_TIMER_RAMP_TYPE';
+        break;
+      case 2:
+        $rampType = 'ALARM_RAMP_TYPE';
+        break;
+      case 3:
+        $rampType = 'AUTOPLAY_RAMP_TYPE';
+        break;
+    }
+
+    return $this->processSoapCall("/MediaRenderer/RenderingControl/Control",
+                                  "urn:schemas-upnp-org:service:RenderingControl:1",
+                                  "RampToVolume",
+                                   array(
+                                          new SoapParam("0",      "InstanceID"),
+                                          new SoapParam("Master", "Channel"),
+                                          new SoapParam($rampType,"RampType"),
+                                          new SoapParam($volume,  "DesiredVolume"),
+                                          new SoapParam(0,        "ResetVolumeAfter"),
+                                          new SoapParam("",       "ProgramURI")
+                                        ));
+  }
+
   public function RemoveFromQueue($track)
   {
     $this->processSoapCall("/MediaRenderer/AVTransport/Control",

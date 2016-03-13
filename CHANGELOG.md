@@ -1,4 +1,21 @@
 # Changelog 
+### Version 1.4.0
+- Verbesserung der DetailsHTML 
+  - Vorschlag von dansch übernmommen, Danke.
+- RampToVolume hinzugefügt
+  - SNS_RampToVolume($InstanceID,$rampType, $volume);
+  - $rampType kann String oder Integer sein
+    - 1 entspricht SLEEP_TIMER_RAMP_TYPE
+    - 2 entspricht ALARM_RAMP_TYPE
+    - 3 entspricht AUTOPLAY_RAMP_TYPE
+- Doku um neue/vergessene Funktionen erweitert
+- neue Funktion SNS_PlayFilesGrouping(integer $InstanceID, array $instances, array $files, $volume)
+  - Autotomatisches Gruppieren der Instanzen 
+  - Dateien abspielen
+  - Ursprünglichen Zustand wiederherstellen
+  - Lautärke anpassen
+- planet radio hinzugefügt
+
 ### Version 1.3.5
 - WDR2 BI hinzugefügt
 - Radio Hochstift hinzugefügt

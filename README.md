@@ -356,11 +356,43 @@ SNS_PlayFiles(17265, Array( "//ipsymcon.fritz.box/sonos/bla.mp3",
 ```
 
 ---
+
+```php
+SNS_PlayFilesGrouping(integer $InstanceID, array $instances, array $files, $volume)
+```
+Diese Funktion ruft die Funktion SNS_PlayFiles auf. Dementsprechend ist das array $files göleich aufgebaut.  
+Vorher werden die in $instances mitgegebenen Instanzen zu der gruppe von $InstanceID hinzugefügt.  
+Das array $instances beinhaltet pro hinzuzufügender instanz einen Eintrag mit dem Key "&lt;instance ID&gt;" der hinzuzufügenden instanz und einem Array mit settings. Diese Array kennt derzeit lediglich einen Eintrag mit dem Key "volume" mit dem Volume Wert entsprechend dem $volumeChange aus der Funktion SNS_PlayFiles.
+
+Beispiel:
+```php
+SNS_PlayFilesGrouping(46954 , array( 11774 => array( "volume" => 10),
+                                     27728 => array( "volume" => "+10"),
+                                     59962 => array( "volume" => 30) ), array( IVNTTS_saveMP3(12748, "Dieser Text wird angesagt")), 28 );
+```
+Die Instanzen 11774, 27728 und 59962 werden der Gruppe mit dem Koordinator 46954 hinzugefügt.  
+Die Instanz 11774 wird auf Lautstärke 10 gesetzt.  
+Bei der Instanz 27728 wird die Lautstärke um 10 Punkte angehoben.  
+Die Instanz 59962 wird auf Lautstärke 30 gesetzt.  
+Die Instanz 46954 wird Gruppen Koordinator für die Ansage(n) und wird auf Lautstärke 28 gesetzt.  
+Der Text "Dieser Text wird angesagt" wird vom dem SymconIvona Modul (Instanz 12748) in eine MP3 umgewandelt, welche dann abgespielt wird.
+
+---
 ```php
 SNS_Previous(integer $InstanceID)
 ```
 Startet den vorhergehenden Titel in der Liste.  
 Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automatisch an den zuständigen Koordinator weitergeleitet und gilt somit für die ganze Gruppe.
+
+---
+```php
+SNS_RampToVolume(integer $InstanceID, $rampType, $volume);
+```
+Ruft die Funktion RampToVolume in Sonos auf.  
+Der Parameter $rampType kann als integer oder als string übergeben werden.  
+- 1 entspricht SLEEP_TIMER_RAMP_TYPE
+- 2 entspricht ALARM_RAMP_TYPE
+- 3 entspricht AUTOPLAY_RAMP_TYPE
 
 ---
 ```php
@@ -383,6 +415,14 @@ SNS_SetBass(integer $InstanceID, integer $bass)
 ```
 Passt die Bass Einstellungen im Equalizer der Sonos Instanz an.  
 Mögliche Werte liegen zwischen -10 und 10.
+
+---
+```php
+SNS_SetCrossfade(integer $InstanceID, boolean $crossfade)
+```
+Schaltet den Crossfade Modus für eine Instanz ein oder aus.  
+Falls die Instanz Teil einer Gruppe ist, wird das Kommano automatisch an den Gruppenkoordinator weitergeleitet.  
+0,1, true und false sind gültige Werte für $loudness.
 
 ---
 ```php
@@ -432,6 +472,21 @@ Entfernt alle Titel aus einer Queue und fügt alle Titel einer Playliste hinzu.
 Der name der Playliste muss in Sonos bekannt sein.  
 Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
 Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
+
+---
+```php
+SNS_SetPlaymode(integer $InstanceID, integer $playMode)
+```
+Setzt den Play Mode einer Sonos Instanz.  
+Falls die Instanz Mitglied einer Gruppe ist, wird das Kommando automatisch an den Gruppenkoordinator weitergeleitet.  
+Mögliche Werte für den Play Mode sind:
+- 0: "NORMAL"
+- 1: "REPEAT_ALL"
+- 2: "REPEAT_ONE"
+- 3: "SHUFFLE_NOREPEAT"
+- 4: "SHUFFLE"
+- 5: "SHUFFLE_REPEAT_ONE"
+
 
 ---
 ```php
@@ -506,6 +561,12 @@ Hierdurch ergeben sich z.B. die Knöpfe im WebFront mit denen man einen Radiosen
 - Wenn zu irgendeinem Zeitpunkt 32 Sender erreicht sind, ist die Liste voll. Dies liegt an der Beschränkung von IPS, dass Variabalenprofile maximal 32 Einträge haben dürfen.
 
 Hinweis: Wenn nur Sender aus Sonos enthalten sein sollen, ist der Konfigurationsparameter "Stations in WebFront" __leer__ zu speichern!
+
+---
+```php
+SNS_UpdateRINCON(integer $InstanceID)
+```
+Liest die RINCON einer Instanz aus und schreibt diese in die Instanzkonfiguration.
 
 ## 7. FAQ
 ### 7.1. Wie viele Variablen werden für das Modul benötigt?  

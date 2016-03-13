@@ -465,6 +465,83 @@ class Sonos extends IPSModule
         }
     }
 
+    public function PlayFilesGrouping(array $instances, array $files, $volumeChange)
+    {
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
+          throw new Exception("Sonos Box ".$ip." is not available");
+
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos         = new SonosAccess($ip);
+        $transportInfo = $sonos->GetTransportInfo();
+        $volume        = GetValueInteger($this->GetIDForIdent("Volume"));
+
+        // pause if playing
+        if($transportInfo==1) $sonos->Pause();
+
+        if($volumeChange != 0){
+          // volume request absolte or relative?
+          if($volumeChange[0] == "+" || $volumeChange[0] == "-"){
+            $this->ChangeVolume($volumeChange);
+          }else{
+            $this->SetVolume($volumeChange);
+          }
+        }
+        
+    
+        foreach ($instances as $instanceID => &$settings){
+             $ip      = IPS_GetProperty($instanceID ,"IPAddress");
+             $timeout = $this->ReadPropertyString("TimeOut");
+             if ($timeout && Sys_Ping($ip, $timeout) != true){
+                 $settings["available"] = false;
+                 print $instanceID." is not available\n";
+                 continue;
+             }
+             
+             $settings["available"]     = true;
+             $settings["sonos"]         = new SonosAccess($ip);
+             $settings["mediaInfo"]     = $settings["sonos"]->GetMediaInfo();
+             $settings["positionInfo"]  = $settings["sonos"]->GetPositionInfo();
+             $settings["transportInfo"] = $settings["sonos"]->GetTransportInfo();
+             $settings["group"]         = GetValueInteger(IPS_GetObjectIDByName("MemberOfGroup", $instanceID));
+             $settings["volumeBefore"]  = GetValueInteger(IPS_GetObjectIDByName("Volume", $instanceID));
+
+             if(isset($settings["volume"]) && $settings["volume"] != 0){
+               // volume request absolte or relative?
+               if($settings["volume"][0] == "+" || $settings["volume"][0] == "-"){
+                 SNS_ChangeVolume($instanceID, $settings["volume"]);
+               }else{
+                 SNS_SetVolume($instanceID, $settings["volume"]);
+               }
+             }
+             
+             SNS_SetGroup($instanceID, $this->InstanceID);
+        }
+        unset($settings);
+
+        $this->PlayFiles($files, 0);
+ 
+        foreach ($instances as $instanceID => $settings){
+          if($settings["available"] == false) continue;
+          SNS_SetGroup($instanceID, $settings["group"]);
+          $settings["sonos"]->SetAVTransportURI($settings["mediaInfo"]["CurrentURI"],$settings["mediaInfo"]["CurrentURIMetaData"]);
+          if(@$settings["mediaInfo"]["Track"] > 1 )
+              $settings["sonos"]->Seek("TRACK_NR",$settings["mediaInfo"]["Track"]);
+          if($settings["positionInfo"]["TrackDuration"] != "0:00:00" && $settings["positionInfo"]["RelTime"] != "NOT_IMPLEMENTED" )
+              $settings["sonos"]->Seek("REL_TIME",$settings["positionInfo"]["RelTime"]);
+          SNS_SetVolume($instanceID, $settings["volumeBefore"]);
+          if($settings["transportInfo"]==1 && !$settings["group"]) SNS_Play($instanceID);
+        }
+
+        if($volumeChange != 0){
+          // set back volume
+          $this->SetVolume($volume); 
+        }
+
+        if($transportInfo==1) $sonos->Play();
+    }
+
     public function Previous()
     {
         $targetInstance = $this->findTarget();
@@ -482,6 +559,18 @@ class Sonos extends IPSModule
         }
     }
     
+    public function RampToVolume($rampType,$volume)
+    {
+        $ip      = $this->ReadPropertyString("IPAddress");
+        $timeout = $this->ReadPropertyString("TimeOut");
+        if ($timeout && Sys_Ping($ip, $timeout) != true)
+           throw new Exception("Sonos Box ".$ip." is not available");
+
+        SetValue($this->GetIDForIdent("Volume"), $volume);
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->RampToVolume($rampType,$volume);
+    }
+
     public function SetAnalogInput($input_instance)
     {
         $ip      = $this->ReadPropertyString("IPAddress");

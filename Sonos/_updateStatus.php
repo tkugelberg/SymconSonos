@@ -145,25 +145,32 @@ if ($MemberOfGroup){
       }elseif($mediaInfo['title']){
         // get stationID if playing via TuneIn
         $stationID = preg_replace("#(.*)x-sonosapi-stream:(.*?)\?sid(.*)#is",'$2',$mediaInfo['CurrentURI']);
-        $image = "";
+        if (!isset($image)) $image = "";
         if($stationID && $stationID[0]=="s"){
           $serial = substr(IPS_GetProperty($vidInstance ,"RINCON"), 7,12);
           $image = preg_replace('#(.*)<LOGO>(.*?)\</LOGO>(.*)#is','$2',@file_get_contents("http://opml.radiotime.com/Describe.ashx?c=nowplaying&id=".$stationID."&partnerId=IAeIhU42&serial=".$serial));
         }
-        $detailHTML = "<div align=\"right\">
-                       <table>
-                         <tr>
-                           <td valign=\"top\">
-                             <table border=\"0\">
-                               <tr><td align=\"right\"><b>".$positionInfo['streamContent']."</b></td></tr>
-                               <tr><td>&nbsp;</td></tr>
-                               <tr><td align=\"right\">".$mediaInfo['title']."</td></tr>
-                             </table>
-                           </td>
-                           <td><img src=\"".$image."\"></td>
-                         </tr>
-                       </table>
-                       </div>";
+        $detailHTML =   "<table width=\"100%\">
+                          <tr>
+                            <td>
+                              <div style=\"text-align: right;\">
+                                <div><b>".$positionInfo['streamContent']."</b></div>
+                                <div>&nbsp;</div>
+                                <div>".$mediaInfo['title']."</div>
+                              </div>
+                            </td>";
+
+			if(strlen($image) > 0) {
+			   $detailHTML .= "<td width=\"170px\" valign=\"top\">
+                              <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0px; margin-bottom: 10px;\">
+                              	<img src=\"".@$image."\" style=\"max-width: 170px; max-height: 170px; -webkit-box-reflect: below 0 -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.88, transparent), to(rgba(255, 255, 255, 0.5))); transform: rotateY(-10deg) translateZ(-35px);\">
+                              </div>
+                            </td>";
+			}
+
+         $detailHTML .= "</tr>
+                        </table>";
+
       // normal files
       }else{
         $durationSeconds        = 0;
@@ -174,23 +181,29 @@ if ($MemberOfGroup){
           $durationSeconds        = $durationArray[0]*3600+$durationArray[1]*60+$durationArray[2];
           $currentPositionSeconds = $currentPositionArray[0]*3600+$currentPositionArray[1]*60+$currentPositionArray[2];
         }
-        $detailHTML = "<div align=\"right\">
-                       <table>
-                         <tr>
-                           <td valign=\"top\">
-                             <table border=\"0\">
-                               <tr><td align=\"right\"><b>".$positionInfo['title']."</b></td></tr>
-                               <tr><td>&nbsp;</td></tr>
-                               <tr><td align=\"right\">".$positionInfo['artist']."</td></tr>
-                               <tr><td align=\"right\">".$positionInfo['album']."</td></tr>
-                               <tr><td align=\"right\">".$positionInfo['RelTime']." / ".$positionInfo['TrackDuration']."</td></tr>
-                               <tr><td align=\"right\"><progress value=\"".$currentPositionSeconds."\" max=\"".$durationSeconds."\"></progress></td></tr>
-                             </table>
-                           </td>
-                           <td><img src=\"".@$positionInfo['albumArtURI']."\" height=\"150\"></td>
-                         </tr>
-                       </table>
-                       </div>";
+        $detailHTML =   "<table width=\"100%\">
+                          <tr>
+                            <td>
+                              <div style=\"text-align: right;\">
+                                <div><b>".$positionInfo['title']."</b></div>
+                                <div>&nbsp;</div>
+                                <div>".$positionInfo['artist']."</div>
+                                <div>".$positionInfo['album']."</div>
+                                <div>&nbsp;</div>
+                                <div>".$positionInfo['RelTime']." / ".$positionInfo['TrackDuration']."</div>
+                              </div>
+                            </td>";
+                            
+         if(isset($positionInfo['albumArtURI'])) {
+            $detailHTML .= "<td width=\"170px\" valign=\"top\">
+                              <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0px; margin-bottom: 10px;\">
+                              	<img src=\"".@$positionInfo['albumArtURI']."\" style=\"max-width: 170px; max-height: 170px; -webkit-box-reflect: below 0 -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.88, transparent), to(rgba(255, 255, 255, 0.5))); transform: rotateY(-10deg) translateZ(-35px);\">
+                              </div>
+                            </td>";
+         }
+         
+         $detailHTML .= "</tr>
+                        </table>";
       }
     }
     @SetValueString($vidDetails, $detailHTML);
