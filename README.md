@@ -88,8 +88,10 @@ Diese Option legt eine Variable "Balance" an und aktiviert dass diese auch über
 Diese Option legt eine Variable "Sleeptimer" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird.
 - Enable Playmode Control:  
 Diese Option legt die Variablen "Playmode" und "Crossfade" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird.
-- Enable Playlist Control:  
-Diese Option legt eine Variable "Playlist" an. Dadurch wird für jede Playlist die aus dem Sonos System importiert wurde ein Knopf auf dem WebFront angezeigt. Die Variable Playlist ist allerdings niemals gefüllt, da dies nicht der Logik in Sonos entspricht.  
+- Import Playlists:  
+Diese Option kann die Werte "none", "saved", "imported" und "saved & imported" annehmen.  
+Wenn "none" gewählt ist, passiert nichts.
+Bei den anderen Werten eine Variable "Playlist" an. Dadurch wird für jede Playlist die aus dem Sonos System importiert wurde ein Knopf auf dem WebFront angezeigt. Die Variable Playlist ist allerdings niemals gefüllt, da dies nicht der Logik in Sonos entspricht.  
 Wenn eine Playliste gestartet wird, werden lediglich alle Titel der Liste der Queue hinzugefügt.  
 Falls die Box einer Gruppe zugeordnet wird, wird diese Variable ausgeblendet.
 - Enable detaild info:  
@@ -157,6 +159,7 @@ Dieser Knopf aktualisiert das Profil, in dem die im Webfront verfügbaren Radios
 Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
 - Update Playlists  
 Dieser Knopf aktualisiert das Profil, in dem die im Webfront verfügbaren Playlisten hinterlegt sind.  
+Abhängig von der Ein stellung für die Option "Import Playlists" werden gespeichert und in Sonos importiert e Playlisten angelegt.  
 Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
 - Read RINCON from Sonos  
 Bei betätigen dieses Knopfes wird die RINCON aus der Sonos Box ausgelesen und in der Instazkonfiguration gespeichert.  
@@ -470,6 +473,7 @@ SNS_SetPlaylist(integer $InstanceID, string $name)
 ```
 Entfernt alle Titel aus einer Queue und fügt alle Titel einer Playliste hinzu.  
 Der name der Playliste muss in Sonos bekannt sein.  
+Es wird zunächst nach dem Namen in den gespeicherten Playlisten gesucht. Wird er dort nciht gefunden, wird ebenfalls in den Importierten Playlisten gesucht. Dabei wird ein Unterstrich ("_") such ein Leerzeichen (" ") ersetzt und die Endungen ".m3u" und ".M3U" werden entfernt. Somit kann z.B. die Playliste mit dem Name "3_Doors_Down.m3u" mit dem Befehl SNS_SetPlaylist(12345,"3 Doors Down"); gestartet werden.  
 Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
 Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
 

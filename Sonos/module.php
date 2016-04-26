@@ -21,7 +21,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyBoolean("BalanceControl", false);
         $this->RegisterPropertyBoolean("SleeptimerControl", false);
         $this->RegisterPropertyBoolean("PlayModeControl", false);
-        $this->RegisterPropertyBoolean("PlaylistControl", false);
+        $this->RegisterPropertyInteger("PlaylistImport", 0);
         $this->RegisterPropertyBoolean("DetailedInformation", false);
         $this->RegisterPropertyBoolean("ForceOrder", false);
         $this->RegisterPropertyBoolean("IncludeTunein", "");
@@ -190,7 +190,7 @@ class Sonos extends IPSModule
         }
      
         // 2g Playlists
-        if ($this->ReadPropertyBoolean("PlaylistControl")){
+        if ($this->ReadPropertyInteger("PlaylistImport")){
             if(!IPS_VariableProfileExists("Playlist.SONOS"))
                 $this->RegisterProfileIntegerEx("Playlist.SONOS", "Database", "", "", Array());
             $this->RegisterVariableInteger("Playlist", "Playlist", "Playlist.SONOS", $positions['Playlist']);
@@ -790,12 +790,21 @@ class Sonos extends IPSModule
         $sonos = new SonosAccess($ip);
 
         $uri = '';
-        foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')['Result']))->container as $container) {
+        foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:','BrowseDirectChildren',999)['Result']))->container as $container) {
             if ($container->xpath('dc:title')[0] == $name){
               $uri = (string)$container->res;
               break;
             }
         }  
+
+        if($uri === ''){
+            foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('A:PLAYLISTS','BrowseDirectChildren',999)['Result']))->container as $container) {
+                if (preg_replace($this->getPlaylistReplacementFrom(), $this->getPlaylistReplacementTo(), $container->xpath('dc:title')[0]) == $name){
+                  $uri = (string)$container->res;
+                  break;
+                }
+            }
+        }
 
         if($uri === '')
             throw new Exception('Playlist \''.$name.'\' not found');
@@ -955,23 +964,33 @@ class Sonos extends IPSModule
         if ($timeout && Sys_Ping($ip, $timeout) != true)
            throw new Exception("Sonos Box ".$ip." is not available");
 
+        if(IPS_VariableProfileExists("Playlist.SONOS"))
+            IPS_DeleteVariableProfile("Playlist.SONOS");
+
         include_once(__DIR__ . "/sonosAccess.php");
         $sonos = new SonosAccess($ip);
 
         $Associations          = Array();
         $Value                 = 1;
+        $PlaylistImport        = $this->ReadPropertyInteger("PlaylistImport");
 
-        foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')['Result']))->container as $container) {
-            $Associations[] = Array($Value++, (string)$container->xpath('dc:title')[0], "", -1);
-            // associations only support up to 32 variables
-            if( $Value === 33 ) break;
+        if( $PlaylistImport === 1 || $PlaylistImport === 3  ){
+            foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')['Result']))->container as $container) {
+                $Associations[] = Array($Value++, (string)$container->xpath('dc:title')[0], "", -1);
+                // associations only support up to 32 variables
+                if( $Value === 33 ) break;
+            }
         }
 
-        if(IPS_VariableProfileExists("Playlist.SONOS"))
-            IPS_DeleteVariableProfile("Playlist.SONOS");
+        if(($PlaylistImport === 2 || $PlaylistImport === 3) && $Value < 33){
+            foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('A:PLAYLISTS')['Result']))->container as $container) {
+                $Associations[] = Array($Value++, (string)preg_replace($this->getPlaylistReplacementFrom(), $this->getPlaylistReplacementTo(), $container->xpath('dc:title')[0]), "", -1);
+                // associations only support up to 32 variables
+                if( $Value === 33 ) break;
+            }
+        }
 
         $this->RegisterProfileIntegerEx("Playlist.SONOS", "Database", "", "", $Associations);
-      
     }
 
     public function UpdateRadioStations()
@@ -1121,6 +1140,22 @@ class Sonos extends IPSModule
         }
     }
     
+    protected function getPlaylistReplacementFrom(){
+        return  array( 
+                       '/\.m3u$/',
+                       '/\.M3U$/',
+                       '/_/'
+                     );
+    }
+
+    protected function getPlaylistReplacementTo(){
+        return  array( 
+                       '',
+                       '',
+                       ' ' 
+                     );
+    }
+
     protected function findTarget(){
         // instance is a coordinator and can execute command
         if(GetValueBoolean($this->GetIDForIdent("Coordinator")) === true)

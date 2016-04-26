@@ -4,6 +4,8 @@ Dies ist das priorisierte Backlog für die Weiterentwicklung des SymconSonos Mod
 Je höher etwas in der Liste auftaucht, desto eher wird es gemacht.
 Wenn es noch wünsche oder Anregungen gibt, können diese gerne im IPS-Forum diskutiert werden: https://www.symcon.de/forum/threads/27500-Sonos-Modul
 
+1. Typisierung in der module.php
+   - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=287264#post287264 
 1. PositionPercent
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=286101#post286101
    - Variable als Fortschrittsbalken mit der Möglichkeit zum Spulen
@@ -11,9 +13,6 @@ Wenn es noch wünsche oder Anregungen gibt, können diese gerne im IPS-Forum dis
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=285853#post285853
    - wenn Box nicht erreichbar
    - wenn pause
-1. Verbesserung von Playlist import
-   - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=285500#post285500
-   - auch importeierte Playlisten hinzufügen 
 1. group Mute
 1. _updateStatus Frequenz
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=283106#post283106

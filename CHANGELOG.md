@@ -1,4 +1,16 @@
 # Changelog 
+### Version 1.4.1
+- Hinzufügen der Möglichkeit auch importierte Playlisten zu importieren.
+  - Boolean Property "Enable Playlist Control" nach Ineger "Import Playlists" geändert
+  - mit den Werten 0 (kein import), 1 (saved Playlists), 2 (imported Playlists) und 3 (beides)
+- Die Funktion SetPlaylist kann jetzt auch importierte Playlisten abspielen
+  - schaut immer zusert in den gespeicherten, dann in den importierten Playlists nach
+  - egal wie der Parameter "Import Playlists" gesetzt ist
+  - bestimmte strings werden ersetzt
+    - ".m3u" und ".M3U" am ende wird gelöscht
+    - "_" wird duch " " ersetzt
+    - Wenn z.B. die Playliste 1_test.m3u abgespielt werden solln benötigt man das Kommando SNS_SetPlaylist(12345,"1 test"); 
+
 ### Version 1.4.0
 - Verbesserung der DetailsHTML 
   - Vorschlag von dansch übernmommen, Danke.

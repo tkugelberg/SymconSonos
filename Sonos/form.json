@@ -15,7 +15,13 @@
                 { "name": "BalanceControl",           "type": "CheckBox",          "caption": "Enable Balance Control" },
                 { "name": "SleeptimerControl",        "type": "CheckBox",          "caption": "Enable Sleeptimer Control" },
                 { "name": "PlayModeControl",          "type": "CheckBox",          "caption": "Enable Playmode Control" },
-                { "name": "PlaylistControl",          "type": "CheckBox",          "caption": "Enable Playlist Control" },
+                { "name": "PlaylistImport",           "type": "Select",            "caption": "Import Playlists",
+                    "options": [ 
+                                 { "label": "none",             "value": 0 },
+                                 { "label": "saved",            "value": 1 },
+                                 { "label": "imported",         "value": 2 },
+                                 { "label": "saved & imported", "value": 3 }
+                               ] },
                 { "name": "DetailedInformation",      "type": "CheckBox",          "caption": "Enable detailed info" },
                 { "name": "ForceOrder",               "type": "CheckBox",          "caption": "Force Variable order" },
                 { "type": "Label", "label": "Settings for radio stations:"},
