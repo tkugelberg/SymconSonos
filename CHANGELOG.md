@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.4.2
+- Minor fix to PlayFiles since on some radio stations "TRACK" is > 1...
+
 ### Version 1.4.1
 - Hinzufügen der Möglichkeit auch importierte Playlisten zu importieren.
   - Boolean Property "Enable Playlist Control" nach Ineger "Import Playlists" geändert
