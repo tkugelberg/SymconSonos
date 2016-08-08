@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.4.3
+- fix "ERROR_AV_UPNP_AVT_INVALID_TRANSITION" wenn PlayFiles auf eine Box ausgeführt wird, die sich in einer Gruppe befindet. 
+
 ### Version 1.4.2
 - Minor fix to PlayFiles since on some radio stations "TRACK" is > 1...
 

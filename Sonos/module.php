@@ -403,8 +403,12 @@ class Sonos extends IPSModule
 
         //adjust volume if needed
         if($volumeChange != 0){
-          // pause if playing
-          if($transportInfo==1) $sonos->Pause(); 
+          // pause if playing or remove from group
+          if(!$isGroupCoordinator){
+            $this->SetGroup(0); 
+          }elseif($transportInfo==1){
+            $sonos->Pause();
+          }
           
           // volume request absolte or relative?
           if($volumeChange[0] == "+" || $volumeChange[0] == "-"){
