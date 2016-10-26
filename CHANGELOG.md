@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.4.5
+- remove unwanted leg messages by deleting last line in _updatStatus
+
 ### Version 1.4.4
 - reduce the frequency of update calls if Box is not available...
   - 5 -> 300 Seconds for update Status

@@ -263,4 +263,3 @@ foreach($groupMembersArray as $key=>$ID) {
 
 SetValueInteger(IPS_GetObjectIDByName("GroupVolume", IPS_GetParent($_IPS["SELF"])), intval(round($GroupVolume / sizeof($groupMembersArray))));
 ?>
-
