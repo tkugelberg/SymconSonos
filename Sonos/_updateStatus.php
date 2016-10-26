@@ -31,11 +31,11 @@ $vidPosition      = @IPS_GetObjectIDByName("Position",      $vidInstance);
 
 // If the Sonos instance is not available update of grouping makes no sense
 if ( $timeout && Sys_Ping($ip, $timeout) == false ){
-  IPS_SetScriptTimer($_IPS["SELF"], 300);
+  @IPS_SetScriptTimer($_IPS["SELF"], 300);
   die('Sonos instance '.$ip.' is not available');
 }
 
-IPS_SetScriptTimer($_IPS["SELF"], 5);
+@IPS_SetScriptTimer($_IPS["SELF"], 5);
 
 $sonos = new SonosAccess($ip);
 
