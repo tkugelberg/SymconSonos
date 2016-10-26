@@ -241,6 +241,7 @@ class Sonos extends IPSModule
             $this->removeVariableAction("Album",         $links);
             $this->removeVariableAction("TrackDuration", $links);
             $this->removeVariableAction("Position",      $links);
+            $this->removeVariableAction("StationID",     $links);
         }
 
         // End Register variables and Actions
