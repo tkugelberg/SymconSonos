@@ -104,6 +104,7 @@ class Sonos extends IPSModule
                              ('Album')           => 25,
                              ('TrackDuration')   => 26,
                              ('Position')        => 27,
+                             ('StationID')       => 28,
                              ('nowPlaying')      => 29,
                              ('Radio')           => 40,
                              ('Playlist')        => 41,
@@ -220,6 +221,17 @@ class Sonos extends IPSModule
             IPS_SetHidden($this->RegisterVariableString("Album",         "Album",         "",         $positions['Album']),true);
             IPS_SetHidden($this->RegisterVariableString("TrackDuration", "TrackDuration", "",         $positions['TrackDuration']),true);
             IPS_SetHidden($this->RegisterVariableString("Position",      "Position",      "",         $positions['Position']),true);
+            if(!@IPS_GetObjectIDByIdent("StationID", $this->InstanceID)){
+              $vidStationID = $this->RegisterVariableString("StationID", "StationID", "", $positions['StationID']);
+              IPS_SetHidden($vidStationID,true);
+              //clear it 5 past the hour 
+              $eid = IPS_CreateEvent(1);
+              IPS_SetParent($eid, $vidStationID);
+              IPS_SetEventCyclicTimeFrom($eid,0,5,0);
+              IPS_SetEventCyclic($eid,0,0,0,3,3,1);
+              IPS_SetEventScript($eid, "SetValueString($vidStationID,'');" );
+              IPS_SetEventActive($eid, true);
+            }
         }else{
             $this->removeVariableAction("Details",       $links);
             $this->removeVariableAction("CoverURL",      $links);

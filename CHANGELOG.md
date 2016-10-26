@@ -1,4 +1,13 @@
 # Changelog 
+### Version 1.4.4
+- reduce the frequency of update calls if Box is not available...
+  - 5 -> 300 Seconds for update Status
+  - 120 -> 900 Seconds for update grouping
+- also update "CoverURL" if image is read from radiotime
+- save SationID
+- Only lookup cover on radiotime when StationID changes
+- add event to clear StationID 5 minutes past the hour
+
 ### Version 1.4.3
 - fix "ERROR_AV_UPNP_AVT_INVALID_TRANSITION" wenn PlayFiles auf eine Box ausgeführt wird, die sich in einer Gruppe befindet. 
 

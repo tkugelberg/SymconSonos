@@ -21,6 +21,7 @@ $vidNowPlaying    = @IPS_GetObjectIDByName("nowPlaying",    $vidInstance);
 $vidGroupMembers  = @IPS_GetObjectIDByName("GroupMembers",  $vidInstance);
 $vidDetails       = @IPS_GetObjectIDByName("Details",       $vidInstance);
 $vidCoverURL      = @IPS_GetObjectIDByName("CoverURL",      $vidInstance);
+$vidStationID     = @IPS_GetObjectIDByName("StationID",     $vidInstance);
 $vidContentStream = @IPS_GetObjectIDByName("ContentStream", $vidInstance);
 $vidArtist        = @IPS_GetObjectIDByName("Artist",        $vidInstance);
 $vidTitle         = @IPS_GetObjectIDByName("Title",         $vidInstance);
@@ -29,8 +30,12 @@ $vidTrackDuration = @IPS_GetObjectIDByName("TrackDuration", $vidInstance);
 $vidPosition      = @IPS_GetObjectIDByName("Position",      $vidInstance);
 
 // If the Sonos instance is not available update of grouping makes no sense
-if ( $timeout && Sys_Ping($ip, $timeout) == false )
-    die('Sonos instance '.$ip.' is not available');
+if ( $timeout && Sys_Ping($ip, $timeout) == false ){
+  IPS_SetScriptTimer($_IPS["SELF"], 300);
+  die('Sonos instance '.$ip.' is not available');
+}
+
+IPS_SetScriptTimer($_IPS["SELF"], 5);
 
 $sonos = new SonosAccess($ip);
 
@@ -99,7 +104,7 @@ if ($MemberOfGroup){
         break;
       }
     }
-            
+
     if( $playingRadioStation == ''){
       foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('R:0/0')['Result']))->item as $item) {
         if ($item->res == htmlspecialchars_decode($mediaInfo["CurrentURI"])){
@@ -123,7 +128,6 @@ if ($MemberOfGroup){
   SetValueInteger($vidRadio, $currentStation);
 
   // detailed Information
-  if($vidCoverURL)        SetValueString($vidCoverURL,      @$positionInfo['albumArtURI']);
   if($vidContentStream)   SetValueString($vidContentStream, @$positionInfo['streamContent']);
   if($vidArtist)          SetValueString($vidArtist,        @$positionInfo['artist']);
   if($vidAlbum)           SetValueString($vidAlbum,         @$positionInfo['album']);
@@ -137,19 +141,26 @@ if ($MemberOfGroup){
     }
   }
   if($vidDetails){
+    if (!isset($stationID)) $stationID = "";
     if(isset($positionInfo)){
-      // SPDIF and analog 
+      // SPDIF and analog
       if(preg_match('/^RINCON_/', $mediaInfo['title']) ){
         $detailHTML = "";
       // Radio or stream(?)
       }elseif($mediaInfo['title']){
         // get stationID if playing via TuneIn
-        $stationID = preg_replace("#(.*)x-sonosapi-stream:(.*?)\?sid(.*)#is",'$2',$mediaInfo['CurrentURI']);
-        if (!isset($image)) $image = "";
-        if($stationID && $stationID[0]=="s"){
-          $serial = substr(IPS_GetProperty($vidInstance ,"RINCON"), 7,12);
-          $image = preg_replace('#(.*)<LOGO>(.*?)\</LOGO>(.*)#is','$2',@file_get_contents("http://opml.radiotime.com/Describe.ashx?c=nowplaying&id=".$stationID."&partnerId=IAeIhU42&serial=".$serial));
-        }
+       $stationID = preg_replace("#(.*)x-sonosapi-stream:(.*?)\?sid(.*)#is",'$2',$mediaInfo['CurrentURI']);
+       if (!isset($image)) $image = "";
+       if($stationID && $stationID[0]=="s"){
+	 if(@GetValueString($vidStationID) == $stationID){
+            $image = GetValueString($vidCoverURL);
+	 }else{
+            $serial = substr(IPS_GetProperty($vidInstance ,"RINCON"), 7,12);
+            $image = preg_replace('#(.*)<LOGO>(.*?)\</LOGO>(.*)#is','$2',@file_get_contents("http://opml.radiotime.com/Describe.ashx?c=nowplaying&id=".$stationID."&partnerId=IAeIhU42&serial=".$serial));
+	 }
+       }else{
+          $stationID = "";
+       }
         $detailHTML =   "<table width=\"100%\">
                           <tr>
                             <td>
@@ -193,7 +204,7 @@ if ($MemberOfGroup){
                                 <div>".$positionInfo['RelTime']." / ".$positionInfo['TrackDuration']."</div>
                               </div>
                             </td>";
-                            
+
          if(isset($positionInfo['albumArtURI'])) {
             $detailHTML .= "<td width=\"170px\" valign=\"top\">
                               <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0px; margin-bottom: 10px;\">
@@ -201,12 +212,20 @@ if ($MemberOfGroup){
                               </div>
                             </td>";
          }
-         
+
          $detailHTML .= "</tr>
                         </table>";
       }
     }
     @SetValueString($vidDetails, $detailHTML);
+    if($vidCoverURL){
+		if((isset($image)) && (strlen($image) > 0)) {
+		  SetValueString($vidCoverURL, $image);
+		}else{
+	     SetValueString($vidCoverURL, @$positionInfo['albumArtURI']);
+		}
+	 }
+  SetValueString($vidStationID,$stationID);
   }
 
   // Sleeptimer
@@ -241,6 +260,7 @@ $GroupVolume = 0;
 foreach($groupMembersArray as $key=>$ID) {
   $GroupVolume += GetValueInteger(IPS_GetObjectIDByName("Volume", $ID));
 }
-  
+
 SetValueInteger(IPS_GetObjectIDByName("GroupVolume", IPS_GetParent($_IPS["SELF"])), intval(round($GroupVolume / sizeof($groupMembersArray))));
 ?>
+

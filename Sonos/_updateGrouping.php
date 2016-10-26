@@ -10,8 +10,14 @@ $rinconMapping     = Array();
 $allSonosInstances = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
 
 // If the Sonos instance is not available update of grouping makes no sense
-if ( $timeout && Sys_Ping($ipAddress, $timeout) == false )
+if ( $timeout && Sys_Ping($ipAddress, $timeout) == false ){
+    // If the Box is not available, only ask every 15 Minutes...
+    IPS_SetScriptTimer($_IPS["SELF"], 900);
     die('Sonos instance '.$ipAddress.' is not available');
+}
+
+// If box is available reset to 120 Seconds interval
+IPS_SetScriptTimer($_IPS["SELF"], 120);
 
 $topology = new SimpleXMLElement(file_get_contents('http://'.$ipAddress.':1400/status/topology'));
 
