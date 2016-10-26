@@ -1192,6 +1192,9 @@ class Sonos extends IPSModule
                 if ( $value['TargetID'] === $vid )
                      IPS_DeleteLink($value['LinkID']);
             }
+            foreach(IPS_GetChildrenIDs($vid) as $key=>$cid){
+              if(IPS_EventExists($cid)) IPS_DeleteEvent($cid);
+            }
             $this->UnregisterVariable($name);
         }
     }
@@ -1203,6 +1206,9 @@ class Sonos extends IPSModule
             foreach( $links as $key=>$value ){
                 if ( $value['TargetID'] === $vid )
                      IPS_DeleteLink($value['LinkID']);
+            }
+            foreach(IPS_GetChildrenIDs($vid) as $key=>$cid){
+              if(IPS_EventExists($cid)) IPS_DeleteEvent($cid);
             }
             $this->DisableAction($name);
             $this->UnregisterVariable($name);
