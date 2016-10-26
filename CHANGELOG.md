@@ -4,7 +4,7 @@
   - 5 -> 300 Seconds for update Status
   - 120 -> 900 Seconds for update grouping
 - also update "CoverURL" if image is read from radiotime
-- save SationID
+- save StationID
 - Only lookup cover on radiotime when StationID changes
 - add event to clear StationID 5 minutes past the hour
 
