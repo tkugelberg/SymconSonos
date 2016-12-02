@@ -1,4 +1,9 @@
 # Changelog 
+### Version 1.4.6
+- also make "update Status Frequency" configurable
+- also make "update Status Frequency when Instance is not available" configurable
+- also make "update Grouping Frequency when Instance is not available" configurable
+
 ### Version 1.4.5
 - remove unwanted leg messages by deleting last line in _updatStatus
 

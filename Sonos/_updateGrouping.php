@@ -1,23 +1,25 @@
 <?
 
-$sonosInstanceID   = IPS_GetParent($_IPS["SELF"]);
-$memberOfGoup      = GetValueInteger(IPS_GetObjectIDByName("MemberOfGroup", $sonosInstanceID));
-$coordinatorInIPS  = GetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID));
-$forceGrouping     = IPS_GetProperty($sonosInstanceID, "GroupForcing");
-$ipAddress         = IPS_GetProperty($sonosInstanceID, "IPAddress");
-$timeout           = IPS_GetProperty($sonosInstanceID, "TimeOut");
-$rinconMapping     = Array();
-$allSonosInstances = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
+$sonosInstanceID       = IPS_GetParent($_IPS["SELF"]);
+$memberOfGoup          = GetValueInteger(IPS_GetObjectIDByName("MemberOfGroup", $sonosInstanceID));
+$coordinatorInIPS      = GetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID));
+$forceGrouping         = IPS_GetProperty($sonosInstanceID, "GroupForcing");
+$ipAddress             = IPS_GetProperty($sonosInstanceID, "IPAddress");
+$timeout               = IPS_GetProperty($sonosInstanceID, "TimeOut");
+$frequency             = IPS_GetProperty($sonosInstanceID, "UpdateGroupingFrequency");
+$frequencyNotAvailable = IPS_GetProperty($sonosInstanceID, "UpdateGroupingFrequencyNA");
+$rinconMapping         = Array();
+$allSonosInstances     = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
 
 // If the Sonos instance is not available update of grouping makes no sense
 if ( $timeout && Sys_Ping($ipAddress, $timeout) == false ){
     // If the Box is not available, only ask every 15 Minutes...
-    IPS_SetScriptTimer($_IPS["SELF"], 900);
+    IPS_SetScriptTimer($_IPS["SELF"], $frequencyNotAvailable );
     die('Sonos instance '.$ipAddress.' is not available');
 }
 
 // If box is available reset to 120 Seconds interval
-IPS_SetScriptTimer($_IPS["SELF"], 120);
+IPS_SetScriptTimer($_IPS["SELF"], $frequency);
 
 $topology = new SimpleXMLElement(file_get_contents('http://'.$ipAddress.':1400/status/topology'));
 

@@ -2,8 +2,10 @@
 include_once("../modules/SymconSonos/Sonos/sonosAccess.php");
 include_once("../modules/SymconSonos/Sonos/radio_stations.php");
 
-$ip      = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
-$timeout = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
+$ip                    = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
+$timeout               = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
+$frequency             = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "UpdateStatusFrequency");
+$frequencyNotAvailable = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "UpdateStatusFrequencyNA");
 
 // Get all needed Variable IDs
 $vidInstance      = IPS_GetParent($_IPS["SELF"]);
@@ -31,11 +33,11 @@ $vidPosition      = @IPS_GetObjectIDByName("Position",      $vidInstance);
 
 // If the Sonos instance is not available update of grouping makes no sense
 if ( $timeout && Sys_Ping($ip, $timeout) == false ){
-  @IPS_SetScriptTimer($_IPS["SELF"], 300);
+  @IPS_SetScriptTimer($_IPS["SELF"], $frequencyNotAvailable );
   die('Sonos instance '.$ip.' is not available');
 }
 
-@IPS_SetScriptTimer($_IPS["SELF"], 5);
+@IPS_SetScriptTimer($_IPS["SELF"], $frequency );
 
 $sonos = new SonosAccess($ip);
 

@@ -12,7 +12,10 @@ class Sonos extends IPSModule
         $this->RegisterPropertyString("IPAddress", "");
         $this->RegisterPropertyInteger("TimeOut", 1000);
         $this->RegisterPropertyInteger("DefaultVolume", 15);
+        $this->RegisterPropertyInteger("UpdateStatusFrequency", 5);
+        $this->RegisterPropertyInteger("UpdateStatusFrequencyNA", 300);
         $this->RegisterPropertyInteger("UpdateGroupingFrequency", 120);
+        $this->RegisterPropertyInteger("UpdateGroupingFrequencyNA", 900);
         $this->RegisterPropertyBoolean("GroupForcing", false);
         $this->RegisterPropertyBoolean("MuteControl", false);
         $this->RegisterPropertyBoolean("LoudnessControl", false);
@@ -256,7 +259,7 @@ class Sonos extends IPSModule
         }
 
         IPS_SetHidden($statusScriptID,true);
-        IPS_SetScriptTimer($statusScriptID, 5); 
+        IPS_SetScriptTimer($statusScriptID, $this->ReadPropertyString("UpdateStatusFrequency")); 
 
         // 2) _updateGrouping
         $groupingScriptID = @$this->GetIDForIdent("_updateGrouping");

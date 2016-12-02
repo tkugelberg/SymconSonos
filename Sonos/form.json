@@ -1,32 +1,35 @@
 {
 	"elements":
 	[
-		{ "name": "IPAddress",                "type": "ValidationTextBox", "caption": "IP-Address/Host" },
-		{ "name": "TimeOut",                  "type": "NumberSpinner",     "caption": "Maximal ping timeout" },
-		{ "name": "DefaultVolume",            "type": "NumberSpinner",     "caption": "Default volume (%)" },
+		{ "name": "IPAddress",                 "type": "ValidationTextBox", "caption": "IP-Address/Host" },
+		{ "name": "TimeOut",                   "type": "NumberSpinner",     "caption": "Maximal ping timeout" },
+		{ "name": "DefaultVolume",             "type": "NumberSpinner",     "caption": "Default volume (%)" },
                 { "type": "Label", "label": "RINCON will be filled automatically during save if it is initial. Update will only be visible when reopening form." },
-                { "name": "RINCON",                   "type": "ValidationTextBox", "caption": "RINCON" },
-                { "name": "UpdateGroupingFrequency",  "type": "NumberSpinner",     "caption": "Update Grouping Frq" },
-                { "name": "GroupForcing",             "type": "CheckBox",          "caption": "Force grouping in Sonos" },
-                { "name": "MuteControl",              "type": "CheckBox",          "caption": "Enable Mute Control" },
-                { "name": "LoudnessControl",          "type": "CheckBox",          "caption": "Enable Loudness Control" },
-                { "name": "BassControl",              "type": "CheckBox",          "caption": "Enable Bass Control" },
-                { "name": "TrebleControl",            "type": "CheckBox",          "caption": "Enable Treble Control" },
-                { "name": "BalanceControl",           "type": "CheckBox",          "caption": "Enable Balance Control" },
-                { "name": "SleeptimerControl",        "type": "CheckBox",          "caption": "Enable Sleeptimer Control" },
-                { "name": "PlayModeControl",          "type": "CheckBox",          "caption": "Enable Playmode Control" },
-                { "name": "PlaylistImport",           "type": "Select",            "caption": "Import Playlists",
+                { "name": "RINCON",                    "type": "ValidationTextBox", "caption": "RINCON" },
+                { "name": "UpdateStatusFrequency",     "type": "NumberSpinner",     "caption": "Update Status Frq" },
+                { "name": "UpdateStatusFrequencyNA",   "type": "NumberSpinner",     "caption": "Update Status Frq (when unavailable)" },
+                { "name": "UpdateGroupingFrequency",   "type": "NumberSpinner",     "caption": "Update Grouping Frq" },
+                { "name": "UpdateGroupingFrequencyNA", "type": "NumberSpinner",     "caption": "Update Grouping Frq (when unavailable)" },
+                { "name": "GroupForcing",              "type": "CheckBox",          "caption": "Force grouping in Sonos" },
+                { "name": "MuteControl",               "type": "CheckBox",          "caption": "Enable Mute Control" },
+                { "name": "LoudnessControl",           "type": "CheckBox",          "caption": "Enable Loudness Control" },
+                { "name": "BassControl",               "type": "CheckBox",          "caption": "Enable Bass Control" },
+                { "name": "TrebleControl",             "type": "CheckBox",          "caption": "Enable Treble Control" },
+                { "name": "BalanceControl",            "type": "CheckBox",          "caption": "Enable Balance Control" },
+                { "name": "SleeptimerControl",         "type": "CheckBox",          "caption": "Enable Sleeptimer Control" },
+                { "name": "PlayModeControl",           "type": "CheckBox",          "caption": "Enable Playmode Control" },
+                { "name": "PlaylistImport",            "type": "Select",            "caption": "Import Playlists",
                     "options": [ 
                                  { "label": "none",             "value": 0 },
                                  { "label": "saved",            "value": 1 },
                                  { "label": "imported",         "value": 2 },
                                  { "label": "saved & imported", "value": 3 }
                                ] },
-                { "name": "DetailedInformation",      "type": "CheckBox",          "caption": "Enable detailed info" },
-                { "name": "ForceOrder",               "type": "CheckBox",          "caption": "Force Variable order" },
+                { "name": "DetailedInformation",       "type": "CheckBox",          "caption": "Enable detailed info" },
+                { "name": "ForceOrder",                "type": "CheckBox",          "caption": "Force Variable order" },
                 { "type": "Label", "label": "Settings for radio stations:"},
-                { "name": "IncludeTunein",            "type": "CheckBox",          "caption": "Include TuneIn favorites" },
-		{ "name": "FavoriteStation",          "type": "Select",            "caption": "Favorite radio station", 
+                { "name": "IncludeTunein",             "type": "CheckBox",          "caption": "Include TuneIn favorites" },
+		{ "name": "FavoriteStation",           "type": "Select",            "caption": "Favorite radio station", 
                     "options": [ 
                                  { "label": "1LIVE",                    "value": "1LIVE" },
                                  { "label": "1LIVE DIGGI",              "value": "1LIVE DIGGI" },
@@ -72,7 +75,7 @@
                                  { "label": "WDR2 BI",                  "value": "WDR2 BI" },
                                  { "label": "YouFM",                    "value": "YouFM" }
                   ] },
-		{ "name": "WebFrontStations",         "type": "ValidationTextBox", "caption": "Stations in WebFront" }
+		{ "name": "WebFrontStations",          "type": "ValidationTextBox", "caption": "Stations in WebFront" }
 	],
 	"actions":
 	[
