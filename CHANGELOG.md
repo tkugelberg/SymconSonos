@@ -1,4 +1,8 @@
 # Changelog 
+### Versuon 1.4.7
+- correct Cover URL in case it is an absolute URL (do not add Sonos host in front)
+- ignore exceptions when SEEK is throwing an exception during PlayFiles (e.g. when playing Amazon Streams)
+
 ### Version 1.4.6
 - also make "update Status Frequency" configurable
 - also make "update Status Frequency when Instance is not available" configurable

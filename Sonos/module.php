@@ -466,10 +466,13 @@ class Sonos extends IPSModule
         // reset to what was playing before
         $sonos->SetAVTransportURI($mediaInfo["CurrentURI"],$mediaInfo["CurrentURIMetaData"]);
         if($positionInfo["TrackDuration"] != "0:00:00" && $positionInfo["Track"] > 1)
-          $sonos->Seek("TRACK_NR",$positionInfo["Track"]);
+          try {
+            $sonos->Seek("TRACK_NR",$positionInfo["Track"]);
+          } catch (Exception $e) { }
         if($positionInfo["TrackDuration"] != "0:00:00" && $positionInfo["RelTime"] != "NOT_IMPLEMENTED" )
-          $sonos->Seek("REL_TIME",$positionInfo["RelTime"]);
- 
+          try {
+            $sonos->Seek("REL_TIME",$positionInfo["RelTime"]);
+          } catch (Exception $e) { }
 
         if($volumeChange != 0){
           // set back volume
@@ -547,9 +550,13 @@ class Sonos extends IPSModule
           SNS_SetGroup($instanceID, $settings["group"]);
           $settings["sonos"]->SetAVTransportURI($settings["mediaInfo"]["CurrentURI"],$settings["mediaInfo"]["CurrentURIMetaData"]);
           if(@$settings["mediaInfo"]["Track"] > 1 )
+            try {     
               $settings["sonos"]->Seek("TRACK_NR",$settings["mediaInfo"]["Track"]);
+            } catch (Exception $e) { }
           if($settings["positionInfo"]["TrackDuration"] != "0:00:00" && $settings["positionInfo"]["RelTime"] != "NOT_IMPLEMENTED" )
+            try {
               $settings["sonos"]->Seek("REL_TIME",$settings["positionInfo"]["RelTime"]);
+            } catch (Exception $e) { }
           SNS_SetVolume($instanceID, $settings["volumeBefore"]);
           if($settings["transportInfo"]==1 && !$settings["group"]) SNS_Play($instanceID);
         }
