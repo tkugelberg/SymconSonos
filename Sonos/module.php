@@ -503,6 +503,7 @@ class Sonos extends IPSModule
                      $settings["available"] = false;
                      print $instanceID." is not available\n";
                      continue;
+                 }
              }
              
              $settings["available"]     = true;
