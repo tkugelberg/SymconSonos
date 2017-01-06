@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.4.8
+- Added duplicate ping check
+
 ### Versuon 1.4.7
 - correct Cover URL in case it is an absolute URL (do not add Sonos host in front)
 - ignore exceptions when SEEK is throwing an exception during PlayFiles (e.g. when playing Amazon Streams)
