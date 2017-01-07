@@ -1057,6 +1057,9 @@ class Sonos extends IPSModule
                 break;
             case "Playlist":
                 $this->SetPlaylist(IPS_GetVariableProfile("Playlist.SONOS")['Associations'][$Value-1]['Name']);
+                SetValue($this->GetIDForIdent($Ident), $Value);
+                sleep(1);
+                SetValue($this->GetIDForIdent($Ident), 0);
                 break;
             case "Radio":
                 $this->SetRadio(IPS_GetVariableProfile("Radio.SONOS")['Associations'][$Value-1]['Name']);
