@@ -64,9 +64,18 @@ Die Lautstärke die eingestellt wird, wenn die Funktionen
 - RINCON:  
 Enthält die RINCON der Sonos Instanz. Dabei handelt es sich um einen weltweit eindeutigen Identifier in dem Format "RINCON_<MAC-Adresse>1400", wobei die "<MAC-Adresse>" nur die Ziffern und Buchstaben ohne Bindestriche enthält.  
 Wenn dieser Wert nicht gepflegt wird, wird er automatisch ermittelt.
+- Update Status Frq:  
+Dieser parameter enthält die Frequenz in sekunden in der das Script _updateStatus ausgeführt werden soll.  
+Default: 5
+- NA Update Status Frq:
+Wenn eine Box nicht erreichbar ist (z.B. Stromlos) wird die Frequenz in der das Script _updateStatus ausgeführt wird auf diesen Wert gesetzt.  
+Default 300
 - Update Grouping Frq:  
 Dieser Parameter enthält die Frequenz in sekunden in der das Script _updateGrouping ausgeführt werden soll.  
 Default: 120
+- NA Update Grouping Frq:
+Wenn eine Box nicht erreichbar ist (z.B. Stromlos) wird die Frequenz in der das Script _updateGrouping ausgeführt wird auf diesen Wert gesetzt.  
+Default: 900
 - Force Grouping in Sonos:  
 Bezüglich des Verhaltens was passieren soll, wenn ein Unterschied in der Gruppenzuordnung zwischen Sonos und IPS vorgefunden wird, gibt es 2 Alternativen:
   1. IPS übernimmt die Einstellungen aus Sonos --> Haken nicht gesetzt  
@@ -503,7 +512,7 @@ Startet die Wiedergabe der "Favorite Radio Station".
 ```php
 SNS_SetRadio(integer $InstanceID, string $radio)
 ```
-Startet die Wiedergabe des in $radio mitgegebenen Radiosenders.  
+Setzt die Audioquelle auf die URL des in $radio mitgegebenen Radiosenders.  
 Zunächst wird gesucht, ob der Sender in den ausgelieferten Sendern gefunden wird. Wenn er dort nicht gefunden wird, wird in den TuneIn Favoriten (Meine Radiosneder) gesucht.  
 Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
 Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
