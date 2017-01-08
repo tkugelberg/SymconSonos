@@ -408,7 +408,11 @@ class Sonos extends IPSModule
           if(!$isGroupCoordinator){
             $this->SetGroup(0); 
           }elseif($transportInfo==1){
-            $sonos->Pause();
+            try{
+              $sonos->Pause();
+            }catch (Exception $e){ 
+              if ( $e->getMessage() != 'Error during Soap Call: UPnPError s:Client 701 (ERROR_AV_UPNP_AVT_INVALID_TRANSITION)') throw $e; 
+            }
           }
           
           // volume request absolte or relative?
@@ -483,7 +487,13 @@ class Sonos extends IPSModule
         $volume        = GetValueInteger($this->GetIDForIdent("Volume"));
 
         // pause if playing
-        if($transportInfo==1) $sonos->Pause();
+        if($transportInfo==1){
+          try{
+            $sonos->Pause();
+          }catch (Exception $e){ 
+            if ( $e->getMessage() != 'Error during Soap Call: UPnPError s:Client 701 (ERROR_AV_UPNP_AVT_INVALID_TRANSITION)') throw $e; 
+          }
+        }
 
         if($volumeChange != 0){
           // volume request absolte or relative?
@@ -587,7 +597,6 @@ class Sonos extends IPSModule
         $sonos = new SonosAccess($ip);
         
         $sonos->SetAVTransportURI("x-rincon-stream:".IPS_GetProperty($input_instance ,"RINCON"));
-        $sonos->Play();
     }
 
     public function SetBalance($balance)	
@@ -794,7 +803,6 @@ class Sonos extends IPSModule
         $sonos->ClearQueue();
         $sonos->AddToQueue($uri);
         $sonos->SetAVTransportURI('x-rincon-queue:'.$this->ReadPropertyString("RINCON").'#0');
-        $sonos->Play();
 
     }
 
@@ -846,7 +854,6 @@ class Sonos extends IPSModule
          throw new Exception("Radio station " . $radio . " is unknown" ); 
 
         $sonos->SetRadio($uri, $radio);
-        $sonos->Play();
     }
     
     public function SetSleepTimer($minutes)
@@ -881,7 +888,6 @@ class Sonos extends IPSModule
         $sonos = new SonosAccess($ip);
         
         $sonos->SetAVTransportURI("x-sonos-htastream:".IPS_GetProperty($input_instance ,"RINCON").":spdif");
-        $sonos->Play();
     }
 
     public function SetTreble($treble)	
@@ -1058,12 +1064,14 @@ class Sonos extends IPSModule
             case "Playlist":
                 $this->SetPlaylist(IPS_GetVariableProfile("Playlist.SONOS")['Associations'][$Value-1]['Name']);
                 SetValue($this->GetIDForIdent($Ident), $Value);
+                $this->Play();
                 sleep(1);
                 SetValue($this->GetIDForIdent($Ident), 0);
                 break;
             case "Radio":
                 $this->SetRadio(IPS_GetVariableProfile("Radio.SONOS")['Associations'][$Value-1]['Name']);
                 SetValue($this->GetIDForIdent($Ident), $Value);
+                $this->Play();
                 break;
             case "Status":
                 switch($Value) {

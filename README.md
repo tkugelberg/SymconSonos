@@ -236,7 +236,8 @@ Diese Variable wird nur erstellt, wenn die Option "Enable Sleeptimer Control" ak
 Sie enthält die aktuellen Wert des Sleeptimers der Instanz und wird von dem Script _updateStatus aktualisiert.  
 Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
 - Playlist  
-Diese Variable hat normalerweise keinen Wert gepflegt. Sie dient nur dazu vom WebFront aus eine Playliste anstarten zu können.
+Diese Variable hat normalerweise keinen Wert gepflegt. Sie dient nur dazu vom WebFront aus eine Playliste anstarten zu können.  
+Lediglich direkt nach dem Drücken des Knopfes am WebFront wird die Variable für eine Sekunde auf den Gewählten Wert gesetzt. Dies soll dem Verwener ein kurzes Feedback geben.
 - PlayMode
 Diese Variable wird nur erstellt, wenn die Option "Enable Playmode Control" aktiviert ist.  
 In diese Variablen ist der aktuelle Wert des Play Mode abgelegt und wird von dem Script _updateStatus aktualisiert. Die möglichen Werte sind:

@@ -1,4 +1,11 @@
 # Changelog 
+### Version 1.5.0
+- Ignoring Exception 'Error during Soap Call: UPnPError s:Client 701 (ERROR_AV_UPNP_AVT_INVALID_TRANSITION)' when pausing during PlayFiles
+- INCOMPATIBLE CHANGE: Do not execute Play() within SetRadio, SetPlaylist, etc.
+
+### Version 1.4.9
+- Setting Playlist for one second to give feedback on WebFront
+
 ### Version 1.4.8
 - Added duplicate ping check
 
