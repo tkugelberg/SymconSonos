@@ -9,7 +9,7 @@ Wenn es noch wünsche oder Anregungen gibt, können diese gerne im IPS-Forum dis
 1. PositionPercent
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=286101#post286101
    - Variable als Fortschrittsbalken mit der Möglichkeit zum Spulen
-1. group Mute
+1. group Mute 
 1. "Volume Factor" einführen 
    - https://www.symcon.de/forum/threads/27500-Sonos-Modul?p=277503#post277503
    - Das Volume wird hiermit multipliziert/dividiert.
