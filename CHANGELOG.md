@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.5.1
+- Changed  URL of Antenne Thüringen and Radio TOP40
+
 ### Version 1.5.0
 - Ignoring Exception 'Error during Soap Call: UPnPError s:Client 701 (ERROR_AV_UPNP_AVT_INVALID_TRANSITION)' when pausing during PlayFiles
 - INCOMPATIBLE CHANGE: Do not execute Play() within SetRadio, SetPlaylist, etc.
