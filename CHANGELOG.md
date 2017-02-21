@@ -1,6 +1,7 @@
 # Changelog 
 ### Version 1.5.2
 - UTF-8 for status buttons
+- allw https for play files
 
 ### Version 1.5.1
 - Changed  URL of Antenne Thüringen and Radio TOP40
