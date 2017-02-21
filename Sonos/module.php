@@ -56,12 +56,12 @@ class Sonos extends IPSModule
                         
         
         // Start create profiles
-        $this->RegisterProfileIntegerEx("Status.SONOS", "Information", "", "",   Array( Array(0, "Prev",       "", -1),
-                                                                                        Array(1, "Play",       "", -1),
-                                                                                        Array(2, "Pause",      "", -1),
-                                                                                        Array(3, "Stop",       "", -1),
-                                                                                        Array(4, "Next",       "", -1),
-                                                                                        Array(5, "Transition", "", -1) ));
+        $this->RegisterProfileIntegerEx("Status.SONOS", "Information", "", "",   Array( Array(0, "&#9194;",       "", -1),
+                                                                                        Array(1, "&#9658;",       "", -1),
+                                                                                        Array(2, "&#10074;&#10074;",      "", -1),
+                                                                                        Array(3, "&#9724;",       "", -1),
+                                                                                        Array(4, "&#9193;",       "", -1),
+                                                                                        Array(5, "&#8904;", "", -1) ));
         $this->RegisterProfileIntegerEx("PlayMode.SONOS", "Information", "", "",   Array( Array(0, "Normal",             "", -1),
                                                                                           Array(1, "Repeat all",         "", -1),
                                                                                           Array(2, "Repeat one",         "", -1),
