@@ -29,7 +29,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyBoolean("ForceOrder", false);
         $this->RegisterPropertyBoolean("IncludeTunein", "");
         $this->RegisterPropertyString("FavoriteStation", "");
-        $this->RegisterPropertyString("WebFrontStations", "");
+        $this->RegisterPropertyString("WebFrontStations", "");25FC
         $this->RegisterPropertyString("RINCON", "");
        
     }
@@ -56,12 +56,12 @@ class Sonos extends IPSModule
                         
         
         // Start create profiles
-        $this->RegisterProfileIntegerEx("Status.SONOS", "Information", "", "",   Array( Array(0, "&#9194;",       "", -1),
-                                                                                        Array(1, "&#9658;",       "", -1),
-                                                                                        Array(2, "&#10074;&#10074;",      "", -1),
-                                                                                        Array(3, "&#9724;",       "", -1),
-                                                                                        Array(4, "&#9193;",       "", -1),
-                                                                                        Array(5, "&#8904;", "", -1) ));
+        $this->RegisterProfileIntegerEx("Status.SONOS", "Information", "", "",   Array( Array(0, "⏪",       "", -1),
+                                                                                        Array(1, "►",       "", -1),
+                                                                                        Array(2, "❚❚",       "", -1),
+                                                                                        Array(3, "◼",       "", -1),
+                                                                                        Array(4, "◼",       "", -1),
+                                                                                        Array(5, "⌛",       "", -1) ));
         $this->RegisterProfileIntegerEx("PlayMode.SONOS", "Information", "", "",   Array( Array(0, "Normal",             "", -1),
                                                                                           Array(1, "Repeat all",         "", -1),
                                                                                           Array(2, "Repeat one",         "", -1),
