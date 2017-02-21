@@ -29,7 +29,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyBoolean("ForceOrder", false);
         $this->RegisterPropertyBoolean("IncludeTunein", "");
         $this->RegisterPropertyString("FavoriteStation", "");
-        $this->RegisterPropertyString("WebFrontStations", "");25FC
+        $this->RegisterPropertyString("WebFrontStations", "");
         $this->RegisterPropertyString("RINCON", "");
        
     }
