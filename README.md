@@ -41,9 +41,9 @@ Audiodateien von einem Samba-Share (z.B. Synology) oder HTTP Server abspielen un
 ### Installation in IPS 4.x
 Füge im "Module Control" (Kern Instanzen->Modules) die URL "git://github.com/tkugelberg/SymconSonos.git" hinzu.  
 Danach ist es möglich eine neue Sonos Instanz zu erstellen:
-![Instanz erstellen](docu/create_instance.png?raw=true "Instanz erstellen")
+![Instanz erstellen](imgs/create_instance.png?raw=true "Instanz erstellen")
 ### Konfiguration
-![Instanz konfigurieren](docu/instance_config.png?raw=true "Instanz konfigurieren")
+![Instanz konfigurieren](imgs/instance_config.png?raw=true "Instanz konfigurieren")
 -  IP-Address/Host:  
 Adresse unter der die Sonos Instanz erreichbar ist.Hierbei kann es sich um eine IP oder einen Hostnamen handeln.  
 Wenn die Einstellungen gespeichert werden wird überprüft ob die Adresse erreichbar ist.
@@ -284,9 +284,9 @@ Sie enthält den Titel des aktuell abgespielten Titels und wird von dem Script _
 - Details
 Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
 Dies ist eine HTMLBox die das Cover, den Titel den Künster, das Album und Positionsinfos anzeigt:  
-![Details Song](docu/details_song.png?raw=true "Details song")
+![Details Song](imgs/details_song.png?raw=true "Details song")
 Wenn gerade ein Sender gestreamt wird, sind nur ContenStram und Titel enthalten:  
-![Details Radio](docu/details_radio.png?raw=true "Details Radio")
+![Details Radio](imgs/details_radio.png?raw=true "Details Radio")
 
 
 
