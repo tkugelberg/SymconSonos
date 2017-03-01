@@ -27,7 +27,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyInteger("PlaylistImport", 0);
         $this->RegisterPropertyBoolean("DetailedInformation", false);
         $this->RegisterPropertyBoolean("ForceOrder", false);
-        $this->RegisterPropertyBoolean("IncludeTunein", "");
+        $this->RegisterPropertyBoolean("IncludeTunein", false);
         $this->RegisterPropertyString("FavoriteStation", "");
         $this->RegisterPropertyString("WebFrontStations", "");
         $this->RegisterPropertyString("RINCON", "");
@@ -259,7 +259,7 @@ class Sonos extends IPSModule
         }
 
         IPS_SetHidden($statusScriptID,true);
-        IPS_SetScriptTimer($statusScriptID, $this->ReadPropertyString("UpdateStatusFrequency")); 
+        IPS_SetScriptTimer($statusScriptID, $this->ReadPropertyInteger("UpdateStatusFrequency"));
 
         // 2) _updateGrouping
         $groupingScriptID = @$this->GetIDForIdent("_updateGrouping");
@@ -270,7 +270,7 @@ class Sonos extends IPSModule
         }
 
         IPS_SetHidden($groupingScriptID,true);
-        IPS_SetScriptTimer($groupingScriptID, $this->ReadPropertyString("UpdateGroupingFrequency")); 
+        IPS_SetScriptTimer($groupingScriptID, $this->ReadPropertyInteger("UpdateGroupingFrequency"));
 
         // End add scripts for regular status and grouping updates
 
@@ -507,7 +507,7 @@ class Sonos extends IPSModule
     
         foreach ($instances as $instanceID => &$settings){
              $ip      = IPS_GetProperty($instanceID ,"IPAddress");
-             $timeout = $this->ReadPropertyString("TimeOut");
+             $timeout = $this->ReadPropertyInteger("TimeOut");
              if ($timeout && Sys_Ping($ip, $timeout) != true){
                  if (Sys_Ping($ip, $timeout) != true){
                      $settings["available"] = false;
@@ -980,7 +980,7 @@ class Sonos extends IPSModule
             }
         }
        
-        if ($this->ReadPropertyString("IncludeTunein") && $Value < 33){
+        if ($this->ReadPropertyBoolean("IncludeTunein") && $Value < 33){
             $ip = $this->getIP();
 
             include_once(__DIR__ . "/sonosAccess.php");
@@ -1121,7 +1121,7 @@ class Sonos extends IPSModule
 
     protected function getIP(){
         $ip      = $this->ReadPropertyString("IPAddress");
-        $timeout = $this->ReadPropertyString("TimeOut");
+        $timeout = $this->ReadPropertyInteger("TimeOut");
 
         if ($timeout && Sys_Ping($ip, $timeout) != true){
            if (Sys_Ping($ip, $timeout)!= true){
