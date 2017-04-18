@@ -37,9 +37,11 @@ class Sonos extends IPSModule
     public function ApplyChanges()
     {
         $ipAddress = $this->ReadPropertyString("IPAddress");
+		$timeout   = $this->ReadPropertyInteger("TimeOut");
         if ($ipAddress){
             $curl = curl_init();
             curl_setopt_array($curl, array( CURLOPT_RETURNTRANSFER => 1,
+			                                CURLOPT_CONNECTTIMEOUT_MS => $timeout,
                                             CURLOPT_URL => 'http://'.$ipAddress.':1400/xml/device_description.xml' ));
 
             if(!curl_exec($curl))  die('Error: "' . curl_error($curl) . '" - Code: ' . curl_errno($curl));
@@ -287,6 +289,36 @@ class Sonos extends IPSModule
     /**
     * Start of Module functions
     */
+	
+	public function alexaResponse( )
+	{
+      $response = [];
+      
+      alexa_get_value('Coordinator',   'bool'           , $response);
+      alexa_get_value('GroupMembers',  'instance_names' , $response);
+      alexa_get_value('MemberOfGroup', 'fromatted'      , $response);
+      alexa_get_value('GroupVolume',   'fromatted'      , $response);
+      alexa_get_value('ContentStream', 'string'         , $response);
+      alexa_get_value('Artist',        'string'         , $response);
+      alexa_get_value('Title',         'string'         , $response);
+      alexa_get_value('Album',         'string'         , $response);
+      alexa_get_value('TrackDuration', 'string'         , $response);
+      alexa_get_value('Position',      'string'         , $response);
+      alexa_get_value('nowPlaying',    'string'         , $response);
+      alexa_get_value('Radio',         'fromatted'      , $response);
+      alexa_get_value('Status',        'fromatted'      , $response);
+      alexa_get_value('Volume',        'fromatted'      , $response);
+      alexa_get_value('Mute',          'fromatted'      , $response);
+      alexa_get_value('Loudness',      'fromatted'      , $response);
+      alexa_get_value('Bass',          'fromatted'      , $response);
+      alexa_get_value('Treble',        'fromatted'      , $response);
+      alexa_get_value('Balance',       'fromatted'      , $response);
+      alexa_get_value('Sleeptimer',    'string'         , $response);
+      alexa_get_value('PlayMode',      'fromatted'      , $response);
+      alexa_get_value('Crossfade',     'fromatted'      , $response);		
+	  
+	  return $response;
+	}
 
     public function ChangeGroupVolume($increment)
     {
@@ -1172,6 +1204,41 @@ class Sonos extends IPSModule
             $this->UnregisterVariable($name);
         }
     }
+	
+    protected function alexa_get_value($variableName, $type, &$response ){
+      $vid = @$this->GetIDForIdent($variableName);
+      if($vid){
+        switch($type){
+    		case 'string':
+    		  $response[$variableName] = strval(GetValue($vid));
+    		  break;
+    		case 'bool':
+    		  $boolean = GetValueBoolean($vid);
+    		    if($boolean){
+                  $response[$variableName] = "true";
+                }else{
+                  $response[$variableName] = "false";
+                }
+    		  break;
+    		case 'fromatted':
+    		  $response[$variableName] = GetValueFormatted($vid);
+    		  break;
+    		case 'instance_names':
+              foreach( explode(",", GetValueString($vid) ) as $key=>$instanceID ){
+                if($instanceID == 0){
+    	          $name_array[] = 'none';
+    	        }else{
+    	          $name_array[] = IPS_GetName($instanceID);
+    	        }
+              }
+    		
+    		  $response[$variableName] = join(",", $name_array);
+    		  break;
+    	}
+      }else{
+    	$response[$variableName] = "not configured";
+      }
+    }	
 
     //Remove on next Symcon update
     protected function RegisterProfileInteger($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, $StepSize) {
