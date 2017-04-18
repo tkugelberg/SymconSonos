@@ -320,7 +320,7 @@ class Sonos extends IPSModule
 	  return $response;
 	}
 
-    public function ChangeGroupVolume($increment)
+    public function ChangeGroupVolume(int $increment)
     {
         if (!@GetValueBoolean($this->GetIDForIdent("Coordinator"))) die("This function is only allowed for Coordinators");
 
@@ -350,7 +350,7 @@ class Sonos extends IPSModule
         SetValueInteger(IPS_GetObjectIDByName("GroupVolume", $this->InstanceID), intval(round($GroupVolume / sizeof($groupMembersArray))));
     }
 
-    public function ChangeVolume($increment)
+    public function ChangeVolume(int $increment)
     {
         $newVolume = (GetValueInteger($this->GetIDForIdent("Volume")) + $increment);
         try{
@@ -417,7 +417,7 @@ class Sonos extends IPSModule
         }
     }
 
-    public function PlayFiles(array $files, $volumeChange)
+    public function PlayFiles(array $files, string $volumeChange)
     {
         $ip = $this->getIP();
 
@@ -509,7 +509,7 @@ class Sonos extends IPSModule
         }
     }
 
-    public function PlayFilesGrouping(array $instances, array $files, $volumeChange)
+    public function PlayFilesGrouping(array $instances, array $files, string $volumeChange)
     {
         $ip = $this->getIP();
 
@@ -609,7 +609,7 @@ class Sonos extends IPSModule
         }
     }
     
-    public function RampToVolume($rampType,$volume)
+    public function RampToVolume(string $rampType,int $volume)
     {
         $ip = $this->getIP();
 
@@ -618,7 +618,7 @@ class Sonos extends IPSModule
         (new SonosAccess($ip))->RampToVolume($rampType,$volume);
     }
 
-    public function SetAnalogInput($input_instance)
+    public function SetAnalogInput(int $input_instance)
     {
         $ip = $this->getIP();
 
@@ -631,7 +631,7 @@ class Sonos extends IPSModule
         $sonos->SetAVTransportURI("x-rincon-stream:".IPS_GetProperty($input_instance ,"RINCON"));
     }
 
-    public function SetBalance($balance)	
+    public function SetBalance(int $balance)	
     {
         $ip = $this->getIP();
 
@@ -650,7 +650,7 @@ class Sonos extends IPSModule
         if (!$this->ReadPropertyBoolean("BalanceControl")) SetValue($this->GetIDForIdent("Balance"), $balance);
     }
     
-    public function SetBass($bass)
+    public function SetBass(int $bass)
     {
         $ip = $this->getIP();
 
@@ -659,7 +659,7 @@ class Sonos extends IPSModule
         if (!$this->ReadPropertyBoolean("BassControl")) SetValue($this->GetIDForIdent("Bass"), $bass);
     }
 
-    public function SetCrossfade($crossfade)
+    public function SetCrossfade(bool $crossfade)
     {
         $targetInstance = $this->findTarget();
       
@@ -705,7 +705,7 @@ class Sonos extends IPSModule
         }catch(Exception $e){throw $e;}
     }
     
-    public function SetGroup($groupCoordinator)
+    public function SetGroup(int $groupCoordinator)
     {
         // Instance has Memners, do nothing
         if(@GetValueString($this->GetIDForIdent("GroupMembers"))) return;
@@ -777,14 +777,14 @@ class Sonos extends IPSModule
         (new SonosAccess($ip))->SetAVTransportURI($uri);
     }
 
-    public function SetGroupVolume($volume)
+    public function SetGroupVolume(int $volume)
     {
         if (!@GetValueBoolean($this->GetIDForIdent("Coordinator"))) die("This function is only allowed for Coordinators");
 
         $this->ChangeGroupVolume($volume - GetValue($this->GetIDForIdent("GroupVolume")));
     }
 
-    public function SetLoudness($loudness)
+    public function SetLoudness(bool $loudness)
     {
         $ip = $this->getIP();
  
@@ -793,7 +793,7 @@ class Sonos extends IPSModule
         if ($this->ReadPropertyBoolean("LoudnessControl")) SetValue($this->GetIDForIdent("Loudness"), $loudness);
     }
 
-    public function SetMute($mute)
+    public function SetMute(bool $mute)
     {
         $ip = $this->getIP();
 
@@ -802,7 +802,7 @@ class Sonos extends IPSModule
         if ($this->ReadPropertyBoolean("MuteControl")) SetValue($this->GetIDForIdent("Mute"), $mute);
     }
     
-    public function SetPlaylist($name)
+    public function SetPlaylist(string $name)
     {
         $ip = $this->getIP();
 
@@ -838,7 +838,7 @@ class Sonos extends IPSModule
 
     }
 
-    public function SetPlayMode($playMode)
+    public function SetPlayMode(int $playMode)
     {
         $targetInstance = $this->findTarget();
       
@@ -858,7 +858,7 @@ class Sonos extends IPSModule
         $this->SetRadio($this->ReadPropertyString("FavoriteStation"));
     }
     
-    public function SetRadio($radio)
+    public function SetRadio(string $radio)
     {
         $ip = $this->getIP();
 
@@ -888,7 +888,7 @@ class Sonos extends IPSModule
         $sonos->SetRadio($uri, $radio);
     }
     
-    public function SetSleepTimer($minutes)
+    public function SetSleepTimer(int $minutes)
     {
         $targetInstance = $this->findTarget();
 
@@ -909,7 +909,7 @@ class Sonos extends IPSModule
         }
     }
 
-    public function SetSpdifInput($input_instance)
+    public function SetSpdifInput(int $input_instance)
     {
         $ip = $this->getIP();
 
@@ -922,7 +922,7 @@ class Sonos extends IPSModule
         $sonos->SetAVTransportURI("x-sonos-htastream:".IPS_GetProperty($input_instance ,"RINCON").":spdif");
     }
 
-    public function SetTreble($treble)	
+    public function SetTreble(int $treble)	
     {
         $ip = $this->getIP();
 
@@ -931,7 +931,7 @@ class Sonos extends IPSModule
         if (!$this->ReadPropertyBoolean("TrebleControl")) SetValue($this->GetIDForIdent("Treble"), $treble);
     }
     
-    public function SetVolume($volume)
+    public function SetVolume(int $volume)
     {
         $ip = $this->getIP();
 
