@@ -294,28 +294,28 @@ class Sonos extends IPSModule
 	{
       $response = [];
       
-      alexa_get_value('Coordinator',   'bool'           , $response);
-      alexa_get_value('GroupMembers',  'instance_names' , $response);
-      alexa_get_value('MemberOfGroup', 'fromatted'      , $response);
-      alexa_get_value('GroupVolume',   'fromatted'      , $response);
-      alexa_get_value('ContentStream', 'string'         , $response);
-      alexa_get_value('Artist',        'string'         , $response);
-      alexa_get_value('Title',         'string'         , $response);
-      alexa_get_value('Album',         'string'         , $response);
-      alexa_get_value('TrackDuration', 'string'         , $response);
-      alexa_get_value('Position',      'string'         , $response);
-      alexa_get_value('nowPlaying',    'string'         , $response);
-      alexa_get_value('Radio',         'fromatted'      , $response);
-      alexa_get_value('Status',        'fromatted'      , $response);
-      alexa_get_value('Volume',        'fromatted'      , $response);
-      alexa_get_value('Mute',          'fromatted'      , $response);
-      alexa_get_value('Loudness',      'fromatted'      , $response);
-      alexa_get_value('Bass',          'fromatted'      , $response);
-      alexa_get_value('Treble',        'fromatted'      , $response);
-      alexa_get_value('Balance',       'fromatted'      , $response);
-      alexa_get_value('Sleeptimer',    'string'         , $response);
-      alexa_get_value('PlayMode',      'fromatted'      , $response);
-      alexa_get_value('Crossfade',     'fromatted'      , $response);		
+      $this->alexa_get_value('Coordinator',   'bool'           , $response);
+      $this->alexa_get_value('GroupMembers',  'instance_names' , $response);
+      $this->alexa_get_value('MemberOfGroup', 'fromatted'      , $response);
+      $this->alexa_get_value('GroupVolume',   'fromatted'      , $response);
+      $this->alexa_get_value('ContentStream', 'string'         , $response);
+      $this->alexa_get_value('Artist',        'string'         , $response);
+      $this->alexa_get_value('Title',         'string'         , $response);
+      $this->alexa_get_value('Album',         'string'         , $response);
+      $this->alexa_get_value('TrackDuration', 'string'         , $response);
+      $this->alexa_get_value('Position',      'string'         , $response);
+      $this->alexa_get_value('nowPlaying',    'string'         , $response);
+      $this->alexa_get_value('Radio',         'fromatted'      , $response);
+      $this->alexa_get_value('Status',        'fromatted'      , $response);
+      $this->alexa_get_value('Volume',        'fromatted'      , $response);
+      $this->alexa_get_value('Mute',          'fromatted'      , $response);
+      $this->alexa_get_value('Loudness',      'fromatted'      , $response);
+      $this->alexa_get_value('Bass',          'fromatted'      , $response);
+      $this->alexa_get_value('Treble',        'fromatted'      , $response);
+      $this->alexa_get_value('Balance',       'fromatted'      , $response);
+      $this->alexa_get_value('Sleeptimer',    'string'         , $response);
+      $this->alexa_get_value('PlayMode',      'fromatted'      , $response);
+      $this->alexa_get_value('Crossfade',     'fromatted'      , $response);		
 	  
 	  return $response;
 	}
