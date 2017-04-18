@@ -2,6 +2,7 @@
 ### Version 1.5.3
 - Add timeout during Instance creation
 - add function alexaResponse( )
+- add type hints
 
 ### Version 1.5.2
 - UTF-8 for status buttons
