@@ -25,13 +25,12 @@ $topology = new SimpleXMLElement(file_get_contents('http://'.$ipAddress.':1400/s
 
 foreach($allSonosInstances as $key=>$SonosID) {
     $rincon = IPS_GetProperty($SonosID ,"RINCON");
+	$coordinatorInSonos = false;
     foreach ($topology->ZonePlayers->ZonePlayer as $zonePlayer){
         if($zonePlayer->attributes()['uuid'] == $rincon){
             $group       = (string)$zonePlayer->attributes()['group'];
             if((string)$zonePlayer->attributes()['coordinator'] === "true"){
                 $coordinatorInSonos = true;
-            }else{
-                $coordinatorInSonos = false;
             }
             break;
         }

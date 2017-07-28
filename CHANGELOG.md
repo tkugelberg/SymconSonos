@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.5.4
+- minor fix in _updateGrouping in case a Sonos Box is not known in IPS
+
 ### Version 1.5.3
 - Add timeout during Instance creation
 - add function alexaResponse( )
