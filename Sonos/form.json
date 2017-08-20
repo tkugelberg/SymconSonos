@@ -6,7 +6,7 @@
 		{ "name": "DefaultVolume",             "type": "NumberSpinner",     "caption": "Default volume (%)" },
                 { "type": "Label", "label": "RINCON will be filled automatically during save if it is initial. Update will only be visible when reopening form." },
                 { "name": "RINCON",                    "type": "ValidationTextBox", "caption": "RINCON" },
-                { "type": "Label", "label": "Update	frequency (s):" },
+                { "type": "Label", "label": "Update	frequency (seconds):" },
                 { "name": "UpdateStatusFrequency",     "type": "NumberSpinner",     "caption": "Status" },
                 { "name": "UpdateStatusFrequencyNA",   "type": "NumberSpinner",     "caption": "NA Status" },
                 { "name": "UpdateGroupingFrequency",   "type": "NumberSpinner",     "caption": "Grouping" },
