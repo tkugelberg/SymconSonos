@@ -1,0 +1,40 @@
+{
+	"translations": {
+		"de": { 
+			"IP-Address/Host": "IP-Adresse / Host",
+			"Maximal ping timeout":"Maximaler Ping Timeout",
+			"Default volume (%)":"Standard Lautstärke (%)",
+			"RINCON will be filled automatically during save if it is initial. Update will only be visible when reopening form.":"RINCON wird automatisch während dem Abspeichern initial ausgefüllt. Ein Update ist erst Sichtbar nachdem das Konfigurationsformular erneut geöffnet wurde.",
+			"RINCON":"RINCON",
+			"Update	frequency (s):":"Update	Frequenz (s):",
+			"Status":"Status",
+			"NA Status": "NA Status",
+			"Grouping": "Gruppen",
+			"NA Grouping": "NA Gruppen",
+			"Force grouping in Sonos": "Gruppieren in Sonos erzwingen",
+			"Enable Mute Control":"Mute Steuerung anzeigen",
+			"Enable Loudness Control":"Loudness Steuerung anzeigen",
+			"Enable Bass Control":"Bass Steuerung anzeigen",
+			"Enable Treble Control": "Höhen Steuerung anzeigen",
+			"Enable Balance Control":"Balance Steuerung anzeigen",
+			"Enable Sleeptimer Control": "Sleeptimer Steuerung anzeigen",
+			"Enable Playmode Control": "Playmode Steuerung anzeigen",
+			"Import Playlists": "Playlisten importieren",
+			"none": "keine",
+			"saved": "gespeicherte",
+			"imported": "importierte",
+			"saved & imported": "gespeicherte & importierte",
+			"Enable detailed info": "Detail Informationen anzeigen",
+			"Enable position info":"Song Position anzeigen",
+			"Enable media image for the cover":"MediaImage anlegen für Cover",
+			"Force Variable order": "Variablen Sortierung vorgeben",
+			"Settings for radio stations:": "Einstellungen für Radio Sender",
+			"Include TuneIn favorites": "TuneIn Favoriten einschließen",
+			"Favorite radio station": "Radio Stationen Favoriten",
+			"Stations in WebFront": "Radiostation im Webfront",
+			"Update Radio Stations": "Update Radio Stations",
+			"Update Playlists": "Update Playlists",
+			"Read RINCON from Sonos": "RINCON von Sonos auslesen"
+		}
+	}
+}

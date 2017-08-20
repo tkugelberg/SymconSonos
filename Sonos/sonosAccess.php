@@ -1,6 +1,6 @@
 <?php
 
-// SONOS Acces Handler
+// SONOS Access Handler
 // using PHO SoapClient
 
 class SonosAccess{

@@ -1,4 +1,8 @@
 <?
+require_once(__DIR__ . "/radio_stations.php");  // radio stations
+require_once(__DIR__ . "/sonosAccess.php");  // Sonos Access
+
+
 class Sonos extends IPSModule
 {
     
@@ -24,6 +28,8 @@ class Sonos extends IPSModule
         $this->RegisterPropertyBoolean("BalanceControl", false);
         $this->RegisterPropertyBoolean("SleeptimerControl", false);
         $this->RegisterPropertyBoolean("PlayModeControl", false);
+        $this->RegisterPropertyBoolean("Position", false);
+        $this->RegisterPropertyBoolean("MediaImage", false);
         $this->RegisterPropertyInteger("PlaylistImport", 0);
         $this->RegisterPropertyBoolean("DetailedInformation", false);
         $this->RegisterPropertyBoolean("ForceOrder", false);
@@ -31,6 +37,8 @@ class Sonos extends IPSModule
         $this->RegisterPropertyString("FavoriteStation", "");
         $this->RegisterPropertyString("WebFrontStations", "");
         $this->RegisterPropertyString("RINCON", "");
+        $this->RegisterTimer('SonosTimerUpdateStatus', 0, 'SNS_UpdateStatus('.$this->InstanceID.');');
+        $this->RegisterTimer('SonosTimerUpdateGrouping', 0, 'SNS_UpdateGrouping('.$this->InstanceID.');');
        
     }
     
@@ -75,6 +83,7 @@ class Sonos extends IPSModule
         $this->RegisterProfileInteger("Balance.SONOS",  "Intensity",   "", " %", -100, 100, 1);
         $this->RegisterProfileIntegerEx("Switch.SONOS", "Information", "",   "", Array( Array(0, "Off", "", 0xFF0000),
                                                                                         Array(1, "On",  "", 0x00FF00) ));
+        $this->RegisterProfileInteger("Position.SONOS",   "Intensity",   "", " %",    0, 100, 1);
         
         //Build Radio Station Associations according to user settings
         if(!IPS_VariableProfileExists("Radio.SONOS"))
@@ -123,6 +132,8 @@ class Sonos extends IPSModule
                              ('Sleeptimer')      => 60,
                              ('PlayMode')        => 61,
                              ('Crossfade')       => 62,
+                             ('Position')        => 70,
+                             ('MediaImage')      => 71,
                              ('_updateStatus')   => 98,
                              ('_updateGrouping') => 99
                            );
@@ -249,10 +260,34 @@ class Sonos extends IPSModule
             $this->removeVariableAction("StationID",     $links);
         }
 
+        //2j) Position
+        if ($this->ReadPropertyBoolean("Position")){
+            $this->RegisterVariableInteger("Position", "Position", "", $positions['Position']);
+        }else{
+            $this->removeVariable("Position", $links);
+        }
+
+        //2k) Media image for cover
+        if ($this->ReadPropertyBoolean("MediaImage")){
+            $this->CreateSonosMediaImage("SonosMediaImageCover", "Cover", $positions['MediaImage']);
+            //$this->RegisterVariableInteger("SonosMediaImageCover", "Cover", "", $positions['MediaImage']);
+        }else{
+            $this->removeMediaImage("SonosMediaImageCover", $links);
+        }
+
+
         // End Register variables and Actions
-        
+
+        // Set interval for timer for regular status and grouping updates
+        // 1) UpdateStatus
+        $this->SetTimerInterval("SonosTimerUpdateStatus", $this->ReadPropertyInteger("UpdateStatusFrequency"));
+
+        // 2) _updateGrouping
+        $this->SetTimerInterval("SonosTimerUpdateGrouping", $this->ReadPropertyInteger("UpdateGroupingFrequency"));
+
         // Start add scripts for regular status and grouping updates
         // 1) _updateStatus 
+        /* replaced intern function
         $statusScriptID = @$this->GetIDForIdent("_updateStatus");
         if ( $statusScriptID === false ){
           $statusScriptID = $this->RegisterScript("_updateStatus", "_updateStatus", file_get_contents(__DIR__ . "/_updateStatus.php"), $positions['_updateStatus']);
@@ -273,7 +308,7 @@ class Sonos extends IPSModule
 
         IPS_SetHidden($groupingScriptID,true);
         IPS_SetScriptTimer($groupingScriptID, $this->ReadPropertyInteger("UpdateGroupingFrequency"));
-
+        */
         // End add scripts for regular status and grouping updates
 
         // sorting
@@ -319,6 +354,355 @@ class Sonos extends IPSModule
 	  
 	  return $response;
 	}
+
+	protected function UpdateStatus()
+    {
+        $ip = $this->ReadPropertyString("IPAddress");
+		$timeout   = $this->ReadPropertyInteger("TimeOut");
+        $frequency             = $this->ReadPropertyInteger("UpdateStatusFrequency");
+        $frequencyNotAvailable = $this->ReadPropertyInteger("UpdateStatusFrequencyNA");
+
+        // Get all needed Variable IDs
+        $vidInstance      = $this->InstanceID;
+        $vidVolume        = @$this->GetIDForIdent("Volume");
+        $vidMute          = @$this->GetIDForIdent("Mute");
+        $vidLoudness      = @$this->GetIDForIdent("Loudness");
+        $vidBass          = @$this->GetIDForIdent("Bass");
+        $vidTreble        = @$this->GetIDForIdent("Treble");
+        $vidBalance       = @$this->GetIDForIdent("Balance");
+        $vidMemberOfGroup = @$this->GetIDForIdent("MemberOfGroup");
+        $vidStatus        = @$this->GetIDForIdent("Status");
+        $vidRadio         = @$this->GetIDForIdent("Radio");
+        $vidSleeptimer    = @$this->GetIDForIdent("Sleeptimer");
+        $vidNowPlaying    = @$this->GetIDForIdent("nowPlaying");
+        $vidGroupMembers  = @$this->GetIDForIdent("GroupMembers");
+        $vidDetails       = @$this->GetIDForIdent("Details");
+        $vidCoverURL      = @$this->GetIDForIdent("CoverURL");
+        $vidStationID     = @$this->GetIDForIdent("StationID");
+        $vidContentStream = @$this->GetIDForIdent("ContentStream");
+        $vidArtist        = @$this->GetIDForIdent("Artist");
+        $vidTitle         = @$this->GetIDForIdent("Title");
+        $vidAlbum         = @$this->GetIDForIdent("Album");
+        $vidTrackDuration = @$this->GetIDForIdent("TrackDuration");
+        $vidPosition      = @$this->GetIDForIdent("Position");
+
+        // If the Sonos instance is not available update of grouping makes no sense
+        if ( $timeout && Sys_Ping($ip, $timeout) == false )
+        {
+            $this->SetTimerInterval("SonosTimerUpdateStatus", $frequencyNotAvailable);
+            die('Sonos instance '.$ip.' is not available');
+        }
+
+        $this->SetTimerInterval("SonosTimerUpdateStatus", $frequency);
+
+        $sonos = new SonosAccess($ip);
+
+        $status = $sonos->GetTransportInfo();
+
+        SetValueInteger($vidVolume, $sonos->GetVolume());
+        if($vidMute)     SetValueInteger($vidMute,     $sonos->GetMute()     );
+        if($vidLoudness) SetValueInteger($vidLoudness, $sonos->GetLoudness() );
+        if($vidBass)     SetValueInteger($vidBass,     $sonos->GetBass()     );
+        if($vidTreble)   SetValueInteger($vidTreble,   $sonos->GetTreble()   );
+        if($vidBalance){
+            $leftVolume  = $sonos->GetVolume("LF");
+            $rightVolume = $sonos->GetVolume("RF");
+
+            if ( $leftVolume == $rightVolume ){
+                SetValueInteger($vidBalance, 0);
+            }elseif ( $leftVolume > $rightVolume ){
+                SetValueInteger($vidBalance, $rightVolume - 100 );
+            }else{
+                SetValueInteger($vidBalance, 100 - $leftVolume );
+            }
+        }
+
+        $MemberOfGroup = 0;
+        if($vidMemberOfGroup) $MemberOfGroup = GetValueInteger($vidMemberOfGroup);
+
+        if ($MemberOfGroup){
+            // If Sonos is member of a group, use values of Group Coordinator
+            SetValueInteger($vidStatus, GetValueInteger(IPS_GetObjectIDByName("Status", $MemberOfGroup)));
+            $actuallyPlaying = GetValueString(IPS_GetObjectIDByName("nowPlaying", $MemberOfGroup));
+            SetValueInteger($vidRadio, GetValueInteger(IPS_GetObjectIDByName("Radio", $MemberOfGroup)));
+            if($vidSleeptimer)    SetValueInteger($vidSleeptimer,   @GetValueInteger(IPS_GetObjectIDByName("Sleeptimer", $MemberOfGroup)));
+            if($vidCoverURL)      SetValueString($vidCoverURL,      @GetValueString(IPS_GetObjectIDByName("CoverURL", $MemberOfGroup)));
+            if($vidContentStream) SetValueString($vidContentStream, @GetValueString(IPS_GetObjectIDByName("ContentStream", $MemberOfGroup)));
+            if($vidArtist)        SetValueString($vidArtist,        @GetValueString(IPS_GetObjectIDByName("Artist", $MemberOfGroup)));
+            if($vidAlbum)         SetValueString($vidAlbum,         @GetValueString(IPS_GetObjectIDByName("Album", $MemberOfGroup)));
+            if($vidTrackDuration) SetValueString($vidTrackDuration, @GetValueString(IPS_GetObjectIDByName("TrackDuration", $MemberOfGroup)));
+            if($vidPosition)      SetValueString($vidPosition,      @GetValueString(IPS_GetObjectIDByName("Position", $MemberOfGroup)));
+            if($vidTitle)         SetValueString($vidTitle,         @GetValueString(IPS_GetObjectIDByName("Title", $MemberOfGroup)));
+            if($vidDetails)       SetValueString($vidDetails,       @GetValueString(IPS_GetObjectIDByName("Details", $MemberOfGroup)));
+        }else{
+            SetValueInteger($vidStatus, $status);
+            // Titelanzeige
+            $currentStation = 0;
+
+            if ( $status <> 1 ){
+                // No title if not playing
+                $actuallyPlaying = "";
+            }else{
+                $positionInfo = $sonos->GetPositionInfo();
+                $mediaInfo    = $sonos->GetMediaInfo();
+
+                if ($positionInfo["streamContent"]){
+                    $actuallyPlaying = $positionInfo["streamContent"];
+                } else {
+                    $actuallyPlaying = $positionInfo["title"]." | ".$positionInfo["artist"];
+                }
+
+                // start find current Radio in VariableProfile
+                $ListRadiostations = new RadioStations();
+                $radioStations     = $ListRadiostations->get_available_stations();
+                $playingRadioStation = '';
+                foreach ($radioStations as $radioStation) {
+                    if($radioStation["url"] == htmlspecialchars_decode($mediaInfo["CurrentURI"])){
+                        $playingRadioStation = $radioStation["name"];
+                        $image               = $radioStation["logo"];
+                        break;
+                    }
+                }
+
+                if( $playingRadioStation == ''){
+                    foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('R:0/0')['Result']))->item as $item) {
+                        if ($item->res == htmlspecialchars_decode($mediaInfo["CurrentURI"])){
+                            $playingRadioStation = (string)$item->xpath('dc:title')[0];
+                            break;
+                        }
+                    }
+                }
+
+                $Associations = IPS_GetVariableProfile("Radio.SONOS")["Associations"];
+                if(isset($playingRadioStation)){
+                    foreach($Associations as $key=>$station) {
+                        if( $station["Name"] == $playingRadioStation ){
+                            $currentStation = $station["Value"];
+                            break;
+                        }
+                    }
+                }
+                // end find current Radio in VariableProfile
+            }
+            SetValueInteger($vidRadio, $currentStation);
+
+            // detailed Information
+            if($vidContentStream)   SetValueString($vidContentStream, @$positionInfo['streamContent']);
+            if($vidArtist)          SetValueString($vidArtist,        @$positionInfo['artist']);
+            if($vidAlbum)           SetValueString($vidAlbum,         @$positionInfo['album']);
+            if($vidTrackDuration)   SetValueString($vidTrackDuration, @$positionInfo['TrackDuration'] );
+            if($vidPosition)        SetValueString($vidPosition,      @$positionInfo['RelTime']);
+            if($vidTitle){
+                if(@$mediaInfo['title']){
+                    SetValueString($vidTitle, @$mediaInfo['title']);
+                }else{
+                    SetValueString($vidTitle, @$positionInfo['title']);
+                }
+            }
+            if($vidDetails){
+                if (!isset($stationID)) $stationID = "";
+                if(isset($positionInfo)){
+                    // SPDIF and analog
+                    if(preg_match('/^RINCON_/', $mediaInfo['title']) ){
+                        $detailHTML = "";
+                        // Radio or stream(?)
+                    }elseif($mediaInfo['title']){
+                        // get stationID if playing via TuneIn
+                        $stationID = preg_replace("#(.*)x-sonosapi-stream:(.*?)\?sid(.*)#is",'$2',$mediaInfo['CurrentURI']);
+                        if (!isset($image)) $image = "";
+                        if($stationID && $stationID[0]=="s"){
+                            if(@GetValueString($vidStationID) == $stationID){
+                                $image = GetValueString($vidCoverURL);
+                            }else{
+                                $serial = substr($this->ReadPropertyString("RINCON"), 7,12);
+                                $image = preg_replace('#(.*)<LOGO>(.*?)\</LOGO>(.*)#is','$2',@file_get_contents("http://opml.radiotime.com/Describe.ashx?c=nowplaying&id=".$stationID."&partnerId=IAeIhU42&serial=".$serial));
+                            }
+                            $this->RefreshMediaImage($image);
+                        }else{
+                            $stationID = "";
+                        }
+                        $detailHTML =   "<table width=\"100%\">
+                          <tr>
+                            <td>
+                              <div style=\"text-align: right;\">
+                                <div><b>".$positionInfo['streamContent']."</b></div>
+                                <div>&nbsp;</div>
+                                <div>".$mediaInfo['title']."</div>
+                              </div>
+                            </td>";
+
+                        if(strlen($image) > 0) {
+                            $detailHTML .= "<td width=\"170px\" valign=\"top\">
+                              <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0px; margin-bottom: 10px;\">
+                              	<img src=\"".@$image."\" style=\"max-width: 170px; max-height: 170px; -webkit-box-reflect: below 0 -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.88, transparent), to(rgba(255, 255, 255, 0.5))); transform: rotateY(-10deg) translateZ(-35px);\">
+                              </div>
+                            </td>";
+                        }
+
+                        $detailHTML .= "</tr>
+                        </table>";
+
+                        // normal files
+                    }else{
+                        $durationSeconds        = 0;
+                        $currentPositionSeconds = 0;
+                        if($positionInfo['TrackDuration'] && preg_match('/\d+:\d+:\d+/', $positionInfo['TrackDuration']) ){
+                            $durationArray          = explode(":",$positionInfo['TrackDuration']);
+                            $currentPositionArray   = explode(":",$positionInfo['RelTime']);
+                            $durationSeconds        = $durationArray[0]*3600+$durationArray[1]*60+$durationArray[2];
+                            $currentPositionSeconds = $currentPositionArray[0]*3600+$currentPositionArray[1]*60+$currentPositionArray[2];
+                        }
+                        $detailHTML =   "<table width=\"100%\">
+                          <tr>
+                            <td>
+                              <div style=\"text-align: right;\">
+                                <div><b>".$positionInfo['title']."</b></div>
+                                <div>&nbsp;</div>
+                                <div>".$positionInfo['artist']."</div>
+                                <div>".$positionInfo['album']."</div>
+                                <div>&nbsp;</div>
+                                <div>".$positionInfo['RelTime']." / ".$positionInfo['TrackDuration']."</div>
+                              </div>
+                            </td>";
+
+                        if(isset($positionInfo['albumArtURI'])) {
+                            $detailHTML .= "<td width=\"170px\" valign=\"top\">
+                              <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0px; margin-bottom: 10px;\">
+                              	<img src=\"".@$positionInfo['albumArtURI']."\" style=\"max-width: 170px; max-height: 170px; -webkit-box-reflect: below 0 -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.88, transparent), to(rgba(255, 255, 255, 0.5))); transform: rotateY(-10deg) translateZ(-35px);\">
+                              </div>
+                            </td>";
+                        }
+
+                        $detailHTML .= "</tr>
+                        </table>";
+                    }
+                }
+                @SetValueString($vidDetails, $detailHTML);
+                if($vidCoverURL){
+                    if((isset($image)) && (strlen($image) > 0)) {
+                        SetValueString($vidCoverURL, $image);
+                    }else{
+                        SetValueString($vidCoverURL, @$positionInfo['albumArtURI']);
+                    }
+                }
+                SetValueString($vidStationID,$stationID);
+            }
+
+            // Sleeptimer
+            if ($vidSleeptimer){
+                $sleeptimer = $sonos->GetSleeptimer();
+                if($sleeptimer){
+                    $SleeptimerArray = explode(":",$sonos->GetSleeptimer());
+
+                    $SleeptimerMinutes = $SleeptimerArray[0]*60+$SleeptimerArray[1];
+                    if($SleeptimerArray[2])
+                        $SleeptimerMinutes = $SleeptimerMinutes + 1;
+                }else{
+                    $SleeptimerMinutes = 0;
+                }
+
+                SetValueInteger($vidSleeptimer, $SleeptimerMinutes);
+            }
+        }
+
+        $nowPlaying   = GetValueString($vidNowPlaying);
+        if ($actuallyPlaying <> $nowPlaying)
+            SetValueString($vidNowPlaying, $actuallyPlaying);
+
+        // Set Group Volume
+        $groupMembers        = GetValueString($vidGroupMembers);
+        $groupMembersArray   = Array();
+        if($groupMembers)
+            $groupMembersArray = array_map("intval", explode(",",$groupMembers));
+        $groupMembersArray[] = $vidInstance;
+
+        $GroupVolume = 0;
+        foreach($groupMembersArray as $key=>$ID) {
+            $GroupVolume += GetValueInteger(IPS_GetObjectIDByName("Volume", $ID));
+        }
+
+        SetValueInteger($this->GetIDForIdent("GroupVolume"), intval(round($GroupVolume / sizeof($groupMembersArray))));
+
+    }
+
+    protected function UpdateGrouping()
+    {
+        $sonosInstanceID       = $this->InstanceID;
+        $memberOfGoup          = GetValueInteger($this->GetIDForIdent("MemberOfGroup"));
+        $coordinatorInIPS      = GetValueBoolean($this->GetIDForIdent("Coordinator"));
+        $forceGrouping         = $this->ReadPropertyBoolean("GroupForcing");
+        $ipAddress = $this->ReadPropertyString("IPAddress");
+        $timeout   = $this->ReadPropertyInteger("TimeOut");
+        $frequency             = $this->ReadPropertyInteger("UpdateGroupingFrequency");
+        $frequencyNotAvailable = $this->ReadPropertyInteger("UpdateGroupingFrequencyNA");
+        $rinconMapping         = Array();
+        $allSonosInstances     = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
+
+        // If the Sonos instance is not available update of grouping makes no sense
+        if ( $timeout && Sys_Ping($ipAddress, $timeout) == false ){
+            // If the Box is not available, only ask every 15 Minutes...
+            $this->SetTimerInterval("SonosTimerUpdateGrouping", $frequencyNotAvailable);
+            die('Sonos instance '.$ipAddress.' is not available');
+        }
+
+        // If box is available reset to 120 Seconds interval
+        $this->SetTimerInterval("SonosTimerUpdateGrouping", $frequency);
+
+        $topology = new SimpleXMLElement(file_get_contents('http://'.$ipAddress.':1400/status/topology'));
+
+        foreach($allSonosInstances as $key=>$SonosID) {
+            $rincon = IPS_GetProperty($SonosID ,"RINCON");
+            $coordinatorInSonos = false;
+            foreach ($topology->ZonePlayers->ZonePlayer as $zonePlayer){
+                if($zonePlayer->attributes()['uuid'] == $rincon){
+                    $group       = (string)$zonePlayer->attributes()['group'];
+                    if((string)$zonePlayer->attributes()['coordinator'] === "true"){
+                        $coordinatorInSonos = true;
+                    }
+                    break;
+                }
+            }
+            $instance = Array( ("ID")          => $SonosID,
+                ("RINCON")      => $rincon,
+                ("COORDINATOR") => $coordinatorInSonos,
+                ("GROUP")       => $group  );
+            $rinconMapping[] = $instance;
+            if($SonosID === $sonosInstanceID){
+                $mySettings       = $instance;
+                if($memberOfGoup === 0) $MemberOfGroupIPS = $instance;
+            }
+            if($SonosID === $memberOfGoup){
+                $MemberOfGroupIPS = $instance;
+            }
+        }
+
+        foreach($rinconMapping as $key=>$instance){
+            if( $instance['GROUP'] === $mySettings['GROUP'] && $instance['COORDINATOR'] == true){
+                $MemberOfGroupSonos = $instance;
+                break;
+            }
+        }
+
+        if(!isset($MemberOfGroupSonos))
+            die ("Coordinator Instance for Group of Sonos Instance ".$sonosInstanceID." not found");
+
+        if($MemberOfGroupIPS['ID'] != $MemberOfGroupSonos['ID']){
+            if($forceGrouping){
+                $groupToSet = $MemberOfGroupIPS['ID'];
+            }else{
+                $groupToSet = $MemberOfGroupSonos['ID'];
+            }
+            SNS_SetGroup($sonosInstanceID,$groupToSet);
+        }elseif($mySettings['COORDINATOR'] != $coordinatorInIPS){
+            if(!$mySettings['COORDINATOR']){
+                SetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID),false);
+                @IPS_SetVariableProfileAssociation("Groups.SONOS", $sonosInstanceID, "", "", -1);
+            }else{
+                SetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID),true);
+                @IPS_SetVariableProfileAssociation("Groups.SONOS", $sonosInstanceID, IPS_GetName($sonosInstanceID), "", -1);
+            }
+        }
+    }
 
     public function ChangeGroupVolume(int $increment)
     {
@@ -993,7 +1377,8 @@ class Sonos extends IPSModule
     {
         include_once(__DIR__ . "/radio_stations.php");
         $Associations          = Array();
-        $AvailableStations     = get_available_stations();
+        $radiostations = new RadioStations();
+        $AvailableStations     = $radiostations->get_available_stations();
         $WebFrontStations      = $this->ReadPropertyString("WebFrontStations");
         $WebFrontStationsArray = array_map("trim", explode(",", $WebFrontStations));
         $FavoriteStation       = $this->ReadPropertyString("FavoriteStation");
@@ -1174,6 +1559,38 @@ class Sonos extends IPSModule
         die("Instance is not a coordinator and group coordinator could not be determined");
     }
 
+    protected function CreateSonosMediaImage($ident, $name, $position)
+    {
+        $details = GetValue($this->GetIDForIdent("Details")); // Detail Variable des Sonos Players
+        $picurlstart = strpos($details, '<img src="');
+        $picurlend = strpos($details, '" style="max-width: 170px; max-height: 170px; -webkit-box-reflect');
+        $picurllength = $picurlend - ($picurlstart+10);
+        $picurl = substr($details, ($picurlstart+10), ($picurllength));
+        $Content = file_get_contents($picurl);
+        $MediaID = IPS_CreateMedia(1);                  // Image im MedienPool anlegen
+        IPS_SetParent($MediaID, $this->InstanceID); // Medienobjekt einsortieren unter der Sonos Instanz
+        IPS_SetIdent ($MediaID, $ident);
+        IPS_SetPosition($MediaID, $position);
+        IPS_SetMediaCached($MediaID, true);
+        // Das Cachen für das Mediaobjekt wird aktiviert.
+        // Beim ersten Zugriff wird dieses von der Festplatte ausgelesen
+        // und zukünftig nur noch im Arbeitsspeicher verarbeitet.
+        $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR."sonoscover".$name.".jpg";  // Image-Datei
+        IPS_SetMediaFile($MediaID, $ImageFile, False);    // Image im MedienPool mit Image-Datei verbinden
+        IPS_SetName($MediaID, $name); // Medienobjekt benennen
+        IPS_SetInfo ($MediaID, $name);
+        IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
+        IPS_SendMediaEvent($MediaID); //aktualisieren
+    }
+
+    protected function RefreshMediaImage($picurl)
+    {
+        $Content = Sys_GetURLContent($picurl);
+        $MediaID = $this->GetIDForIdent("SonosMediaImageCover");
+        IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
+        IPS_SendMediaEvent($MediaID); //aktualisieren
+    }
+
     protected function removeVariable($name, $links){
         $vid = @$this->GetIDForIdent($name);
         if ($vid){
@@ -1202,6 +1619,23 @@ class Sonos extends IPSModule
             }
             $this->DisableAction($name);
             $this->UnregisterVariable($name);
+        }
+    }
+
+    protected function removeMediaImage($name, $links)
+    {
+        $MediaID = @$this->GetIDForIdent($name);
+        if ($MediaID){
+            // delete links to MediaImage
+            foreach( $links as $key=>$value ){
+                if ( $value['TargetID'] === $MediaID )
+                    IPS_DeleteLink($value['LinkID']);
+            }
+            foreach(IPS_GetChildrenIDs($MediaID) as $key=>$cid){
+                if(IPS_EventExists($cid)) IPS_DeleteEvent($cid);
+            }
+
+            IPS_DeleteMedia($MediaID, true);
         }
     }
 	
