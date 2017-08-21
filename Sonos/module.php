@@ -37,8 +37,8 @@ class Sonos extends IPSModule
         $this->RegisterPropertyString("FavoriteStation", "");
         $this->RegisterPropertyString("WebFrontStations", "");
         $this->RegisterPropertyString("RINCON", "");
-        $this->RegisterTimer('SonosTimerUpdateStatus', 0, 'SNS_UpdateStatus('.$this->InstanceID.');');
-        $this->RegisterTimer('SonosTimerUpdateGrouping', 0, 'SNS_UpdateGrouping('.$this->InstanceID.');');
+        $this->RegisterTimer('SonosTimerUpdateStatus', 5000, 'SNS_UpdateStatus('.$this->InstanceID.');');
+        $this->RegisterTimer('SonosTimerUpdateGrouping', 120000, 'SNS_UpdateGrouping('.$this->InstanceID.');');
        
     }
     
@@ -280,10 +280,12 @@ class Sonos extends IPSModule
 
         // Set interval for timer for regular status and grouping updates
         // 1) UpdateStatus
-        $this->SetTimerInterval("SonosTimerUpdateStatus", $this->ReadPropertyInteger("UpdateStatusFrequency"));
+        $UpdateStatusFrequency = ($this->ReadPropertyInteger("UpdateStatusFrequency"))*1000;
+        $this->SetTimerInterval("SonosTimerUpdateStatus", $UpdateStatusFrequency);
 
         // 2) _updateGrouping
-        $this->SetTimerInterval("SonosTimerUpdateGrouping", $this->ReadPropertyInteger("UpdateGroupingFrequency"));
+        $UpdateGroupingFrequency = ($this->ReadPropertyInteger("UpdateGroupingFrequency"))*1000;
+        $this->SetTimerInterval("SonosTimerUpdateGrouping", $UpdateGroupingFrequency);
 
         // Start add scripts for regular status and grouping updates
         // 1) _updateStatus 
@@ -359,8 +361,8 @@ class Sonos extends IPSModule
     {
         $ip = $this->ReadPropertyString("IPAddress");
 		$timeout   = $this->ReadPropertyInteger("TimeOut");
-        $frequency             = $this->ReadPropertyInteger("UpdateStatusFrequency");
-        $frequencyNotAvailable = $this->ReadPropertyInteger("UpdateStatusFrequencyNA");
+        $frequencyms             = $this->ReadPropertyInteger("UpdateStatusFrequency");
+        $frequencyNotAvailablems = $this->ReadPropertyInteger("UpdateStatusFrequencyNA");
 
         // Get all needed Variable IDs
         $vidInstance      = $this->InstanceID;
@@ -390,10 +392,11 @@ class Sonos extends IPSModule
         // If the Sonos instance is not available update of grouping makes no sense
         if ( $timeout && Sys_Ping($ip, $timeout) == false )
         {
+            $frequencyNotAvailable = $frequencyNotAvailablems*1000;
             $this->SetTimerInterval("SonosTimerUpdateStatus", $frequencyNotAvailable);
             die('Sonos instance '.$ip.' is not available');
         }
-
+        $frequency = $frequencyms*1000;
         $this->SetTimerInterval("SonosTimerUpdateStatus", $frequency);
 
         $sonos = new SonosAccess($ip);
@@ -636,19 +639,21 @@ class Sonos extends IPSModule
         $forceGrouping         = $this->ReadPropertyBoolean("GroupForcing");
         $ipAddress = $this->ReadPropertyString("IPAddress");
         $timeout   = $this->ReadPropertyInteger("TimeOut");
-        $frequency             = $this->ReadPropertyInteger("UpdateGroupingFrequency");
-        $frequencyNotAvailable = $this->ReadPropertyInteger("UpdateGroupingFrequencyNA");
+        $frequencyms             = $this->ReadPropertyInteger("UpdateGroupingFrequency");
+        $frequencyNotAvailablems = $this->ReadPropertyInteger("UpdateGroupingFrequencyNA");
         $rinconMapping         = Array();
         $allSonosInstances     = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
 
         // If the Sonos instance is not available update of grouping makes no sense
         if ( $timeout && Sys_Ping($ipAddress, $timeout) == false ){
             // If the Box is not available, only ask every 15 Minutes...
+            $frequencyNotAvailable = $frequencyNotAvailablems * 1000;
             $this->SetTimerInterval("SonosTimerUpdateGrouping", $frequencyNotAvailable);
             die('Sonos instance '.$ipAddress.' is not available');
         }
 
         // If box is available reset to 120 Seconds interval
+        $frequency = $frequencyms*1000;
         $this->SetTimerInterval("SonosTimerUpdateGrouping", $frequency);
 
         $topology = new SimpleXMLElement(file_get_contents('http://'.$ipAddress.':1400/status/topology'));
