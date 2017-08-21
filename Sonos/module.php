@@ -262,9 +262,9 @@ class Sonos extends IPSModule
 
         //2j) Position
         if ($this->ReadPropertyBoolean("Position")){
-            $this->RegisterVariableInteger("Position", "Position", "", $positions['Position']);
+            $this->RegisterVariableInteger("PositionPercent", "Position", "Position.SONOS", $positions['Position']);
         }else{
-            $this->removeVariable("Position", $links);
+            $this->removeVariable("PositionPercent", $links);
         }
 
         //2k) Media image for cover
@@ -385,6 +385,7 @@ class Sonos extends IPSModule
         $vidAlbum         = @$this->GetIDForIdent("Album");
         $vidTrackDuration = @$this->GetIDForIdent("TrackDuration");
         $vidPosition      = @$this->GetIDForIdent("Position");
+        $vidPositionPercent = @$this->GetIDForIdent("PositionPercent");
 
         // If the Sonos instance is not available update of grouping makes no sense
         if ( $timeout && Sys_Ping($ip, $timeout) == false )
@@ -434,6 +435,7 @@ class Sonos extends IPSModule
             if($vidPosition)      SetValueString($vidPosition,      @GetValueString(IPS_GetObjectIDByName("Position", $MemberOfGroup)));
             if($vidTitle)         SetValueString($vidTitle,         @GetValueString(IPS_GetObjectIDByName("Title", $MemberOfGroup)));
             if($vidDetails)       SetValueString($vidDetails,       @GetValueString(IPS_GetObjectIDByName("Details", $MemberOfGroup)));
+            if($vidPositionPercent) SetValueString($vidPositionPercent,       @GetValueInteger(IPS_GetObjectIDByName("PositionPercent", $MemberOfGroup)));
         }else{
             SetValueInteger($vidStatus, $status);
             // Titelanzeige
@@ -492,6 +494,7 @@ class Sonos extends IPSModule
             if($vidAlbum)           SetValueString($vidAlbum,         @$positionInfo['album']);
             if($vidTrackDuration)   SetValueString($vidTrackDuration, @$positionInfo['TrackDuration'] );
             if($vidPosition)        SetValueString($vidPosition,      @$positionInfo['RelTime']);
+            if($vidPositionPercent)        SetValueString($vidPositionPercent,      $this->CalculateSongPosition($positionInfo['RelTime'], $positionInfo['TrackDuration']));
             if($vidTitle){
                 if(@$mediaInfo['title']){
                     SetValueString($vidTitle, @$mediaInfo['title']);
@@ -702,6 +705,23 @@ class Sonos extends IPSModule
                 @IPS_SetVariableProfileAssociation("Groups.SONOS", $sonosInstanceID, IPS_GetName($sonosInstanceID), "", -1);
             }
         }
+    }
+
+    protected function CalculateSongPosition($Position, $TrackDuration)
+    {
+        if (!$Position == "")
+        {
+            $Position = explode(":", $Position);
+            $TrackDuration = explode(":", $TrackDuration);
+            $PositionSec = ($Position[0]*3600)+($Position[1]*60)+$Position[2];
+            $TrackDurationSec = ($TrackDuration[0]*3600)+($TrackDuration[1]*60)+$TrackDuration[2];
+            $PositionP = round(($PositionSec/$TrackDurationSec*100), 0);
+        }
+        else
+        {
+            $PositionP = 0;
+        }
+        return $PositionP;
     }
 
     public function ChangeGroupVolume(int $increment)
@@ -1249,8 +1269,6 @@ class Sonos extends IPSModule
         if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
-        include_once(__DIR__ . "/sonosAccess.php");
-        include_once(__DIR__ . "/radio_stations.php");
         $sonos = new SonosAccess($ip);
 
         // try to find Radio Station URL
@@ -1566,7 +1584,14 @@ class Sonos extends IPSModule
         $picurlend = strpos($details, '" style="max-width: 170px; max-height: 170px; -webkit-box-reflect');
         $picurllength = $picurlend - ($picurlstart+10);
         $picurl = substr($details, ($picurlstart+10), ($picurllength));
-        $Content = file_get_contents($picurl);
+        if ($picurl = "")
+        {
+            $Content = "";
+        }
+        else
+        {
+            $Content = file_get_contents($picurl);
+        }
         $MediaID = IPS_CreateMedia(1);                  // Image im MedienPool anlegen
         IPS_SetParent($MediaID, $this->InstanceID); // Medienobjekt einsortieren unter der Sonos Instanz
         IPS_SetIdent ($MediaID, $ident);
@@ -1585,10 +1610,14 @@ class Sonos extends IPSModule
 
     protected function RefreshMediaImage($picurl)
     {
-        $Content = Sys_GetURLContent($picurl);
-        $MediaID = $this->GetIDForIdent("SonosMediaImageCover");
-        IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
-        IPS_SendMediaEvent($MediaID); //aktualisieren
+        if($picurl != "")
+        {
+            $Content = Sys_GetURLContent($picurl);
+            $MediaID = $this->GetIDForIdent("SonosMediaImageCover");
+            IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
+            IPS_SendMediaEvent($MediaID); //aktualisieren
+            $this->SendDebug("Sonos:", "Refresh cover in media image ". $MediaID,0);
+        }
     }
 
     protected function removeVariable($name, $links){
@@ -1603,6 +1632,7 @@ class Sonos extends IPSModule
               if(IPS_EventExists($cid)) IPS_DeleteEvent($cid);
             }
             $this->UnregisterVariable($name);
+            $this->SendDebug("Sonos:", "Unregister variable ". $vid,0);
         }
     }
 
@@ -1619,6 +1649,7 @@ class Sonos extends IPSModule
             }
             $this->DisableAction($name);
             $this->UnregisterVariable($name);
+            $this->SendDebug("Sonos:", "Unregister variable ". $vid,0);
         }
     }
 
