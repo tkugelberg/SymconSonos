@@ -2,7 +2,8 @@
 	"elements":
 	[
 		{ "name": "IPAddress",                 "type": "ValidationTextBox", "caption": "IP-Address/Host" },
-		{ "name": "TimeOut",                   "type": "NumberSpinner",     "caption": "Maximal ping timeout" },
+        { "type": "Label", "label": "Maximal ping timeout" },
+		{ "name": "TimeOut",                   "type": "NumberSpinner",     "caption": "Timeout" },
 		{ "name": "DefaultVolume",             "type": "NumberSpinner",     "caption": "Default volume (%)" },
                 { "type": "Label", "label": "RINCON will be filled automatically during save if it is initial. Update will only be visible when reopening form." },
                 { "name": "RINCON",                    "type": "ValidationTextBox", "caption": "RINCON" },
@@ -19,7 +20,7 @@
                 { "name": "BalanceControl",            "type": "CheckBox",          "caption": "Enable Balance Control" },
                 { "name": "SleeptimerControl",         "type": "CheckBox",          "caption": "Enable Sleeptimer Control" },
                 { "name": "PlayModeControl",           "type": "CheckBox",          "caption": "Enable Playmode Control" },
-                { "name": "PlaylistImport",            "type": "Select",            "caption": "Import Playlists",
+                { "name": "PlaylistImport",            "type": "Select",            "caption": "Playlist import",
                     "options": [ 
                                  { "label": "none",             "value": 0 },
                                  { "label": "saved",            "value": 1 },
@@ -32,7 +33,8 @@
                 { "name": "ForceOrder",                "type": "CheckBox",          "caption": "Force Variable order" },
                 { "type": "Label", "label": "Settings for radio stations:"},
                 { "name": "IncludeTunein",             "type": "CheckBox",          "caption": "Include TuneIn favorites" },
-		{ "name": "FavoriteStation",           "type": "Select",            "caption": "Favorite radio station", 
+        { "type": "Label", "label": "Favorite radio station:"},
+		{ "name": "FavoriteStation",           "type": "Select",            "caption": "Radio station",
                     "options": [ 
                                  { "label": "1LIVE",                    "value": "1LIVE" },
                                  { "label": "1LIVE DIGGI",              "value": "1LIVE DIGGI" },
@@ -78,7 +80,8 @@
                                  { "label": "WDR2 BI",                  "value": "WDR2 BI" },
                                  { "label": "YouFM",                    "value": "YouFM" }
                   ] },
-		{ "name": "WebFrontStations",          "type": "ValidationTextBox", "caption": "Stations in WebFront" }
+      { "type": "Label", "label": "Stations in WebFront:"},
+      { "name": "WebFrontStations",          "type": "ValidationTextBox", "caption": "WebFront" }
 	],
 	"actions":
 	[
