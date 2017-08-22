@@ -823,6 +823,8 @@ class Sonos extends IPSModule
             (new SonosAccess($ip))->Play();
         }else{
             SNS_Play($targetInstance);
+            $this->SendDebug("Sonos:", "Start play instance ". $targetInstance,0);
+            $this->SendDebug("Sonos:", "Sonos access in directory: ". __DIR__."/sonosAccess.php" ,0);
         }
     }
 
@@ -1589,7 +1591,7 @@ class Sonos extends IPSModule
         $picurlend = strpos($details, '" style="max-width: 170px; max-height: 170px; -webkit-box-reflect');
         $picurllength = $picurlend - ($picurlstart+10);
         $picurl = substr($details, ($picurlstart+10), ($picurllength));
-        if ($picurl = "")
+        if ($picurl == "")
         {
             $Content = "";
         }
@@ -1611,6 +1613,16 @@ class Sonos extends IPSModule
         IPS_SetInfo ($MediaID, $name);
         IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
         IPS_SendMediaEvent($MediaID); //aktualisieren
+    }
+
+    protected function CreateTransparentImage()
+    {
+
+    }
+
+    protected function CreateCoverMirrorEffect($size, $angle)
+    {
+
     }
 
     protected function RefreshMediaImage($picurl)
