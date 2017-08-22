@@ -356,7 +356,7 @@ class Sonos extends IPSModule
 	  return $response;
 	}
 
-	protected function UpdateStatus()
+	public function UpdateStatus()
     {
         $ip = $this->ReadPropertyString("IPAddress");
 		$timeout   = $this->ReadPropertyInteger("TimeOut");
@@ -630,7 +630,7 @@ class Sonos extends IPSModule
 
     }
 
-    protected function UpdateGrouping()
+    public function UpdateGrouping()
     {
         $sonosInstanceID       = $this->InstanceID;
         $memberOfGoup          = GetValueInteger($this->GetIDForIdent("MemberOfGroup"));
@@ -773,7 +773,7 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->SetSleeptimer(0,0,0);
         }else{
             SNS_DeleteSleepTimer($targetInstance);
@@ -787,7 +787,7 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->Next();
         }else{
             SNS_Next($targetInstance);
@@ -802,7 +802,7 @@ class Sonos extends IPSModule
             $ip = $this->getIP();
 
             SetValue($this->GetIDForIdent("Status"), 2);
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             $sonos = new SonosAccess($ip);
             if($sonos->GetTransportInfo() == 1) $sonos->Pause();
         }else{
@@ -818,7 +818,7 @@ class Sonos extends IPSModule
             $ip = $this->getIP();
 
             SetValue($this->GetIDForIdent("Status"), 1);
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->Play();
         }else{
             SNS_Play($targetInstance);
@@ -829,7 +829,7 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
     
         $positionInfo       = $sonos->GetPositionInfo();
@@ -921,7 +921,7 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos         = new SonosAccess($ip);
         $transportInfo = $sonos->GetTransportInfo();
         $volume        = GetValueInteger($this->GetIDForIdent("Volume"));
@@ -1010,7 +1010,7 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->Previous();
         }else{
             SNS_Previous($targetInstance);
@@ -1022,7 +1022,7 @@ class Sonos extends IPSModule
         $ip = $this->getIP();
 
         SetValue($this->GetIDForIdent("Volume"), $volume);
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->RampToVolume($rampType,$volume);
     }
 
@@ -1033,7 +1033,7 @@ class Sonos extends IPSModule
         if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
         
         $sonos->SetAVTransportURI("x-rincon-stream:".IPS_GetProperty($input_instance ,"RINCON"));
@@ -1051,10 +1051,11 @@ class Sonos extends IPSModule
           $leftVolume  = 100 - $balance;
         }
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = (new SonosAccess($ip));
         $sonos->SetVolume($leftVolume,'LF');
         $sonos->SetVolume($rightVolume,'RF');
+        $this->SendDebug("Sonos:", "BalanceControl set to ". $balance,0);
         if (!$this->ReadPropertyBoolean("BalanceControl")) SetValue($this->GetIDForIdent("Balance"), $balance);
     }
     
@@ -1062,8 +1063,9 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->SetBass($bass);
+        $this->SendDebug("Sonos:", "BassControl set to ". $bass,0);
         if (!$this->ReadPropertyBoolean("BassControl")) SetValue($this->GetIDForIdent("Bass"), $bass);
     }
 
@@ -1074,7 +1076,7 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->SetCrossfade($crossfade);
             if ($this->ReadPropertyBoolean("PlayModeControl")) SetValue($this->GetIDForIdent("Crossfade"), $crossfade);
         }else{
@@ -1181,7 +1183,7 @@ class Sonos extends IPSModule
         @IPS_SetHidden(IPS_GetVariableIDByName("GroupVolume",$this->InstanceID),true);
         @IPS_SetHidden(IPS_GetVariableIDByName("MemberOfGroup",$this->InstanceID),false);
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->SetAVTransportURI($uri);
     }
 
@@ -1196,7 +1198,7 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
  
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->SetLoudness($loudness);
         if ($this->ReadPropertyBoolean("LoudnessControl")) SetValue($this->GetIDForIdent("Loudness"), $loudness);
     }
@@ -1205,7 +1207,7 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->SetMute($mute);
         if ($this->ReadPropertyBoolean("MuteControl")) SetValue($this->GetIDForIdent("Mute"), $mute);
     }
@@ -1217,7 +1219,7 @@ class Sonos extends IPSModule
         if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
 
         $uri = '';
@@ -1253,7 +1255,7 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->SetPlayMode($playMode);
             if ($this->ReadPropertyBoolean("PlayModeControl")) SetValue($this->GetIDForIdent("PlayMode"), $playMode);
         }else{
@@ -1308,7 +1310,7 @@ class Sonos extends IPSModule
                 $minutes = $minutes - 60;
             }
 
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->SetSleeptimer($hours,$minutes,0);
         }else{
             SNS_SetSleepTimer($targetInstance,$minutes);
@@ -1322,7 +1324,7 @@ class Sonos extends IPSModule
         if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
         
         $sonos->SetAVTransportURI("x-sonos-htastream:".IPS_GetProperty($input_instance ,"RINCON").":spdif");
@@ -1332,7 +1334,7 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->SetTreble($treble);
         if (!$this->ReadPropertyBoolean("TrebleControl")) SetValue($this->GetIDForIdent("Treble"), $treble);
     }
@@ -1342,7 +1344,7 @@ class Sonos extends IPSModule
         $ip = $this->getIP();
 
         SetValue($this->GetIDForIdent("Volume"), $volume);
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->SetVolume($volume);
     }
 
@@ -1354,7 +1356,7 @@ class Sonos extends IPSModule
             $ip = $this->getIP();
 
             SetValue($this->GetIDForIdent("Status"), 3);
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             $sonos = new SonosAccess($ip);
             if($sonos->GetTransportInfo() == 1) $sonos->Stop();
         }else{
@@ -1369,7 +1371,7 @@ class Sonos extends IPSModule
         if(IPS_VariableProfileExists("Playlist.SONOS"))
             IPS_DeleteVariableProfile("Playlist.SONOS");
 
-        include_once(__DIR__ . "/sonosAccess.php");
+        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
 
         $Associations          = Array();
@@ -1422,7 +1424,7 @@ class Sonos extends IPSModule
         if ($this->ReadPropertyBoolean("IncludeTunein") && $Value < 33){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . "/sonosAccess.php");
+            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             $sonos = new SonosAccess($ip);
 
             foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('R:0/0')['Result']))->item as $item) {
@@ -1476,7 +1478,7 @@ class Sonos extends IPSModule
     public function RequestAction($Ident, $Value)
     {
         $this->SendDebug("Sonos:", "Request action for ident ". $Ident." with value ".$Value,0);
-        $this->SendDebug("Sonos:", "Sonos access in directory: ". __DIR__."/sonosAccess.php" ,0);
+        $this->SendDebug("Sonos:", "Sonos access in directory: ". __DIR__.DIRECTORY_SEPARATOR."sonosAccess.php" ,0);
         switch($Ident) {
             case "Balance":
                 $this->SetBalance($Value);
