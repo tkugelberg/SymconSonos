@@ -1,7 +1,6 @@
 <?
-require_once(__DIR__ . "/radio_stations.php");  // radio stations
-require_once(__DIR__ . "/sonosAccess.php");  // Sonos Access
-
+require_once(__DIR__ .DIRECTORY_SEPARATOR."radio_stations.php");  // radio stations
+require_once(__DIR__ .DIRECTORY_SEPARATOR."sonosAccess.php");  // Sonos Access
 
 class Sonos extends IPSModule
 {
