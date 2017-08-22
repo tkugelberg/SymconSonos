@@ -1,4 +1,6 @@
 <?
+namespace Sonos\Radio;
+
 class RadioStations
 {
     public function get_available_stations()

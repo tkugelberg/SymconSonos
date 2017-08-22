@@ -1,6 +1,8 @@
 <?
-require_once(__DIR__ .DIRECTORY_SEPARATOR."radio_stations.php");  // radio stations
-require_once(__DIR__ .DIRECTORY_SEPARATOR."sonosAccess.php");  // Sonos Access
+require_once(__DIR__ . DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."bootstrap.php");
+use Sonos\Radio\RadioStations;
+use Sonos\Sonos\SonosAccess;
+
 
 class Sonos extends IPSModule
 {
@@ -65,32 +67,32 @@ class Sonos extends IPSModule
                         
         
         // Start create profiles
-        $this->RegisterProfileIntegerEx("Status.SONOS", "Information", "", "",   Array( Array(0, "prev",       "", -1),
+        $this->RegisterProfileIntegerEx("Sonos.Status", "Information", "", "",   Array( Array(0, "prev",       "", -1),
                                                                                         Array(1, "play",       "", -1),
                                                                                         Array(2, "pause",      "", -1),
                                                                                         Array(3, "stop",       "", -1),
                                                                                         Array(4, "next",       "", -1),
                                                                                         Array(5, "transition", "", -1) ));
-        $this->RegisterProfileIntegerEx("PlayMode.SONOS", "Information", "", "",   Array( Array(0, "Normal",             "", -1),
+        $this->RegisterProfileIntegerEx("Sonos.PlayMode", "Information", "", "",   Array( Array(0, "Normal",             "", -1),
                                                                                           Array(1, "Repeat all",         "", -1),
                                                                                           Array(2, "Repeat one",         "", -1),
                                                                                           Array(3, "Shuffle no repeat",  "", -1),
                                                                                           Array(4, "Shuffle",            "", -1),
                                                                                           Array(5, "Shuffle repeat one", "", -1) ));
-        $this->RegisterProfileInteger("Volume.SONOS",   "Intensity",   "", " %",    0, 100, 1);
-        $this->RegisterProfileInteger("Tone.SONOS",     "Intensity",   "", " %",  -10,  10, 1);
-        $this->RegisterProfileInteger("Balance.SONOS",  "Intensity",   "", " %", -100, 100, 1);
-        $this->RegisterProfileIntegerEx("Switch.SONOS", "Information", "",   "", Array( Array(0, "Off", "", 0xFF0000),
+        $this->RegisterProfileInteger("Sonos.Volume",   "Intensity",   "", " %",    0, 100, 1);
+        $this->RegisterProfileInteger("Sonos.Tone",     "Intensity",   "", " %",  -10,  10, 1);
+        $this->RegisterProfileInteger("Sonos.Balance",  "Intensity",   "", " %", -100, 100, 1);
+        $this->RegisterProfileIntegerEx("Sonos.Switch", "Information", "",   "", Array( Array(0, "Off", "", 0xFF0000),
                                                                                         Array(1, "On",  "", 0x00FF00) ));
-        $this->RegisterProfileInteger("Position.SONOS",   "Intensity",   "", " %",    0, 100, 1);
+        $this->RegisterProfileInteger("Sonos.Position",   "Intensity",   "", " %",    0, 100, 1);
         
         //Build Radio Station Associations according to user settings
-        if(!IPS_VariableProfileExists("Radio.SONOS"))
+        if(!IPS_VariableProfileExists("Sonos.Radio"))
             $this->UpdateRadioStations();
 
         // Build Group Associations according Sonos Instance settings
-        if(IPS_VariableProfileExists("Groups.SONOS"))
-          IPS_DeleteVariableProfile("Groups.SONOS"); 
+        if(IPS_VariableProfileExists("Sonos.Groups"))
+          IPS_DeleteVariableProfile("Sonos.Groups");
         $allSonosInstances = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E-83FD99407EE8}");
         $GroupAssociations = Array(Array(0, "none", "", -1));
 
@@ -99,7 +101,7 @@ class Sonos extends IPSModule
               $GroupAssociations[] = Array($SonosID, IPS_GetName($SonosID), "", -1);
         }
 
-        $this->RegisterProfileIntegerEx("Groups.SONOS", "Network", "", "", $GroupAssociations);
+        $this->RegisterProfileIntegerEx("Sonos.Groups", "Network", "", "", $GroupAssociations);
         // End Create Profiles     
    
         // Start Register variables and Actions
@@ -139,12 +141,12 @@ class Sonos extends IPSModule
         // 1) general availabe
         IPS_SetHidden( $this->RegisterVariableBoolean("Coordinator", "Coordinator", "", $positions['Coordinator']), true);
         IPS_SetHidden( $this->RegisterVariableString("GroupMembers", "GroupMembers", "", $positions['GroupMembers']), true);
-        $this->RegisterVariableInteger("MemberOfGroup", "MemberOfGroup", "Groups.SONOS", $positions['MemberOfGroup']);
-        $this->RegisterVariableInteger("GroupVolume", "GroupVolume", "Volume.SONOS", $positions['GroupVolume']);
+        $this->RegisterVariableInteger("MemberOfGroup", "MemberOfGroup", "Sonos.Groups", $positions['MemberOfGroup']);
+        $this->RegisterVariableInteger("GroupVolume", "GroupVolume", "Sonos.Volume", $positions['GroupVolume']);
         $this->RegisterVariableString("nowPlaying", "nowPlaying", "", $positions['nowPlaying']);
-        $this->RegisterVariableInteger("Radio", "Radio", "Radio.SONOS", $positions['Radio']);
-        $this->RegisterVariableInteger("Status", "Status", "Status.SONOS", $positions['Status']);
-        $this->RegisterVariableInteger("Volume", "Volume", "Volume.SONOS", $positions['Volume']);
+        $this->RegisterVariableInteger("Radio", "Radio", "Sonos.Radio", $positions['Radio']);
+        $this->RegisterVariableInteger("Status", "Status", "Sonos.Status", $positions['Status']);
+        $this->RegisterVariableInteger("Volume", "Volume", "Sonos.Volume", $positions['Volume']);
         $this->EnableAction("GroupVolume");
         $this->EnableAction("MemberOfGroup");
         $this->EnableAction("Radio");
@@ -160,7 +162,7 @@ class Sonos extends IPSModule
           
         // 2a) Bass
         if ($this->ReadPropertyBoolean("BassControl")){
-            $this->RegisterVariableInteger("Bass", "Bass", "Tone.SONOS", $positions['Bass']);
+            $this->RegisterVariableInteger("Bass", "Bass", "Sonos.Tone", $positions['Bass']);
             $this->EnableAction("Bass");
         }else{
             $this->removeVariableAction("Bass", $links);
@@ -168,7 +170,7 @@ class Sonos extends IPSModule
 
         // 2b) Treble
         if ($this->ReadPropertyBoolean("TrebleControl")){
-            $this->RegisterVariableInteger("Treble", "Treble", "Tone.SONOS", $positions['Treble']);
+            $this->RegisterVariableInteger("Treble", "Treble", "Sonos.Tone", $positions['Treble']);
             $this->EnableAction("Treble");
         }else{
             $this->removeVariableAction("Treble", $links);
@@ -176,7 +178,7 @@ class Sonos extends IPSModule
 
         // 2c) Mute
         if ($this->ReadPropertyBoolean("MuteControl")){
-            $this->RegisterVariableInteger("Mute","Mute", "Switch.SONOS", $positions['Mute']);
+            $this->RegisterVariableInteger("Mute","Mute", "Sonos.Switch", $positions['Mute']);
             $this->EnableAction("Mute");
         }else{
             $this->removeVariableAction("Mute", $links);
@@ -184,7 +186,7 @@ class Sonos extends IPSModule
 
         // 2d) Loudness
         if ($this->ReadPropertyBoolean("LoudnessControl")){
-            $this->RegisterVariableInteger("Loudness", "Loudness", "Switch.SONOS", $positions['Loudness']);
+            $this->RegisterVariableInteger("Loudness", "Loudness", "Sonos.Switch", $positions['Loudness']);
             $this->EnableAction("Loudness");
         }else{
             $this->removeVariableAction("Loudness", $links);
@@ -192,7 +194,7 @@ class Sonos extends IPSModule
 
         // 2e) Balance
         if ($this->ReadPropertyBoolean("BalanceControl")){
-            $this->RegisterVariableInteger("Balance", "Balance", "Balance.SONOS", $positions['Balance']);
+            $this->RegisterVariableInteger("Balance", "Balance", "Sonos.Balance", $positions['Balance']);
             $this->EnableAction("Balance");
         }else{
             $this->removeVariableAction("Balance", $links);
@@ -207,9 +209,9 @@ class Sonos extends IPSModule
      
         // 2g Playlists
         if ($this->ReadPropertyInteger("PlaylistImport")){
-            if(!IPS_VariableProfileExists("Playlist.SONOS"))
-                $this->RegisterProfileIntegerEx("Playlist.SONOS", "Database", "", "", Array());
-            $this->RegisterVariableInteger("Playlist", "Playlist", "Playlist.SONOS", $positions['Playlist']);
+            if(!IPS_VariableProfileExists("Sonos.Playlist"))
+                $this->RegisterProfileIntegerEx("Sonos.Playlist", "Database", "", "", Array());
+            $this->RegisterVariableInteger("Playlist", "Playlist", "Sonos.Playlist", $positions['Playlist']);
             $this->EnableAction("Playlist");
         }else{
             $this->removeVariable("Playlist", $links);
@@ -217,8 +219,8 @@ class Sonos extends IPSModule
 
         // 2h) PlayMode + Crossfade
         if ($this->ReadPropertyBoolean("PlayModeControl")){
-            $this->RegisterVariableInteger("PlayMode",  "PlayMode",  "PlayMode.SONOS", $positions['PlayMode']);
-            $this->RegisterVariableInteger("Crossfade", "Crossfade", "Switch.SONOS",   $positions['Crossfade']);
+            $this->RegisterVariableInteger("PlayMode",  "PlayMode",  "Sonos.PlayMode", $positions['PlayMode']);
+            $this->RegisterVariableInteger("Crossfade", "Crossfade", "Sonos.Switch",   $positions['Crossfade']);
             $this->EnableAction("PlayMode");
             $this->EnableAction("Crossfade");
         }else{
@@ -261,7 +263,7 @@ class Sonos extends IPSModule
 
         //2j) Position
         if ($this->ReadPropertyBoolean("Position")){
-            $this->RegisterVariableInteger("PositionPercent", "Position", "Position.SONOS", $positions['Position']);
+            $this->RegisterVariableInteger("PositionPercent", "Position", "Sonos.Position", $positions['Position']);
         }else{
             $this->removeVariable("PositionPercent", $links);
         }
@@ -285,32 +287,6 @@ class Sonos extends IPSModule
         // 2) _updateGrouping
         $UpdateGroupingFrequency = ($this->ReadPropertyInteger("UpdateGroupingFrequency"))*1000;
         $this->SetTimerInterval("SonosTimerUpdateGrouping", $UpdateGroupingFrequency);
-
-        // Start add scripts for regular status and grouping updates
-        // 1) _updateStatus 
-        /* replaced intern function
-        $statusScriptID = @$this->GetIDForIdent("_updateStatus");
-        if ( $statusScriptID === false ){
-          $statusScriptID = $this->RegisterScript("_updateStatus", "_updateStatus", file_get_contents(__DIR__ . "/_updateStatus.php"), $positions['_updateStatus']);
-        }else{
-          IPS_SetScriptContent($statusScriptID, file_get_contents(__DIR__ . "/_updateStatus.php"));
-        }
-
-        IPS_SetHidden($statusScriptID,true);
-        IPS_SetScriptTimer($statusScriptID, $this->ReadPropertyInteger("UpdateStatusFrequency"));
-
-        // 2) _updateGrouping
-        $groupingScriptID = @$this->GetIDForIdent("_updateGrouping");
-        if ( $groupingScriptID === false ){
-          $groupingScriptID = $this->RegisterScript("_updateGrouping", "_updateGrouping", file_get_contents(__DIR__ . "/_updateGrouping.php"), $positions['_updateGrouping']);
-        }else{
-          IPS_SetScriptContent($groupingScriptID, file_get_contents(__DIR__ . "/_updateGrouping.php"));
-        }
-
-        IPS_SetHidden($groupingScriptID,true);
-        IPS_SetScriptTimer($groupingScriptID, $this->ReadPropertyInteger("UpdateGroupingFrequency"));
-        */
-        // End add scripts for regular status and grouping updates
 
         // sorting
         if ($this->ReadPropertyBoolean("ForceOrder")){
@@ -423,7 +399,8 @@ class Sonos extends IPSModule
         $MemberOfGroup = 0;
         if($vidMemberOfGroup) $MemberOfGroup = GetValueInteger($vidMemberOfGroup);
 
-        if ($MemberOfGroup){
+        if ($MemberOfGroup)
+        {
             // If Sonos is member of a group, use values of Group Coordinator
             SetValueInteger($vidStatus, GetValueInteger(IPS_GetObjectIDByName("Status", $MemberOfGroup)));
             $actuallyPlaying = GetValueString(IPS_GetObjectIDByName("nowPlaying", $MemberOfGroup));
@@ -438,21 +415,28 @@ class Sonos extends IPSModule
             if($vidTitle)         SetValueString($vidTitle,         @GetValueString(IPS_GetObjectIDByName("Title", $MemberOfGroup)));
             if($vidDetails)       SetValueString($vidDetails,       @GetValueString(IPS_GetObjectIDByName("Details", $MemberOfGroup)));
             if($vidPositionPercent) SetValueString($vidPositionPercent,       @GetValueInteger(IPS_GetObjectIDByName("PositionPercent", $MemberOfGroup)));
-        }else{
+        }
+        else
+        {
             SetValueInteger($vidStatus, $status);
             // Titelanzeige
             $currentStation = 0;
-
-            if ( $status <> 1 ){
+            $positionInfo = $sonos->GetPositionInfo();
+            $mediaInfo    = $sonos->GetMediaInfo();
+            if ( $status <> 1 )
+            {
                 // No title if not playing
                 $actuallyPlaying = "";
-            }else{
-                $positionInfo = $sonos->GetPositionInfo();
-                $mediaInfo    = $sonos->GetMediaInfo();
 
-                if ($positionInfo["streamContent"]){
+            }
+            else
+            {
+                if ($positionInfo["streamContent"])
+                {
                     $actuallyPlaying = $positionInfo["streamContent"];
-                } else {
+                }
+                else
+                {
                     $actuallyPlaying = $positionInfo["title"]." | ".$positionInfo["artist"];
                 }
 
@@ -460,24 +444,29 @@ class Sonos extends IPSModule
                 $ListRadiostations = new RadioStations();
                 $radioStations     = $ListRadiostations->get_available_stations();
                 $playingRadioStation = '';
-                foreach ($radioStations as $radioStation) {
-                    if($radioStation["url"] == htmlspecialchars_decode($mediaInfo["CurrentURI"])){
+                foreach ($radioStations as $radioStation)
+                {
+                    if($radioStation["url"] == htmlspecialchars_decode($mediaInfo["CurrentURI"]))
+                    {
                         $playingRadioStation = $radioStation["name"];
                         $image               = $radioStation["logo"];
                         break;
                     }
                 }
 
-                if( $playingRadioStation == ''){
-                    foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('R:0/0')['Result']))->item as $item) {
-                        if ($item->res == htmlspecialchars_decode($mediaInfo["CurrentURI"])){
+                if( $playingRadioStation == '')
+                {
+                    foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('R:0/0')['Result']))->item as $item)
+                    {
+                        if ($item->res == htmlspecialchars_decode($mediaInfo["CurrentURI"]))
+                        {
                             $playingRadioStation = (string)$item->xpath('dc:title')[0];
                             break;
                         }
                     }
                 }
 
-                $Associations = IPS_GetVariableProfile("Radio.SONOS")["Associations"];
+                $Associations = IPS_GetVariableProfile("Sonos.Radio")["Associations"];
                 if(isset($playingRadioStation)){
                     foreach($Associations as $key=>$station) {
                         if( $station["Name"] == $playingRadioStation ){
@@ -506,12 +495,17 @@ class Sonos extends IPSModule
             }
             if($vidDetails){
                 if (!isset($stationID)) $stationID = "";
-                if(isset($positionInfo)){
+                $detailHTML = "";
+                if(isset($positionInfo))
+                {
                     // SPDIF and analog
-                    if(preg_match('/^RINCON_/', $mediaInfo['title']) ){
+                    if(preg_match('/^RINCON_/', $mediaInfo['title']) )
+                    {
                         $detailHTML = "";
                         // Radio or stream(?)
-                    }elseif($mediaInfo['title']){
+                    }
+                    elseif($mediaInfo['title'])
+                    {
                         // get stationID if playing via TuneIn
                         $stationID = preg_replace("#(.*)x-sonosapi-stream:(.*?)\?sid(.*)#is",'$2',$mediaInfo['CurrentURI']);
                         if (!isset($image)) $image = "";
@@ -538,7 +532,7 @@ class Sonos extends IPSModule
 
                         if(strlen($image) > 0) {
                             $detailHTML .= "<td width=\"170px\" valign=\"top\">
-                              <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0px; margin-bottom: 10px;\">
+                              <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0; margin-bottom: 10px;\">
                               	<img src=\"".@$image."\" style=\"max-width: 170px; max-height: 170px; -webkit-box-reflect: below 0 -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.88, transparent), to(rgba(255, 255, 255, 0.5))); transform: rotateY(-10deg) translateZ(-35px);\">
                               </div>
                             </td>";
@@ -548,14 +542,16 @@ class Sonos extends IPSModule
                         </table>";
 
                         // normal files
-                    }else{
-                        $durationSeconds        = 0;
-                        $currentPositionSeconds = 0;
+                    }
+                    else
+                    {
+                        // $durationSeconds        = 0;
+                        // $currentPositionSeconds = 0;
                         if($positionInfo['TrackDuration'] && preg_match('/\d+:\d+:\d+/', $positionInfo['TrackDuration']) ){
-                            $durationArray          = explode(":",$positionInfo['TrackDuration']);
-                            $currentPositionArray   = explode(":",$positionInfo['RelTime']);
-                            $durationSeconds        = $durationArray[0]*3600+$durationArray[1]*60+$durationArray[2];
-                            $currentPositionSeconds = $currentPositionArray[0]*3600+$currentPositionArray[1]*60+$currentPositionArray[2];
+                            // $durationArray          = explode(":",$positionInfo['TrackDuration']);
+                            // $currentPositionArray   = explode(":",$positionInfo['RelTime']);
+                            // $durationSeconds        = $durationArray[0]*3600+$durationArray[1]*60+$durationArray[2];
+                            // $currentPositionSeconds = $currentPositionArray[0]*3600+$currentPositionArray[1]*60+$currentPositionArray[2];
                         }
                         $detailHTML =   "<table width=\"100%\">
                           <tr>
@@ -572,7 +568,7 @@ class Sonos extends IPSModule
 
                         if(isset($positionInfo['albumArtURI'])) {
                             $detailHTML .= "<td width=\"170px\" valign=\"top\">
-                              <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0px; margin-bottom: 10px;\">
+                              <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0; margin-bottom: 10px;\">
                               	<img src=\"".@$positionInfo['albumArtURI']."\" style=\"max-width: 170px; max-height: 170px; -webkit-box-reflect: below 0 -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.88, transparent), to(rgba(255, 255, 255, 0.5))); transform: rotateY(-10deg) translateZ(-35px);\">
                               </div>
                             </td>";
@@ -703,10 +699,10 @@ class Sonos extends IPSModule
         }elseif($mySettings['COORDINATOR'] != $coordinatorInIPS){
             if(!$mySettings['COORDINATOR']){
                 SetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID),false);
-                @IPS_SetVariableProfileAssociation("Groups.SONOS", $sonosInstanceID, "", "", -1);
+                @IPS_SetVariableProfileAssociation("Sonos.Groups", $sonosInstanceID, "", "", -1);
             }else{
                 SetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID),true);
-                @IPS_SetVariableProfileAssociation("Groups.SONOS", $sonosInstanceID, IPS_GetName($sonosInstanceID), "", -1);
+                @IPS_SetVariableProfileAssociation("Sonos.Groups", $sonosInstanceID, IPS_GetName($sonosInstanceID), "", -1);
             }
         }
     }
@@ -773,7 +769,6 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->SetSleeptimer(0,0,0);
         }else{
             SNS_DeleteSleepTimer($targetInstance);
@@ -787,7 +782,6 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->Next();
         }else{
             SNS_Next($targetInstance);
@@ -802,7 +796,7 @@ class Sonos extends IPSModule
             $ip = $this->getIP();
 
             SetValue($this->GetIDForIdent("Status"), 2);
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
+
             $sonos = new SonosAccess($ip);
             if($sonos->GetTransportInfo() == 1) $sonos->Pause();
         }else{
@@ -818,7 +812,7 @@ class Sonos extends IPSModule
             $ip = $this->getIP();
 
             SetValue($this->GetIDForIdent("Status"), 1);
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
+
             (new SonosAccess($ip))->Play();
         }else{
             SNS_Play($targetInstance);
@@ -829,7 +823,6 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
     
         $positionInfo       = $sonos->GetPositionInfo();
@@ -921,7 +914,6 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos         = new SonosAccess($ip);
         $transportInfo = $sonos->GetTransportInfo();
         $volume        = GetValueInteger($this->GetIDForIdent("Volume"));
@@ -1010,7 +1002,6 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->Previous();
         }else{
             SNS_Previous($targetInstance);
@@ -1022,7 +1013,7 @@ class Sonos extends IPSModule
         $ip = $this->getIP();
 
         SetValue($this->GetIDForIdent("Volume"), $volume);
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
+
         (new SonosAccess($ip))->RampToVolume($rampType,$volume);
     }
 
@@ -1033,7 +1024,6 @@ class Sonos extends IPSModule
         if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
         
         $sonos->SetAVTransportURI("x-rincon-stream:".IPS_GetProperty($input_instance ,"RINCON"));
@@ -1051,7 +1041,6 @@ class Sonos extends IPSModule
           $leftVolume  = 100 - $balance;
         }
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = (new SonosAccess($ip));
         $sonos->SetVolume($leftVolume,'LF');
         $sonos->SetVolume($rightVolume,'RF');
@@ -1063,7 +1052,6 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->SetBass($bass);
         $this->SendDebug("Sonos:", "BassControl set to ". $bass,0);
         if (!$this->ReadPropertyBoolean("BassControl")) SetValue($this->GetIDForIdent("Bass"), $bass);
@@ -1076,7 +1064,6 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->SetCrossfade($crossfade);
             if ($this->ReadPropertyBoolean("PlayModeControl")) SetValue($this->GetIDForIdent("Crossfade"), $crossfade);
         }else{
@@ -1140,7 +1127,6 @@ class Sonos extends IPSModule
         }
 
         // get variable of coordinator members to be updated
-        $currentMembers = Array();
         if($groupCoordinator){
             $groupMembersID = @IPS_GetObjectIDByIdent("GroupMembers",$groupCoordinator);
             $currentMembers = explode(",",GetValueString($groupMembersID));
@@ -1152,11 +1138,11 @@ class Sonos extends IPSModule
             SetValueString($groupMembersID,implode(",",$currentMembers));
             $uri            = "x-rincon:".IPS_GetProperty($groupCoordinator ,"RINCON");
             SetValueBoolean($this->GetIDForIdent("Coordinator"),false);
-            @IPS_SetVariableProfileAssociation("Groups.SONOS", $this->InstanceID, "", "", -1);
+            @IPS_SetVariableProfileAssociation("Sonos.Groups", $this->InstanceID, "", "", -1);
         }else{
             $uri            = "";
             SetValueBoolean($this->GetIDForIdent("Coordinator"),true);
-            @IPS_SetVariableProfileAssociation("Groups.SONOS", $this->InstanceID, IPS_GetName($this->InstanceID), "", -1);
+            @IPS_SetVariableProfileAssociation("Sonos.Groups", $this->InstanceID, IPS_GetName($this->InstanceID), "", -1);
         }
         
         // update coordinator members
@@ -1182,8 +1168,7 @@ class Sonos extends IPSModule
         // always hide GroupVolume, unhide executed on GroupCoordinator a few lines above
         @IPS_SetHidden(IPS_GetVariableIDByName("GroupVolume",$this->InstanceID),true);
         @IPS_SetHidden(IPS_GetVariableIDByName("MemberOfGroup",$this->InstanceID),false);
-
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
+        
         (new SonosAccess($ip))->SetAVTransportURI($uri);
     }
 
@@ -1197,8 +1182,7 @@ class Sonos extends IPSModule
     public function SetLoudness(bool $loudness)
     {
         $ip = $this->getIP();
- 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
+
         (new SonosAccess($ip))->SetLoudness($loudness);
         if ($this->ReadPropertyBoolean("LoudnessControl")) SetValue($this->GetIDForIdent("Loudness"), $loudness);
     }
@@ -1207,7 +1191,6 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->SetMute($mute);
         if ($this->ReadPropertyBoolean("MuteControl")) SetValue($this->GetIDForIdent("Mute"), $mute);
     }
@@ -1219,7 +1202,6 @@ class Sonos extends IPSModule
         if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
 
         $uri = '';
@@ -1255,7 +1237,6 @@ class Sonos extends IPSModule
         if($targetInstance === $this->InstanceID){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->SetPlayMode($playMode);
             if ($this->ReadPropertyBoolean("PlayModeControl")) SetValue($this->GetIDForIdent("PlayMode"), $playMode);
         }else{
@@ -1278,7 +1259,8 @@ class Sonos extends IPSModule
         $sonos = new SonosAccess($ip);
 
         // try to find Radio Station URL
-        $uri = get_station_url($radio);
+        $radiostations = new RadioStations();
+        $uri = $radiostations->get_station_url($radio);
 
         if( $uri == ""){
             // check in TuneIn Favorites
@@ -1310,7 +1292,6 @@ class Sonos extends IPSModule
                 $minutes = $minutes - 60;
             }
 
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             (new SonosAccess($ip))->SetSleeptimer($hours,$minutes,0);
         }else{
             SNS_SetSleepTimer($targetInstance,$minutes);
@@ -1324,7 +1305,6 @@ class Sonos extends IPSModule
         if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
           $this->SetGroup(0);
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
         
         $sonos->SetAVTransportURI("x-sonos-htastream:".IPS_GetProperty($input_instance ,"RINCON").":spdif");
@@ -1334,7 +1314,6 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         (new SonosAccess($ip))->SetTreble($treble);
         if (!$this->ReadPropertyBoolean("TrebleControl")) SetValue($this->GetIDForIdent("Treble"), $treble);
     }
@@ -1344,7 +1323,7 @@ class Sonos extends IPSModule
         $ip = $this->getIP();
 
         SetValue($this->GetIDForIdent("Volume"), $volume);
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
+
         (new SonosAccess($ip))->SetVolume($volume);
     }
 
@@ -1356,7 +1335,7 @@ class Sonos extends IPSModule
             $ip = $this->getIP();
 
             SetValue($this->GetIDForIdent("Status"), 3);
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
+
             $sonos = new SonosAccess($ip);
             if($sonos->GetTransportInfo() == 1) $sonos->Stop();
         }else{
@@ -1368,10 +1347,9 @@ class Sonos extends IPSModule
     {
         $ip = $this->getIP();
 
-        if(IPS_VariableProfileExists("Playlist.SONOS"))
-            IPS_DeleteVariableProfile("Playlist.SONOS");
+        if(IPS_VariableProfileExists("Sonos.Playlist"))
+            IPS_DeleteVariableProfile("Sonos.Playlist");
 
-        include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
         $sonos = new SonosAccess($ip);
 
         $Associations          = Array();
@@ -1394,12 +1372,11 @@ class Sonos extends IPSModule
             }
         }
 
-        $this->RegisterProfileIntegerEx("Playlist.SONOS", "Database", "", "", $Associations);
+        $this->RegisterProfileIntegerEx("Sonos.Playlist", "Database", "", "", $Associations);
     }
 
     public function UpdateRadioStations()
     {
-        include_once(__DIR__ . "/radio_stations.php");
         $Associations          = Array();
         $radiostations = new RadioStations();
         $AvailableStations     = $radiostations->get_available_stations();
@@ -1424,7 +1401,6 @@ class Sonos extends IPSModule
         if ($this->ReadPropertyBoolean("IncludeTunein") && $Value < 33){
             $ip = $this->getIP();
 
-            include_once(__DIR__ . DIRECTORY_SEPARATOR."sonosAccess.php");
             $sonos = new SonosAccess($ip);
 
             foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('R:0/0')['Result']))->item as $item) {
@@ -1441,10 +1417,10 @@ class Sonos extends IPSModule
             $Associations[$Value-1][0] = $Value++ ;
         }
 
-        if(IPS_VariableProfileExists("Radio.SONOS"))
-            IPS_DeleteVariableProfile("Radio.SONOS");
+        if(IPS_VariableProfileExists("Sonos.Radio"))
+            IPS_DeleteVariableProfile("Sonos.Radio");
 
-        $this->RegisterProfileIntegerEx("Radio.SONOS", "Speaker", "", "", $Associations);
+        $this->RegisterProfileIntegerEx("Sonos.Radio", "Speaker", "", "", $Associations);
     
     }
  
@@ -1478,7 +1454,7 @@ class Sonos extends IPSModule
     public function RequestAction($Ident, $Value)
     {
         $this->SendDebug("Sonos:", "Request action for ident ". $Ident." with value ".$Value,0);
-        $this->SendDebug("Sonos:", "Sonos access in directory: ". __DIR__.DIRECTORY_SEPARATOR."sonosAccess.php" ,0);
+        //$this->SendDebug("Sonos:", "Sonos access in directory: ". __DIR__.DIRECTORY_SEPARATOR."SonosAccess.php" ,0);
         switch($Ident) {
             case "Balance":
                 $this->SetBalance($Value);
@@ -1505,14 +1481,14 @@ class Sonos extends IPSModule
                 $this->SetPlayMode($Value);
                 break;
             case "Playlist":
-                $this->SetPlaylist(IPS_GetVariableProfile("Playlist.SONOS")['Associations'][$Value-1]['Name']);
+                $this->SetPlaylist(IPS_GetVariableProfile("Sonos.Playlist")['Associations'][$Value-1]['Name']);
                 SetValue($this->GetIDForIdent($Ident), $Value);
                 $this->Play();
                 sleep(1);
                 SetValue($this->GetIDForIdent($Ident), 0);
                 break;
             case "Radio":
-                $this->SetRadio(IPS_GetVariableProfile("Radio.SONOS")['Associations'][$Value-1]['Name']);
+                $this->SetRadio(IPS_GetVariableProfile("Sonos.Radio")['Associations'][$Value-1]['Name']);
                 SetValue($this->GetIDForIdent($Ident), $Value);
                 $this->Play();
                 break;
@@ -1714,7 +1690,7 @@ class Sonos extends IPSModule
     	          $name_array[] = IPS_GetName($instanceID);
     	        }
               }
-    		
+
     		  $response[$variableName] = join(",", $name_array);
     		  break;
     	}
@@ -1755,6 +1731,135 @@ class Sonos extends IPSModule
             IPS_SetVariableProfileAssociation($Name, $Association[0], $Association[1], $Association[2], $Association[3]);
         }
         
+    }
+
+    protected function CreateMediaImage($Ident, $name, $picid, $Content, $ImageFile, $position, $visible)
+    {
+        $MediaID = false;
+        if($this->ReadPropertyBoolean($visible) == true)
+        {
+            $MediaID = @$this->GetIDForIdent($Ident);
+            if ($MediaID === false)
+            {
+                $MediaID = IPS_CreateMedia(1);                  // Image im MedienPool anlegen
+                IPS_SetParent($MediaID, $this->InstanceID); // Medienobjekt einsortieren unter dem Modul
+                IPS_SetIdent ($MediaID, $Ident);
+                IPS_SetPosition($MediaID, $position);
+                IPS_SetMediaCached($MediaID, true);
+                // Das Cachen für das Mediaobjekt wird aktiviert.
+                // Beim ersten Zugriff wird dieses von der Festplatte ausgelesen
+                // und zukünftig nur noch im Arbeitsspeicher verarbeitet.
+                IPS_SetName($MediaID, $name); // Medienobjekt benennen
+            }
+
+            IPS_SetMediaFile($MediaID, $ImageFile, False);    // Image im MedienPool mit Image-Datei verbinden
+            IPS_SetInfo ($MediaID, $picid);
+            IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
+            IPS_SendMediaEvent($MediaID); //aktualisieren
+        }
+        return $MediaID;
+    }
+
+    protected function getimageinfo($imagefile)
+    {
+        if(!$imagefile == "")
+        {
+            $imagesize = getimagesize($imagefile);
+            $imagewidth = $imagesize[0];
+            $imageheight = $imagesize[1];
+            $imagetype = $imagesize[2];
+            $imageinfo = array("imagewidth" => $imagewidth, "imageheight" => $imageheight, "imagetype" => $imagetype);
+        }
+        else
+        {
+            $imageinfo = "";
+        }
+        return $imageinfo;
+    }
+
+    protected function createimage($imagefile, $imagetype)
+    {
+        switch ($imagetype)
+        {
+            // Bedeutung von $imagetype:
+            // 1 = GIF, 2 = JPG, 3 = PNG, 4 = SWF, 5 = PSD, 6 = BMP, 7 = TIFF(intel byte order), 8 = TIFF(motorola byte order), 9 = JPC, 10 = JP2, 11 = JPX, 12 = JB2, 13 = SWC, 14 = IFF, 15 = WBMP, 16 = XBM
+            case 1: // GIF
+                $image = imagecreatefromgif($imagefile);
+                break;
+            case 2: // JPEG
+                $image = imagecreatefromjpeg($imagefile);
+                break;
+            case 3: // PNG
+                $image = imagecreatefrompng($imagefile);
+                //imagealphablending($image, true); // setting alpha blending on
+                //imagesavealpha($image, true); // save alphablending setting (important)
+                break;
+            default:
+                die('Unsupported imageformat');
+        }
+        return $image;
+    }
+
+    protected function createthumbnail($mediaimgwidth, $mediaimgheight, $imagewidth, $imageheight)
+    {
+        // Maximalausmaße
+        $maxthumbwidth = $mediaimgwidth;
+        $maxthumbheight = $mediaimgheight;
+        // Ausmaße kopieren, wir gehen zuerst davon aus, dass das Bild schon Thumbnailgröße hat
+        $thumbwidth = $imagewidth;
+        $thumbheight = $imageheight;
+        // Breite skalieren falls nötig
+        if ($thumbwidth > $maxthumbwidth)
+        {
+            $factor = $maxthumbwidth / $thumbwidth;
+            $thumbwidth *= $factor;
+            $thumbheight *= $factor;
+        }
+        // Höhe skalieren, falls nötig
+        if ($thumbheight > $maxthumbheight)
+        {
+            $factor = $maxthumbheight / $thumbheight;
+            $thumbwidth *= $factor;
+            $thumbheight *= $factor;
+        }
+        // Vergrößern Breite
+        if ($thumbwidth < $maxthumbwidth)
+        {
+            $factor = $maxthumbheight / $thumbheight;
+            $thumbwidth *= $factor;
+            $thumbheight *= $factor;
+        }
+        //vergrößern Höhe
+        if ($thumbheight < $maxthumbheight)
+        {
+            $factor = $maxthumbheight / $thumbheight;
+            $thumbwidth *= $factor;
+            $thumbheight *= $factor;
+        }
+
+        // Thumbnail erstellen
+        $thumbimg = imagecreatetruecolor($thumbwidth, $thumbheight);
+        imagesavealpha($thumbimg, true);
+        $trans_colour = imagecolorallocatealpha($thumbimg, 0, 0, 0, 127);
+        imagefill($thumbimg, 0, 0, $trans_colour);
+        $thumb = array("img" => $thumbimg, "width" => $thumbwidth, "height" => $thumbheight);
+        return $thumb;
+    }
+
+    protected function copyimgtothumbnail($thumb, $image, $thumbwidth, $thumbheight, $imagewidth, $imageheight, $picturename)
+    {
+        imagecopyresampled(
+            $thumb,
+            $image,
+            0, 0, 0, 0, // Startposition des Ausschnittes
+            $thumbwidth, $thumbheight,
+            $imagewidth, $imageheight
+        );
+        // In Datei speichern
+        $thumbfile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR."resampled_".$picturename.".png";  // Image-Datei
+        imagepng($thumb, $thumbfile);
+        imagedestroy($thumb);
+        return $thumbfile;
     }
 }
 ?>

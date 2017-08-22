@@ -1,4 +1,5 @@
 <?php
+namespace Sonos\Sonos;
 
 // SONOS Access Handler
 // using PHO SoapClient
