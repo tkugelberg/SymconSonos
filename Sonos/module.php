@@ -823,8 +823,6 @@ class Sonos extends IPSModule
             (new SonosAccess($ip))->Play();
         }else{
             SNS_Play($targetInstance);
-            $this->SendDebug("Sonos:", "Start play instance ". $targetInstance,0);
-            $this->SendDebug("Sonos:", "Sonos access in directory: ". __DIR__."/sonosAccess.php" ,0);
         }
     }
 
@@ -1478,6 +1476,8 @@ class Sonos extends IPSModule
 
     public function RequestAction($Ident, $Value)
     {
+        $this->SendDebug("Sonos:", "Request action for ident ". $Ident." with value ".$Value,0);
+        $this->SendDebug("Sonos:", "Sonos access in directory: ". __DIR__."/sonosAccess.php" ,0);
         switch($Ident) {
             case "Balance":
                 $this->SetBalance($Value);
