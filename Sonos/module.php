@@ -713,17 +713,17 @@ class Sonos extends IPSModule
 
     protected function CalculateSongPosition($Position, $TrackDuration)
     {
-        if (!$Position == "")
+        if ($Position == "")
+        {
+            $PositionP = 0;
+        }
+        else
         {
             $Position = explode(":", $Position);
             $TrackDuration = explode(":", $TrackDuration);
             $PositionSec = ($Position[0]*3600)+($Position[1]*60)+$Position[2];
             $TrackDurationSec = ($TrackDuration[0]*3600)+($TrackDuration[1]*60)+$TrackDuration[2];
             $PositionP = round(($PositionSec/$TrackDurationSec*100), 0);
-        }
-        else
-        {
-            $PositionP = 0;
         }
         return $PositionP;
     }
