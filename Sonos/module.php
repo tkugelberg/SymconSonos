@@ -1168,7 +1168,7 @@ class Sonos extends IPSModule
         // always hide GroupVolume, unhide executed on GroupCoordinator a few lines above
         @IPS_SetHidden(IPS_GetVariableIDByName("GroupVolume",$this->InstanceID),true);
         @IPS_SetHidden(IPS_GetVariableIDByName("MemberOfGroup",$this->InstanceID),false);
-        
+
         (new SonosAccess($ip))->SetAVTransportURI($uri);
     }
 

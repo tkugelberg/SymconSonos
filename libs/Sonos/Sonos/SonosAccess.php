@@ -4,7 +4,8 @@ namespace Sonos\Sonos;
 // SONOS Access Handler
 // using PHO SoapClient
 
-class SonosAccess{
+class SonosAccess
+{
 
   public function __construct( $address )
   {
