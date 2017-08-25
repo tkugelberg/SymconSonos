@@ -263,7 +263,7 @@ class Sonos extends IPSModule
 
         //2j) Position
         if ($this->ReadPropertyBoolean("Position")){
-            $this->RegisterVariableInteger("PositionPercent", "Position", "Sonos.PositionP", $positions['Position']);
+            $this->RegisterVariableInteger("PositionPercent", "Song Fortschritt", "Sonos.PositionP", $positions['Position']);
         }else{
             $this->removeVariable("PositionPercent", $links);
         }
@@ -719,7 +719,18 @@ class Sonos extends IPSModule
             $TrackDuration = explode(":", $TrackDuration);
             $PositionSec = ($Position[0]*3600)+($Position[1]*60)+$Position[2];
             $TrackDurationSec = ($TrackDuration[0]*3600)+($TrackDuration[1]*60)+$TrackDuration[2];
-            $PositionP = round(($PositionSec/$TrackDurationSec*100), 0);
+            if ($PositionSec == 0)
+            {
+                $PositionP = 0;
+            }
+            elseif ($TrackDurationSec == 0)
+            {
+                $PositionP = 0;
+            }
+            else
+            {
+                $PositionP = intval($PositionSec/$TrackDurationSec*100);
+            }
         }
         return $PositionP;
     }
