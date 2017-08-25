@@ -84,7 +84,7 @@ class Sonos extends IPSModule
         $this->RegisterProfileInteger("Sonos.Balance",  "Intensity",   "", " %", -100, 100, 1);
         $this->RegisterProfileIntegerEx("Sonos.Switch", "Information", "",   "", Array( Array(0, "Off", "", 0xFF0000),
                                                                                         Array(1, "On",  "", 0x00FF00) ));
-        $this->RegisterProfileInteger("Sonos.Position",   "Intensity",   "", " %",    0, 100, 1);
+        $this->RegisterProfileInteger("Sonos.PositionP",   "Intensity",   "", " %",    0, 100, 1);
         
         //Build Radio Station Associations according to user settings
         if(!IPS_VariableProfileExists("Sonos.Radio"))
@@ -263,7 +263,7 @@ class Sonos extends IPSModule
 
         //2j) Position
         if ($this->ReadPropertyBoolean("Position")){
-            $this->RegisterVariableInteger("PositionPercent", "Position", "Sonos.Position", $positions['Position']);
+            $this->RegisterVariableInteger("PositionPercent", "Position", "Sonos.PositionP", $positions['Position']);
         }else{
             $this->removeVariable("PositionPercent", $links);
         }
