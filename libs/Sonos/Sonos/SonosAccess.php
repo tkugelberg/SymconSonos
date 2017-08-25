@@ -18,11 +18,11 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "AddURIToQueue",
                            array( 
-                                  new SoapParam("0"                     ,"InstanceID"                     ),
-                                  new SoapParam(htmlspecialchars($file) ,"EnqueuedURI"                    ),
-                                  new SoapParam(""                      ,"EnqueuedURIMetaData"            ),
-                                  new SoapParam("0"                     ,"DesiredFirstTrackNumberEnqueued"),
-                                  new SoapParam("1"                     ,"EnqueueAsNext"                  )
+                                  new \SoapParam("0"                     ,"InstanceID"                     ),
+                                  new \SoapParam(htmlspecialchars($file) ,"EnqueuedURI"                    ),
+                                  new \SoapParam(""                      ,"EnqueuedURIMetaData"            ),
+                                  new \SoapParam("0"                     ,"DesiredFirstTrackNumberEnqueued"),
+                                  new \SoapParam("1"                     ,"EnqueueAsNext"                  )
                                 ));
   }
 
@@ -32,12 +32,12 @@ class SonosAccess
                                   "urn:schemas-upnp-org:service:ContentDirectory:1",
                                   "Browse",
                                   array(
-                                         new SoapParam($objectID      ,"ObjectID"      ),
-                                         new SoapParam($browseFlag    ,"BrowseFlag"    ),
-                                         new SoapParam($filter        ,"Filter"        ),
-                                         new SoapParam($startingIndex ,"StartingIndex" ),
-                                         new SoapParam($requestedCount,"RequestedCount"),
-                                         new SoapParam($sortCriteria  ,"SortCriteria"  )
+                                         new \SoapParam($objectID      ,"ObjectID"      ),
+                                         new \SoapParam($browseFlag    ,"BrowseFlag"    ),
+                                         new \SoapParam($filter        ,"Filter"        ),
+                                         new \SoapParam($startingIndex ,"StartingIndex" ),
+                                         new \SoapParam($requestedCount,"RequestedCount"),
+                                         new \SoapParam($sortCriteria  ,"SortCriteria"  )
                                        ));
   }
 
@@ -47,7 +47,7 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "RemoveAllTracksFromQueue",
                             array(
-                                   new SoapParam("0","InstanceID")
+                                   new \SoapParam("0","InstanceID")
                                  ));
   }
 
@@ -57,8 +57,8 @@ class SonosAccess
                                        "urn:schemas-upnp-org:service:RenderingControl:1",
                                        "GetBass",
                                        array(
-                                              new SoapParam("0"     ,"InstanceID"),
-                                              new SoapParam("Master","Channel"   )
+                                              new \SoapParam("0"     ,"InstanceID"),
+                                              new \SoapParam("Master","Channel"   )
                                             ));
   }
 
@@ -68,7 +68,7 @@ class SonosAccess
                                        "urn:schemas-upnp-org:service:AVTransport:1",
                                        "GetCrossfadeMode",
                                        array(
-                                              new SoapParam("0","InstanceID")
+                                              new \SoapParam("0","InstanceID")
                                             ));
   }
 
@@ -78,8 +78,8 @@ class SonosAccess
                                        "urn:schemas-upnp-org:service:RenderingControl:1",
                                        "GetLoudness",
                                        array(
-                                              new SoapParam("0"     ,"InstanceID"),
-                                              new SoapParam("Master","Channel"   )
+                                              new \SoapParam("0"     ,"InstanceID"),
+                                              new \SoapParam("Master","Channel"   )
                                             )); 
   }
 
@@ -89,7 +89,7 @@ class SonosAccess
                                         "urn:schemas-upnp-org:service:AVTransport:1",
                                         "GetMediaInfo",
                                         array(
-                                               new SoapParam("0","InstanceID")
+                                               new \SoapParam("0","InstanceID")
                                              ));
 
     $xmlParser = xml_parser_create("UTF-8");
@@ -112,8 +112,8 @@ class SonosAccess
                                        "urn:schemas-upnp-org:service:RenderingControl:1",
                                        "GetMute",
                                        array(
-                                              new SoapParam("0"     ,"InstanceID"),
-                                              new SoapParam("Master","Channel"   )
+                                              new \SoapParam("0"     ,"InstanceID"),
+                                              new \SoapParam("Master","Channel"   )
                                             ));
   }
 
@@ -123,7 +123,7 @@ class SonosAccess
                                            "urn:schemas-upnp-org:service:AVTransport:1",
                                            "GetPositionInfo",
                                            array(
-                                                  new SoapParam("0","InstanceID")
+                                                  new \SoapParam("0","InstanceID")
                                                  ));
 
     $xmlParser = xml_parser_create("UTF-8");
@@ -180,7 +180,7 @@ class SonosAccess
                                              "urn:schemas-upnp-org:service:AVTransport:1",
                                              "GetRemainingSleepTimerDuration",
                                              array(
-                                                    new SoapParam("0","InstanceID")
+                                                    new \SoapParam("0","InstanceID")
                                                   ));
     return $remainingTimer["RemainingSleepTimerDuration"];
  
@@ -192,7 +192,7 @@ class SonosAccess
                                             "urn:schemas-upnp-org:service:AVTransport:1",
                                             "GetTransportInfo",
                                             array(
-                                                   new SoapParam("0","InstanceID")
+                                                   new \SoapParam("0","InstanceID")
                                                  ));
     
     switch ($returnContent["CurrentTransportState"]){
@@ -205,7 +205,7 @@ class SonosAccess
       case "TRANSITIONING":
         return 5;
       default:
-        throw new Exception("Unknown Transport State: ".$returnContent["CurrentTransportState"]); 
+        throw new \Exception("Unknown Transport State: ".$returnContent["CurrentTransportState"]);
     }
   }
 
@@ -215,7 +215,7 @@ class SonosAccess
                                             "urn:schemas-upnp-org:service:AVTransport:1",
                                             "GetTransportSettings",
                                             array(
-                                                   new SoapParam("0","InstanceID")
+                                                   new \SoapParam("0","InstanceID")
                                                  ));
 
     switch ($returnContent["PlayMode"]){
@@ -232,7 +232,7 @@ class SonosAccess
       case "SHUFFLE_REPEAT_ONE":
         return 5;
       default:
-        throw new Exception("Unknown Play Mode: ".$returnContent["CurrentTransportState"]);
+        throw new \Exception("Unknown Play Mode: ".$returnContent["CurrentTransportState"]);
     }
   }
 
@@ -242,8 +242,8 @@ class SonosAccess
                                        "urn:schemas-upnp-org:service:RenderingControl:1",
                                        "GetTreble",
                                        array(
-                                              new SoapParam("0"     ,"InstanceID"),
-                                              new SoapParam("Master","Channel"   )
+                                              new \SoapParam("0"     ,"InstanceID"),
+                                              new \SoapParam("Master","Channel"   )
                                             ));
                                        
   }
@@ -254,8 +254,8 @@ class SonosAccess
                                        "urn:schemas-upnp-org:service:RenderingControl:1",
                                        "GetVolume",
                                        array(
-                                              new SoapParam("0"     ,"InstanceID"),
-                                              new SoapParam($channel,"Channel"   )
+                                              new \SoapParam("0"     ,"InstanceID"),
+                                              new \SoapParam($channel,"Channel"   )
                                             ));
   }
 
@@ -274,7 +274,7 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "Next",
                            array(
-                                  new SoapParam("0","InstanceID")
+                                  new \SoapParam("0","InstanceID")
                                 ));
   }
 
@@ -284,7 +284,7 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "Pause",
                             array(
-                                   new SoapParam("0","InstanceID")
+                                   new \SoapParam("0","InstanceID")
                                  ));
   }
 
@@ -294,8 +294,8 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "Play",
                            array(
-                                  new SoapParam("0","InstanceID"),
-                                  new SoapParam("1","Speed"     )
+                                  new \SoapParam("0","InstanceID"),
+                                  new \SoapParam("1","Speed"     )
                                 ));
   }
 
@@ -305,7 +305,7 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "Previous",
                             array(
-                                   new SoapParam("0","InstanceID")
+                                   new \SoapParam("0","InstanceID")
                                  ));
   }
 
@@ -327,12 +327,12 @@ class SonosAccess
                                   "urn:schemas-upnp-org:service:RenderingControl:1",
                                   "RampToVolume",
                                    array(
-                                          new SoapParam("0",      "InstanceID"),
-                                          new SoapParam("Master", "Channel"),
-                                          new SoapParam($rampType,"RampType"),
-                                          new SoapParam($volume,  "DesiredVolume"),
-                                          new SoapParam(0,        "ResetVolumeAfter"),
-                                          new SoapParam("",       "ProgramURI")
+                                          new \SoapParam("0",      "InstanceID"),
+                                          new \SoapParam("Master", "Channel"),
+                                          new \SoapParam($rampType,"RampType"),
+                                          new \SoapParam($volume,  "DesiredVolume"),
+                                          new \SoapParam(0,        "ResetVolumeAfter"),
+                                          new \SoapParam("",       "ProgramURI")
                                         ));
   }
 
@@ -342,8 +342,8 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "RemoveTrackFromQueue",
                            array(
-                                  new SoapParam("0"          ,"InstanceID"),
-                                  new SoapParam("Q:0/".$track,"ObjectID"  )
+                                  new \SoapParam("0"          ,"InstanceID"),
+                                  new \SoapParam("Q:0/".$track,"ObjectID"  )
                                 ));
   }
 
@@ -358,9 +358,9 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "Seek",
                            array(
-                                  new SoapParam("0"    ,"InstanceID"),
-                                  new SoapParam($unit  ,"Unit"      ),
-                                  new SoapParam($target,"Target"    )
+                                  new \SoapParam("0"    ,"InstanceID"),
+                                  new \SoapParam($unit  ,"Unit"      ),
+                                  new \SoapParam($target,"Target"    )
                                 ));
   }
 
@@ -370,9 +370,9 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "SetAVTransportURI",
                            array(
-                                  new SoapParam("0"                      ,"InstanceID"        ),
-                                  new SoapParam(htmlspecialchars($tspuri),"CurrentURI"        ),
-                                  new SoapParam($MetaData                ,"CurrentURIMetaData")
+                                  new \SoapParam("0"                      ,"InstanceID"        ),
+                                  new \SoapParam(htmlspecialchars($tspuri),"CurrentURI"        ),
+                                  new \SoapParam($MetaData                ,"CurrentURIMetaData")
                                 ));
   }
 
@@ -382,8 +382,8 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:RenderingControl:1",
                            "SetBass",
                            array(
-                                  new SoapParam("0"  ,"InstanceID" ),
-                                  new SoapParam($bass,"DesiredBass")
+                                  new \SoapParam("0"  ,"InstanceID" ),
+                                  new \SoapParam($bass,"DesiredBass")
                                 ));
   }
 
@@ -399,8 +399,8 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "SetCrossfadeMode",
                            array(
-                                  new SoapParam("0"       ,"InstanceID"   ),
-                                  new SoapParam($crossfade,"CrossfadeMode")
+                                  new \SoapParam("0"       ,"InstanceID"   ),
+                                  new \SoapParam($crossfade,"CrossfadeMode")
                                 ));
   }
 
@@ -416,9 +416,9 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:RenderingControl:1",
                            "SetLoudness",
                            array(
-                                  new SoapParam("0"     ,"InstanceID"     ),
-                                  new SoapParam("Master","Channel"        ),
-                                  new SoapParam($loud   ,"DesiredLoudness")
+                                  new \SoapParam("0"     ,"InstanceID"     ),
+                                  new \SoapParam("Master","Channel"        ),
+                                  new \SoapParam($loud   ,"DesiredLoudness")
                                 ));
   }
 
@@ -434,9 +434,9 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:RenderingControl:1",
                            "SetMute",
                            array(
-                                  new SoapParam("0"     ,"InstanceID" ),
-                                  new SoapParam("Master","Channel"    ),
-                                  new SoapParam($mute   ,"DesiredMute")
+                                  new \SoapParam("0"     ,"InstanceID" ),
+                                  new \SoapParam("Master","Channel"    ),
+                                  new \SoapParam($mute   ,"DesiredMute")
                                 ));
   }
 
@@ -462,15 +462,15 @@ class SonosAccess
         $PlayMode = "SHUFFLE_REPEAT_ONE";
         break;
       default:
-        throw new Exception("Unknown Play Mode: ".$PlayMode);
+        throw new \Exception("Unknown Play Mode: ".$PlayMode);
     }
   
     $this->processSoapCall("/MediaRenderer/AVTransport/Control",
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "SetPlayMode",
                            array(
-                                  new SoapParam("0"      ,"InstanceID"  ),
-                                  new SoapParam($PlayMode,"NewPlayMode" )
+                                  new \SoapParam("0"      ,"InstanceID"  ),
+                                  new \SoapParam($PlayMode,"NewPlayMode" )
                                 ));
   }
 
@@ -498,8 +498,8 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "ConfigureSleepTimer",
                            array(
-                                  new SoapParam("0"        ,"InstanceID"           ),
-                                  new SoapParam($sleeptimer,"NewSleepTimerDuration")
+                                  new \SoapParam("0"        ,"InstanceID"           ),
+                                  new \SoapParam($sleeptimer,"NewSleepTimerDuration")
                                 ));
   }
 
@@ -514,8 +514,8 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:RenderingControl:1",
                            "SetTreble",
                            array(
-                                  new SoapParam("0"    ,"InstanceID"   ),
-                                  new SoapParam($treble,"DesiredTreble")
+                                  new \SoapParam("0"    ,"InstanceID"   ),
+                                  new \SoapParam($treble,"DesiredTreble")
                                 ));
   }
 
@@ -525,9 +525,9 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:RenderingControl:1",
                            "SetVolume",
                            array(
-                                  new SoapParam("0"     ,"InstanceID"   ),
-                                  new SoapParam($channel,"Channel"      ),
-                                  new SoapParam($volume ,"DesiredVolume")
+                                  new \SoapParam("0"     ,"InstanceID"   ),
+                                  new \SoapParam($channel,"Channel"      ),
+                                  new \SoapParam($volume ,"DesiredVolume")
                                 ));
   }
 
@@ -537,7 +537,7 @@ class SonosAccess
                            "urn:schemas-upnp-org:service:AVTransport:1",
                            "Stop",
                            array(
-                                  new SoapParam("0","InstanceID")
+                                  new \SoapParam("0","InstanceID")
                                 ));
   }
 
@@ -545,19 +545,19 @@ class SonosAccess
   private function processSoapCall($path,$uri,$action,$parameter)
   {
     try{
-      $client     = new SoapClient(null, array("location"   => "http://".$this->address.":1400".$path,
+      $client     = new \SoapClient(null, array("location"   => "http://".$this->address.":1400".$path,
                                                "uri"        => $uri,
                                                "trace"      => true ));
 
       return $client->__soapCall($action,$parameter);
-    }catch(Exception $e){
+    }catch(\Exception $e){
       $faultstring = $e->faultstring;
       $faultcode   = $e->faultcode;
       if(isset($e->detail->UPnPError->errorCode)){
         $errorCode   = $e->detail->UPnPError->errorCode;
-        throw new Exception("Error during Soap Call: ".$faultstring." ".$faultcode." ".$errorCode." (".$this->resoveErrorCode($path,$errorCode).")");
+        throw new \Exception("Error during Soap Call: ".$faultstring." ".$faultcode." ".$errorCode." (".$this->resoveErrorCode($path,$errorCode).")");
       }else{
-        throw new Exception("Error during Soap Call: ".$faultstring." ".$faultcode);
+        throw new \Exception("Error during Soap Call: ".$faultstring." ".$faultcode);
       }
     }
   }
