@@ -516,7 +516,11 @@ class Sonos extends IPSModule
                                 $serial = substr($this->ReadPropertyString("RINCON"), 7,12);
                                 $image = preg_replace('#(.*)<LOGO>(.*?)\</LOGO>(.*)#is','$2',@file_get_contents("http://opml.radiotime.com/Describe.ashx?c=nowplaying&id=".$stationID."&partnerId=IAeIhU42&serial=".$serial));
                             }
-                            $this->RefreshMediaImage($image);
+                            if($this->ReadPropertyBoolean("MediaImage"))
+                            {
+                                $this->RefreshMediaImage($image);
+                            }
+
                         }else{
                             $stationID = "";
                         }
