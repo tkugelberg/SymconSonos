@@ -414,7 +414,7 @@ class Sonos extends IPSModule
             if($vidPosition)      SetValueString($vidPosition,      @GetValueString(IPS_GetObjectIDByName("Position", $MemberOfGroup)));
             if($vidTitle)         SetValueString($vidTitle,         @GetValueString(IPS_GetObjectIDByName("Title", $MemberOfGroup)));
             if($vidDetails)       SetValueString($vidDetails,       @GetValueString(IPS_GetObjectIDByName("Details", $MemberOfGroup)));
-            if($vidPositionPercent) SetValueString($vidPositionPercent,       @GetValueInteger(IPS_GetObjectIDByName("PositionPercent", $MemberOfGroup)));
+            if($vidPositionPercent) SetValueInteger($vidPositionPercent,       @GetValueInteger(IPS_GetObjectIDByName("PositionPercent", $MemberOfGroup)));
         }
         else
         {
@@ -485,7 +485,7 @@ class Sonos extends IPSModule
             if($vidAlbum)           SetValueString($vidAlbum,         @$positionInfo['album']);
             if($vidTrackDuration)   SetValueString($vidTrackDuration, @$positionInfo['TrackDuration'] );
             if($vidPosition)        SetValueString($vidPosition,      @$positionInfo['RelTime']);
-            if($vidPositionPercent)        SetValueString($vidPositionPercent,      $this->CalculateSongPosition($positionInfo['RelTime'], $positionInfo['TrackDuration']));
+            if($vidPositionPercent)        SetValueInteger($vidPositionPercent,      $this->CalculateSongPosition($positionInfo['RelTime'], $positionInfo['TrackDuration']));
             if($vidTitle){
                 if(@$mediaInfo['title']){
                     SetValueString($vidTitle, @$mediaInfo['title']);
