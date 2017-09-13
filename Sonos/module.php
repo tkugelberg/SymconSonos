@@ -515,19 +515,17 @@ class Sonos extends IPSModule
                         // get stationID if playing via TuneIn
                         $stationID = preg_replace("#(.*)x-sonosapi-stream:(.*?)\?sid(.*)#is",'$2',$mediaInfo['CurrentURI']);
                         if (!isset($image)) $image = "";
-                        if($stationID && $stationID[0]=="s"){
+                        if($stationID && $stationID[0]=="s")
+                        {
                             if(@GetValueString($vidStationID) == $stationID){
                                 $image = GetValueString($vidCoverURL);
                             }else{
                                 $serial = substr($this->ReadPropertyString("RINCON"), 7,12);
                                 $image = preg_replace('#(.*)<LOGO>(.*?)\</LOGO>(.*)#is','$2',@file_get_contents("http://opml.radiotime.com/Describe.ashx?c=nowplaying&id=".$stationID."&partnerId=IAeIhU42&serial=".$serial));
                             }
-                            if($this->ReadPropertyBoolean("MediaImage"))
-                            {
-                                $this->RefreshMediaImage($image);
-                            }
-
-                        }else{
+                        }
+                        else
+                        {
                             $stationID = "";
                         }
                         $detailHTML =   "<table width=\"100%\">
@@ -540,7 +538,8 @@ class Sonos extends IPSModule
                               </div>
                             </td>";
 
-                        if(strlen($image) > 0) {
+                        if(strlen($image) > 0)
+                        {
                             $detailHTML .= "<td width=\"170px\" valign=\"top\">
                               <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0; margin-bottom: 10px;\">
                               	<img src=\"".@$image."\" style=\"max-width: 170px; max-height: 170px; -webkit-box-reflect: below 0 -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.88, transparent), to(rgba(255, 255, 255, 0.5))); transform: rotateY(-10deg) translateZ(-35px);\">
@@ -590,10 +589,21 @@ class Sonos extends IPSModule
                 }
                 @SetValueString($vidDetails, $detailHTML);
                 if($vidCoverURL){
-                    if((isset($image)) && (strlen($image) > 0)) {
+                    if((isset($image)) && (strlen($image) > 0))
+                    {
                         SetValueString($vidCoverURL, $image);
-                    }else{
+                        if($this->ReadPropertyBoolean("MediaImage"))
+                        {
+                            $this->RefreshMediaImage($image);
+                        }
+                    }
+                    else
+                    {
                         SetValueString($vidCoverURL, @$positionInfo['albumArtURI']);
+                        if($this->ReadPropertyBoolean("MediaImage"))
+                        {
+                            $this->RefreshMediaImage($positionInfo['albumArtURI']);
+                        }
                     }
                 }
                 SetValueString($vidStationID,$stationID);
