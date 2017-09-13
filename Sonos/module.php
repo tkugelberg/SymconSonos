@@ -1584,15 +1584,19 @@ class Sonos extends IPSModule
     {
 
         $picurl = @GetValue($this->GetIDForIdent("CoverURL")); // Cover URL Variable des Sonos Players
+        $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR."sonoscover".$name.".png";  // Image-Datei
         if ($picurl)
         {
             $Content = base64_encode(file_get_contents($picurl)); // Bild Base64 codieren
+            // convert to png
+            imagepng(imagecreatefromstring(file_get_contents($picurl)), $ImageFile);
         }
         else
         {
             // set transparent image
-            $picurl = "transparent";
             $Content = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Transparent png 1x1 Base64
+            $data = base64_decode($Content);
+            file_put_contents($ImageFile, $data);
         }
         $MediaID = @$this->GetIDForIdent($ident);
         if ($MediaID === false)
@@ -1605,35 +1609,26 @@ class Sonos extends IPSModule
             // Das Cachen für das Mediaobjekt wird aktiviert.
             // Beim ersten Zugriff wird dieses von der Festplatte ausgelesen
             // und zukünftig nur noch im Arbeitsspeicher verarbeitet.
-            $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR."sonoscover".$name.".png";  // Image-Datei
             IPS_SetMediaFile($MediaID, $ImageFile, False);    // Image im MedienPool mit Image-Datei verbinden
             IPS_SetName($MediaID, $name); // Medienobjekt benennen
             IPS_SetInfo ($MediaID, $name);
             IPS_SetMediaContent($MediaID, $Content);  // Base64 codiertes Bild ablegen
             IPS_SendMediaEvent($MediaID); //aktualisieren
             $picturename = "sonoscover".$name;
-            $this->ResizeCover($picturename, $ImageFile, $picurl);
+            $this->ResizeCover($picturename, $ImageFile);
         }
     }
 
-    protected function ResizeCover($picturename, $ImageFile, $picurl)
+    protected function ResizeCover($picturename, $ImageFile)
     {
         $selectionresize = $this->ReadPropertyBoolean("selectionresize");
         $coversize = $this->ReadPropertyInteger("coversize");
         if ($selectionresize)//resize image
         {
-            if($picurl == "transparent")
-            {
-                $imageinfo = array("imagewidth" => 1, "imageheight" => 1, "imagetype" => 3);
-            }
-            else
-            {
-                $imageinfo = $this->getimageinfo($picurl);
-            }
-
+            $imageinfo = $this->getimageinfo($ImageFile);
             if($imageinfo)
             {
-                $image = $this->createimage($ImageFile, 3);
+                $image = $this->createimage($ImageFile, $imageinfo["imagetype"]);
                 $thumb = $this->createthumbnail($coversize, $coversize, $imageinfo["imagewidth"],$imageinfo["imageheight"]);
                 $thumbimg = $thumb["img"];
                 $thumbwidth = $thumb["width"];
@@ -1788,32 +1783,7 @@ class Sonos extends IPSModule
         
     }
 
-    protected function CreateMediaImage($Ident, $name, $picid, $Content, $ImageFile, $position, $visible)
-    {
-        $MediaID = false;
-        if($this->ReadPropertyBoolean($visible) == true)
-        {
-            $MediaID = @$this->GetIDForIdent($Ident);
-            if ($MediaID === false)
-            {
-                $MediaID = IPS_CreateMedia(1);                  // Image im MedienPool anlegen
-                IPS_SetParent($MediaID, $this->InstanceID); // Medienobjekt einsortieren unter dem Modul
-                IPS_SetIdent ($MediaID, $Ident);
-                IPS_SetPosition($MediaID, $position);
-                IPS_SetMediaCached($MediaID, true);
-                // Das Cachen für das Mediaobjekt wird aktiviert.
-                // Beim ersten Zugriff wird dieses von der Festplatte ausgelesen
-                // und zukünftig nur noch im Arbeitsspeicher verarbeitet.
-                IPS_SetName($MediaID, $name); // Medienobjekt benennen
-            }
 
-            IPS_SetMediaFile($MediaID, $ImageFile, False);    // Image im MedienPool mit Image-Datei verbinden
-            IPS_SetInfo ($MediaID, $picid);
-            IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
-            IPS_SendMediaEvent($MediaID); //aktualisieren
-        }
-        return $MediaID;
-    }
 
     protected function getimageinfo($imagefile)
     {
