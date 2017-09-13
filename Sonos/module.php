@@ -271,8 +271,10 @@ class Sonos extends IPSModule
         }
 
         //2k) Media image for cover
-        if ($this->ReadPropertyBoolean("MediaImage")){
-            $this->CreateSonosMediaImage("SonosMediaImageCover", "Cover", $positions['MediaImage']);
+        if ($this->ReadPropertyBoolean("MediaImage"))
+        {
+            $covername = IPS_GetName($this->InstanceID);
+            $this->CreateSonosMediaImage("SonosMediaImageCover", $covername, $positions['MediaImage']);
             //$this->RegisterVariableInteger("SonosMediaImageCover", "Cover", "", $positions['MediaImage']);
         }else{
             $this->removeMediaImage("SonosMediaImageCover", $links);
@@ -1589,6 +1591,7 @@ class Sonos extends IPSModule
         else
         {
             // set transparent image
+            $picurl = "transparent";
             $Content = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Transparent png 1x1 Base64
         }
         $MediaID = @$this->GetIDForIdent($ident);
@@ -1609,20 +1612,28 @@ class Sonos extends IPSModule
             IPS_SetMediaContent($MediaID, $Content);  // Base64 codiertes Bild ablegen
             IPS_SendMediaEvent($MediaID); //aktualisieren
             $picturename = "sonoscover".$name;
-            $this->ResizeCover($picturename, $ImageFile);
+            $this->ResizeCover($picturename, $ImageFile, $picurl);
         }
     }
 
-    protected function ResizeCover($picturename, $ImageFile)
+    protected function ResizeCover($picturename, $ImageFile, $picurl)
     {
         $selectionresize = $this->ReadPropertyBoolean("selectionresize");
         $coversize = $this->ReadPropertyInteger("coversize");
         if ($selectionresize)//resize image
         {
-            $imageinfo = $this->getimageinfo($ImageFile);
+            if($picurl == "transparent")
+            {
+                $imageinfo = array("imagewidth" => 1, "imageheight" => 1, "imagetype" => 3);
+            }
+            else
+            {
+                $imageinfo = $this->getimageinfo($picurl);
+            }
+
             if($imageinfo)
             {
-                $image = $this->createimage($ImageFile, $imageinfo["imagetype"]);
+                $image = $this->createimage($ImageFile, 3);
                 $thumb = $this->createthumbnail($coversize, $coversize, $imageinfo["imagewidth"],$imageinfo["imageheight"]);
                 $thumbimg = $thumb["img"];
                 $thumbwidth = $thumb["width"];
