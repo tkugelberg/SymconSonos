@@ -40,6 +40,8 @@ class Sonos extends IPSModule
         $this->RegisterPropertyString("RINCON", "");
         $this->RegisterTimer('SonosTimerUpdateStatus', 5000, 'SNS_UpdateStatus('.$this->InstanceID.');');
         $this->RegisterTimer('SonosTimerUpdateGrouping', 120000, 'SNS_UpdateGrouping('.$this->InstanceID.');');
+        $this->RegisterPropertyBoolean("selectionresize", true);
+        $this->RegisterPropertyInteger("coversize", 100);
        
     }
     
@@ -1578,38 +1580,65 @@ class Sonos extends IPSModule
 
     protected function CreateSonosMediaImage($ident, $name, $position)
     {
-        $details = GetValue($this->GetIDForIdent("Details")); // Detail Variable des Sonos Players
-        $picurlstart = strpos($details, '<img src="');
-        $picurlend = strpos($details, '" style="max-width: 170px; max-height: 170px; -webkit-box-reflect');
-        $picurllength = $picurlend - ($picurlstart+10);
-        $picurl = substr($details, ($picurlstart+10), ($picurllength));
-        if ($picurl == "")
+
+        $picurl = @GetValue($this->GetIDForIdent("CoverURL")); // Cover URL Variable des Sonos Players
+        if ($picurl)
         {
-            $Content = "";
+            $Content = base64_encode(file_get_contents($picurl)); // Bild Base64 codieren
         }
         else
         {
-            $Content = file_get_contents($picurl);
+            // set transparent image
+            $Content = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Transparent png 1x1 Base64
         }
-        $MediaID = IPS_CreateMedia(1);                  // Image im MedienPool anlegen
-        IPS_SetParent($MediaID, $this->InstanceID); // Medienobjekt einsortieren unter der Sonos Instanz
-        IPS_SetIdent ($MediaID, $ident);
-        IPS_SetPosition($MediaID, $position);
-        IPS_SetMediaCached($MediaID, true);
-        // Das Cachen für das Mediaobjekt wird aktiviert.
-        // Beim ersten Zugriff wird dieses von der Festplatte ausgelesen
-        // und zukünftig nur noch im Arbeitsspeicher verarbeitet.
-        $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR."sonoscover".$name.".jpg";  // Image-Datei
-        IPS_SetMediaFile($MediaID, $ImageFile, False);    // Image im MedienPool mit Image-Datei verbinden
-        IPS_SetName($MediaID, $name); // Medienobjekt benennen
-        IPS_SetInfo ($MediaID, $name);
-        IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
-        IPS_SendMediaEvent($MediaID); //aktualisieren
+        $MediaID = @$this->GetIDForIdent($ident);
+        if ($MediaID === false)
+        {
+            $MediaID = IPS_CreateMedia(1);                  // Image im MedienPool anlegen
+            IPS_SetParent($MediaID, $this->InstanceID); // Medienobjekt einsortieren unter der Sonos Instanz
+            IPS_SetIdent ($MediaID, $ident);
+            IPS_SetPosition($MediaID, $position);
+            IPS_SetMediaCached($MediaID, true);
+            // Das Cachen für das Mediaobjekt wird aktiviert.
+            // Beim ersten Zugriff wird dieses von der Festplatte ausgelesen
+            // und zukünftig nur noch im Arbeitsspeicher verarbeitet.
+            $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR."sonoscover".$name.".png";  // Image-Datei
+            IPS_SetMediaFile($MediaID, $ImageFile, False);    // Image im MedienPool mit Image-Datei verbinden
+            IPS_SetName($MediaID, $name); // Medienobjekt benennen
+            IPS_SetInfo ($MediaID, $name);
+            IPS_SetMediaContent($MediaID, $Content);  // Base64 codiertes Bild ablegen
+            IPS_SendMediaEvent($MediaID); //aktualisieren
+            $picturename = "sonoscover".$name;
+            $this->ResizeCover($picturename, $ImageFile);
+        }
     }
 
-    protected function CreateTransparentImage()
+    protected function ResizeCover($picturename, $ImageFile)
     {
-
+        $selectionresize = $this->ReadPropertyBoolean("selectionresize");
+        $coversize = $this->ReadPropertyInteger("coversize");
+        if ($selectionresize)//resize image
+        {
+            $imageinfo = $this->getimageinfo($ImageFile);
+            if($imageinfo)
+            {
+                $image = $this->createimage($ImageFile, $imageinfo["imagetype"]);
+                $thumb = $this->createthumbnail($coversize, $coversize, $imageinfo["imagewidth"],$imageinfo["imageheight"]);
+                $thumbimg = $thumb["img"];
+                $thumbwidth = $thumb["width"];
+                $thumbheight = $thumb["height"];
+                $ImageFile = $this->copyimgtothumbnail($thumbimg, $image, $thumbwidth, $thumbheight, $imageinfo["imagewidth"],$imageinfo["imageheight"], $picturename);
+            }
+            else
+            {
+                IPS_LogMessage("Sonos", "Bild wurde nicht gefunden.");
+            }
+            $MediaID = $this->GetIDForIdent("SonosMediaImageCover");
+            $Content = @Sys_GetURLContent($ImageFile);
+            IPS_SetMediaFile($MediaID, $ImageFile, False);    // Image im MedienPool mit Image-Datei verbinden
+            IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
+            IPS_SendMediaEvent($MediaID); //aktualisieren
+        }
     }
 
     protected function CreateCoverMirrorEffect($size, $angle)
