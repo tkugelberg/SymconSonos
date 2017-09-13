@@ -276,7 +276,9 @@ class Sonos extends IPSModule
             $covername = IPS_GetName($this->InstanceID);
             $this->CreateSonosMediaImage("SonosMediaImageCover", $covername, $positions['MediaImage']);
             //$this->RegisterVariableInteger("SonosMediaImageCover", "Cover", "", $positions['MediaImage']);
-        }else{
+        }
+        else
+        {
             $this->removeMediaImage("SonosMediaImageCover", $links);
         }
 
@@ -1647,20 +1649,34 @@ class Sonos extends IPSModule
         }
     }
 
-    protected function CreateCoverMirrorEffect($size, $angle)
+    protected function CreateCoverMirrorEffect()
     {
-
+         $angle = 30;
     }
 
     protected function RefreshMediaImage($picurl)
     {
-        if($picurl != "")
+        $selectionresize = $this->ReadPropertyBoolean("selectionresize");
+        $coversize = $this->ReadPropertyInteger("coversize");
+        $imageinfo = $this->getimageinfo($picurl);
+        if ($selectionresize)//resize image
         {
-            $Content = Sys_GetURLContent($picurl);
-            $MediaID = $this->GetIDForIdent("SonosMediaImageCover");
-            IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
-            IPS_SendMediaEvent($MediaID); //aktualisieren
-            $this->SendDebug("Sonos:", "Refresh cover in media image ". $MediaID,0);
+            if($picurl != "")
+            {
+                $image_p = imagecreatetruecolor($coversize, $coversize);
+                $image = imagecreatefromstring(file_get_contents($picurl));
+                imagecopyresampled($image_p, $image, 0, 0, 0, 0, $coversize, $coversize, $imageinfo["imagewidth"], $imageinfo["imageheight"]);
+                ob_start ();
+                imagepng($image_p);
+                $image_data = ob_get_contents ();
+                ob_end_clean ();
+                $image_data_base64 = base64_encode ($image_data);
+                imagedestroy($image_p);
+                $MediaID = $this->GetIDForIdent("SonosMediaImageCover");
+                IPS_SetMediaContent($MediaID, $image_data_base64);  //Bild Base64 codieren und ablegen
+                IPS_SendMediaEvent($MediaID); //aktualisieren
+                $this->SendDebug("Sonos:", "Refresh cover in media image ". $MediaID,0);
+            }
         }
     }
 
