@@ -2,6 +2,7 @@
 require_once(__DIR__ . DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."bootstrap.php");
 use Sonos\Radio\RadioStations;
 use Sonos\Sonos\SonosAccess;
+use Sonos\PHPImageWorkshop\ImageWorkshop;
 
 
 class Sonos extends IPSModule
@@ -42,6 +43,8 @@ class Sonos extends IPSModule
         $this->RegisterTimer('SonosTimerUpdateGrouping', 120000, 'SNS_UpdateGrouping('.$this->InstanceID.');');
         $this->RegisterPropertyBoolean("selectionresize", true);
         $this->RegisterPropertyInteger("coversize", 100);
+        $this->RegisterPropertyInteger("coverangle", 10);
+        $this->RegisterPropertyBoolean("reflection", true);
        
     }
     
@@ -273,8 +276,7 @@ class Sonos extends IPSModule
         //2k) Media image for cover
         if ($this->ReadPropertyBoolean("MediaImage"))
         {
-            $covername = IPS_GetName($this->InstanceID);
-            $this->CreateSonosMediaImage("SonosMediaImageCover", $covername, $positions['MediaImage']);
+            $this->CreateSonosMediaImage("SonosMediaImageCover", $positions['MediaImage']);
             //$this->RegisterVariableInteger("SonosMediaImageCover", "Cover", "", $positions['MediaImage']);
         }
         else
@@ -1592,28 +1594,31 @@ class Sonos extends IPSModule
         die("Instance is not a coordinator and group coordinator could not be determined");
     }
 
-    protected function CreateSonosMediaImage($ident, $name, $position)
+    protected function CreateSonosMediaImage($ident, $position)
     {
-
+        $covername = $this->Covername();
         $picurl = @GetValue($this->GetIDForIdent("CoverURL")); // Cover URL Variable des Sonos Players
-        $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR."sonoscover".$name.".png";  // Image-Datei
-        if ($picurl)
-        {
-            $Content = base64_encode(file_get_contents($picurl)); // Bild Base64 codieren
-            // convert to png
-            imagepng(imagecreatefromstring(file_get_contents($picurl)), $ImageFile);
-        }
-        else
-        {
-            // set transparent image
-            $Content = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Transparent png 1x1 Base64
-            $data = base64_decode($Content);
-            file_put_contents($ImageFile, $data);
-        }
+        $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR.$covername.".png";  // Image-Datei
+
         $MediaID = @$this->GetIDForIdent($ident);
         if ($MediaID === false)
         {
+            if ($picurl)
+            {
+                $Content = base64_encode(file_get_contents($picurl)); // Bild Base64 codieren
+                // convert to png
+                imagepng(imagecreatefromstring(file_get_contents($picurl)), $ImageFile); // save PNG
+            }
+            else
+            {
+                // set transparent image
+                $Content = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Transparent png 1x1 Base64
+                $data = base64_decode($Content);
+                file_put_contents($ImageFile, $data); // save PNG
+                $picurl = false;
+            }
             $MediaID = IPS_CreateMedia(1);                  // Image im MedienPool anlegen
+            $name = IPS_GetName($this->InstanceID);
             IPS_SetParent($MediaID, $this->InstanceID); // Medienobjekt einsortieren unter der Sonos Instanz
             IPS_SetIdent ($MediaID, $ident);
             IPS_SetPosition($MediaID, $position);
@@ -1626,68 +1631,149 @@ class Sonos extends IPSModule
             IPS_SetInfo ($MediaID, $name);
             IPS_SetMediaContent($MediaID, $Content);  // Base64 codiertes Bild ablegen
             IPS_SendMediaEvent($MediaID); //aktualisieren
-            $picturename = "sonoscover".$name;
-            $this->ResizeCover($picturename, $ImageFile);
+            $this->RefreshMediaImage($picurl);
         }
-    }
-
-    protected function ResizeCover($picturename, $ImageFile)
-    {
-        $selectionresize = $this->ReadPropertyBoolean("selectionresize");
-        $coversize = $this->ReadPropertyInteger("coversize");
-        if ($selectionresize)//resize image
-        {
-            $imageinfo = $this->getimageinfo($ImageFile);
-            if($imageinfo)
-            {
-                $image = $this->createimage($ImageFile, $imageinfo["imagetype"]);
-                $thumb = $this->createthumbnail($coversize, $coversize, $imageinfo["imagewidth"],$imageinfo["imageheight"]);
-                $thumbimg = $thumb["img"];
-                $thumbwidth = $thumb["width"];
-                $thumbheight = $thumb["height"];
-                $ImageFile = $this->copyimgtothumbnail($thumbimg, $image, $thumbwidth, $thumbheight, $imageinfo["imagewidth"],$imageinfo["imageheight"], $picturename);
-            }
-            else
-            {
-                IPS_LogMessage("Sonos", "Bild wurde nicht gefunden.");
-            }
-            $MediaID = $this->GetIDForIdent("SonosMediaImageCover");
-            $Content = @Sys_GetURLContent($ImageFile);
-            IPS_SetMediaFile($MediaID, $ImageFile, False);    // Image im MedienPool mit Image-Datei verbinden
-            IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
-            IPS_SendMediaEvent($MediaID); //aktualisieren
-        }
-    }
-
-    protected function CreateCoverMirrorEffect()
-    {
-         $angle = 30;
     }
 
     protected function RefreshMediaImage($picurl)
     {
-        $selectionresize = $this->ReadPropertyBoolean("selectionresize");
-        $coversize = $this->ReadPropertyInteger("coversize");
-        $imageinfo = $this->getimageinfo($picurl);
-        if ($selectionresize)//resize image
+        $MediaID = $this->GetIDForIdent("SonosMediaImageCover");
+        if($picurl)
         {
-            if($picurl != "")
+            $covername = $this->Covername();
+            // $Content = base64_decode(IPS_GetMediaContent($this->GetIDForIdent("SonosMediaImageCover"))); // get cover from media element
+            $Content = base64_encode(file_get_contents($picurl)); // Bild Base64 codieren
+            $selectionresize = $this->ReadPropertyBoolean("selectionresize");
+            $coversize = $this->ReadPropertyInteger("coversize");
+            // Resize
+            if ($selectionresize)//resize image
             {
-                $image_p = imagecreatetruecolor($coversize, $coversize);
-                $image = imagecreatefromstring(file_get_contents($picurl));
-                imagecopyresampled($image_p, $image, 0, 0, 0, 0, $coversize, $coversize, $imageinfo["imagewidth"], $imageinfo["imageheight"]);
-                ob_start ();
-                imagepng($image_p);
-                $image_data = ob_get_contents ();
-                ob_end_clean ();
-                $image_data_base64 = base64_encode ($image_data);
-                imagedestroy($image_p);
-                $MediaID = $this->GetIDForIdent("SonosMediaImageCover");
-                IPS_SetMediaContent($MediaID, $image_data_base64);  //Bild Base64 codieren und ablegen
-                IPS_SendMediaEvent($MediaID); //aktualisieren
-                $this->SendDebug("Sonos:", "Refresh cover in media image ". $MediaID,0);
+                $imageinfo = $this->getimageinfo($picurl, $type = "file");
+                if($imageinfo)
+                {
+                    $image = createimage(file_get_contents($picurl), $imageinfo["imagetype"]);
+                    // Add Reflection
+                    if($this->ReadPropertyBoolean("reflection"))
+                    {
+                        $angle = $this->ReadPropertyInteger("coverangle");
+                        $thumbfile = $this->CreateCoverMirrorEffect($image, $angle, $imageinfo["imagewidth"], $imageinfo["imageheight"]);
+                    }
+                    else
+                    {
+                        $thumb = $this->createthumbnail($coversize, $coversize, $imageinfo["imagewidth"],$imageinfo["imageheight"]);
+                        $thumbimg = $thumb["img"];
+                        $thumbwidth = $thumb["width"];
+                        $thumbheight = $thumb["height"];
+                        $thumbfile = $this->copyimgtothumbnail($thumbimg, $image, $thumbwidth, $thumbheight, $imageinfo["imagewidth"], $imageinfo["imageheight"], $covername);
+                    }
+                    $Content = @Sys_GetURLContent($thumbfile);
+                    IPS_SetMediaFile($MediaID, $thumbfile, False);    // Image im MedienPool mit Image-Datei verbinden
+                }
+                else
+                {
+                    IPS_LogMessage("Sonos", "Bild wurde nicht gefunden.");
+                }
             }
         }
+        else
+        {
+            // set transparent image
+            $Content = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Transparent png 1x1 Base64
+        }
+        IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
+        IPS_SendMediaEvent($MediaID); //aktualisieren
+    }
+
+    protected function Covername()
+    {
+        $name = IPS_GetName($this->InstanceID);
+        $search = Array("ä","ö","ü","Ä","Ö","Ü","ß"," ");
+        $replace = Array("ae","oe","ue","Ae","Oe","Ue","ss","_");
+        $covername =  "sonoscover".(str_replace($search, $replace, $name));
+        return $covername;
+    }
+
+    protected function CreateCoverMirrorEffect($image, $angle, $width, $height)
+    {
+        $covername = $this->Covername();
+        $image_dest = imagecreatetruecolor( $width, $height + ( $height / 2 ) );
+        $image_src = $image;
+
+        imagealphablending( $image_dest, false );
+        imagesavealpha( $image_dest, true );
+        imagecopyresampled( $image_dest, $image_src, 0, 0, 0, 0, $width, $height, $width, $height );
+
+        for ( $i = 1; $i <= $height / 2; $i++ )
+        {
+            for ( $j = 0; $j < $width; $j++ )
+            {
+                $rgb = imagecolorat( $image_src, $j, $height - $i );
+                $alpha = ( $rgb & 0x7F000000 ) >> 24;
+                $alpha =  max( $alpha, 47 + ( $i * ( 80 / ( $height / 2 ) ) ) );
+                $rgb = imagecolorsforindex( $image_src, $rgb );
+
+                //Check for transparent pixel
+                if ( $rgb['alpha'] == 127 )
+                {
+                    $rgb = imagecolorallocatealpha( $image_dest, $rgb['red'], $rgb['green'], $rgb['blue'], 127 );
+                    imagesetpixel( $image_dest, $j, $height + $i - 1, $rgb );
+                }
+                else
+                {
+                    $rgb = imagecolorallocatealpha( $image_dest, $rgb['red'], $rgb['green'], $rgb['blue'], $alpha );
+                    imagesetpixel( $image_dest, $j, $height + $i - 1, $rgb );
+                }
+            }
+        }
+        if (!function_exists('imageaffine'))
+        {
+            echo 'FUNCTION NOT DEFINED IN THIS VERSION OF PHP';
+            exit;
+        }
+
+        
+        $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR.$covername.".png";  // Image-Datei
+        imagepng($image_dest, $ImageFile);
+        imagedestroy($image_dest);
+        return $ImageFile;
+        /*
+         im = 'path/to/image.jpg'; // The input image
+        $size = getimagesize($im);
+        $rH = 150; // Reflection height
+        $tr = 30; // Starting transparency
+        $div = 1; // Size of the divider line
+        $w = $size[0];
+        $h = $size[1];
+
+        $im = imagecreatefromjpeg($im);
+        $li = imagecreatetruecolor($w, 1);
+        $bgc = imagecolorallocate($li, 255, 255, 255); // Background color
+        imagefilledrectangle($li, 0, 0, $w, 1, $bgc);
+        $bg = imagecreatetruecolor($w, $rH);
+        $wh = imagecolorallocate($im,255,255,255);
+
+        $im = imagerotate($im, -180, $wh);
+        imagecopyresampled($bg, $im, 0, 0, 0, 0, $w, $h, $w, $h);
+        $im = $bg;
+        $bg = imagecreatetruecolor($w, $rH);
+        for ($x = 0; $x < $w; $x++) {
+            imagecopy($bg, $im, $x, 0, $w-$x, 0, 1, $rH);
+        }
+        $im = $bg;
+
+        $in = 100/$rH;
+        for($i=0; $i<=$rH; $i++){
+            if($tr>100) $tr = 100;
+            imagecopymerge($im, $li, 0, $i, 0, 0, $w, 1, $tr);
+            $tr+=$in;
+        }
+        imagecopymerge($im, $li, 0, 0, 0, 0, $w, $div, 100); // Divider
+
+        header('content-type: image/jpeg');
+        imagejpeg($im, '', 100);
+        imagedestroy($im);
+        imagedestroy($li);
+        */
     }
 
     protected function removeVariable($name, $links){
@@ -1811,11 +1897,18 @@ class Sonos extends IPSModule
 
 
 
-    protected function getimageinfo($imagefile)
+    protected function getimageinfo($image, $type = NULL)
     {
-        if(!$imagefile == "")
+        if(!$image == "")
         {
-            $imagesize = getimagesize($imagefile);
+            if($type == "file")
+            {
+                $imagesize = getimagesize($image);
+            }
+            else
+            {
+                $imagesize = getimagesizefromstring($image);
+            }
             $imagewidth = $imagesize[0];
             $imageheight = $imagesize[1];
             $imagetype = $imagesize[2];
@@ -1823,30 +1916,38 @@ class Sonos extends IPSModule
         }
         else
         {
-            $imageinfo = "";
+            $imageinfo = false;
         }
         return $imageinfo;
     }
 
-    protected function createimage($imagefile, $imagetype)
+    protected function createimage($imagefile, $imagetype, $type = NULL)
     {
-        switch ($imagetype)
+        if($type == "file")
         {
-            // Bedeutung von $imagetype:
-            // 1 = GIF, 2 = JPG, 3 = PNG, 4 = SWF, 5 = PSD, 6 = BMP, 7 = TIFF(intel byte order), 8 = TIFF(motorola byte order), 9 = JPC, 10 = JP2, 11 = JPX, 12 = JB2, 13 = SWC, 14 = IFF, 15 = WBMP, 16 = XBM
-            case 1: // GIF
-                $image = imagecreatefromgif($imagefile);
-                break;
-            case 2: // JPEG
-                $image = imagecreatefromjpeg($imagefile);
-                break;
-            case 3: // PNG
-                $image = imagecreatefrompng($imagefile);
-                //imagealphablending($image, true); // setting alpha blending on
-                //imagesavealpha($image, true); // save alphablending setting (important)
-                break;
-            default:
-                die('Unsupported imageformat');
+            switch ($imagetype)
+            {
+                // Bedeutung von $imagetype:
+                // 1 = GIF, 2 = JPG, 3 = PNG, 4 = SWF, 5 = PSD, 6 = BMP, 7 = TIFF(intel byte order), 8 = TIFF(motorola byte order), 9 = JPC, 10 = JP2, 11 = JPX, 12 = JB2, 13 = SWC, 14 = IFF, 15 = WBMP, 16 = XBM
+                case 1: // GIF
+                    $image = imagecreatefromgif($imagefile);
+                    break;
+                case 2: // JPEG
+                    $image = imagecreatefromjpeg($imagefile);
+                    break;
+                case 3: // PNG
+                    $image = imagecreatefrompng($imagefile);
+                    //imagealphablending($image, true); // setting alpha blending on
+                    //imagesavealpha($image, true); // save alphablending setting (important)
+                    break;
+                default:
+                    die('Unsupported imageformat');
+            }
+        }
+        else
+        {
+            $Content = $imagefile; // Content from Media Element, not a file
+            $image = imagecreatefromstring($Content);
         }
         return $image;
     }
@@ -1897,7 +1998,7 @@ class Sonos extends IPSModule
         return $thumb;
     }
 
-    protected function copyimgtothumbnail($thumb, $image, $thumbwidth, $thumbheight, $imagewidth, $imageheight, $picturename)
+    protected function copyimgtothumbnail($thumb, $image, $thumbwidth, $thumbheight, $imagewidth, $imageheight, $covername)
     {
         imagecopyresampled(
             $thumb,
@@ -1907,7 +2008,7 @@ class Sonos extends IPSModule
             $imagewidth, $imageheight
         );
         // In Datei speichern
-        $thumbfile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR."resampled_".$picturename.".png";  // Image-Datei
+        $thumbfile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR.$covername.".png";  // Image-Datei
         imagepng($thumb, $thumbfile);
         imagedestroy($thumb);
         return $thumbfile;
