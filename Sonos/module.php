@@ -1791,7 +1791,7 @@ class Sonos extends IPSModule
 
     protected function SetAlpha($alpha)
     {
-        $moretransparency = 70; // add more transparency
+        $moretransparency = 40; // add more transparency
         $alpha = $alpha + $moretransparency;
         if ($alpha > 127)
         {
