@@ -1642,7 +1642,7 @@ class Sonos extends IPSModule
         {
             $covername = $this->Covername();
             // $Content = base64_decode(IPS_GetMediaContent($this->GetIDForIdent("SonosMediaImageCover"))); // get cover from media element
-            $Content = base64_encode(file_get_contents($picurl)); // Bild Base64 codieren
+            $Content_base64 = base64_encode(file_get_contents($picurl)); // get picture Base 64
             $selectionresize = $this->ReadPropertyBoolean("selectionresize");
             $coversize = $this->ReadPropertyInteger("coversize");
             // Resize
@@ -1656,7 +1656,8 @@ class Sonos extends IPSModule
                     if($this->ReadPropertyBoolean("reflection"))
                     {
                         $angle = $this->ReadPropertyInteger("coverangle");
-                        $thumbfile = $this->CreateCoverMirrorEffect($image, $angle, $imageinfo["imagewidth"], $imageinfo["imageheight"]);
+                        $Content = $this->CreateCoverMirrorEffect($image, $angle, $imageinfo["imagewidth"], $imageinfo["imageheight"]);
+                        $Content_base64 = base64_encode($Content);
                     }
                     else
                     {
@@ -1664,10 +1665,11 @@ class Sonos extends IPSModule
                         $thumbimg = $thumb["img"];
                         $thumbwidth = $thumb["width"];
                         $thumbheight = $thumb["height"];
-                        $thumbfile = $this->copyimgtothumbnail($thumbimg, $image, $thumbwidth, $thumbheight, $imageinfo["imagewidth"], $imageinfo["imageheight"], $covername);
+                        $Content = $this->copyimgtothumbnail($thumbimg, $image, $thumbwidth, $thumbheight, $imageinfo["imagewidth"], $imageinfo["imageheight"], $covername);
+                        $Content_base64 = base64_encode($Content);
                     }
-                    $Content = @Sys_GetURLContent($thumbfile);
-                    IPS_SetMediaFile($MediaID, $thumbfile, False);    // Image im MedienPool mit Image-Datei verbinden
+                    // $Content = @Sys_GetURLContent($thumbfile); // bei File
+                    // IPS_SetMediaFile($MediaID, $thumbfile, False);    // Image im MedienPool mit Image-Datei verbinden
                 }
                 else
                 {
@@ -1678,9 +1680,9 @@ class Sonos extends IPSModule
         else
         {
             // set transparent image
-            $Content = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Transparent png 1x1 Base64
+            $Content_base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="; // Transparent png 1x1 Base64
         }
-        IPS_SetMediaContent($MediaID, base64_encode($Content));  //Bild Base64 codieren und ablegen
+        IPS_SetMediaContent($MediaID, $Content_base64);  //Bild Base64 codiert ablegen
         IPS_SendMediaEvent($MediaID); //aktualisieren
     }
 
@@ -1695,7 +1697,6 @@ class Sonos extends IPSModule
 
     protected function CreateCoverMirrorEffect($image, $angle, $width, $height)
     {
-        $covername = $this->Covername();
         $image_dest = imagecreatetruecolor( $width, $height + ( $height / 2 ) );
         $image_src = $image;
 
@@ -1725,17 +1726,29 @@ class Sonos extends IPSModule
                 }
             }
         }
-        if (!function_exists('imageaffine'))
-        {
-            echo 'FUNCTION NOT DEFINED IN THIS VERSION OF PHP';
-            exit;
-        }
-
-
+            /*
+            if (!function_exists('imageaffine'))
+            {
+                echo 'FUNCTION NOT DEFINED IN THIS VERSION OF PHP';
+                exit;
+            }
+    */
+        /*
+        $covername = $this->Covername();
         $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR.$covername.".png";  // Image-Datei
         imagepng($image_dest, $ImageFile);
         imagedestroy($image_dest);
         return $ImageFile;
+        */
+        ob_start();
+        @imagepng($image_dest);
+        $image_data = ob_get_contents(); // read from buffer
+        ob_end_clean(); // delete buffer
+        imagedestroy($image_dest);
+        return $image_data;
+
+
+
         /*
          im = 'path/to/image.jpg'; // The input image
         $size = getimagesize($im);
@@ -2007,11 +2020,20 @@ class Sonos extends IPSModule
             $thumbwidth, $thumbheight,
             $imagewidth, $imageheight
         );
+
         // In Datei speichern
+        /*
         $thumbfile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR.$covername.".png";  // Image-Datei
         imagepng($thumb, $thumbfile);
         imagedestroy($thumb);
         return $thumbfile;
+        */
+        ob_start();
+        @imagepng($thumb);
+        $image_data = ob_get_contents(); // read from buffer
+        ob_end_clean(); // delete buffer
+        imagedestroy($thumb);
+        return $image_data;
     }
 }
 ?>
