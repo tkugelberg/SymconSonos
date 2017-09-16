@@ -1651,7 +1651,7 @@ class Sonos extends IPSModule
                 $imageinfo = $this->getimageinfo($picurl, $type = "file");
                 if($imageinfo)
                 {
-                    $image = createimage(file_get_contents($picurl), $imageinfo["imagetype"]);
+                    $image = $this->createimage(file_get_contents($picurl), $imageinfo["imagetype"]);
                     // Add Reflection
                     if($this->ReadPropertyBoolean("reflection"))
                     {
@@ -1731,7 +1731,7 @@ class Sonos extends IPSModule
             exit;
         }
 
-        
+
         $ImageFile = IPS_GetKernelDir()."media".DIRECTORY_SEPARATOR.$covername.".png";  // Image-Datei
         imagepng($image_dest, $ImageFile);
         imagedestroy($image_dest);
