@@ -1721,7 +1721,7 @@ class Sonos extends IPSModule
                 }
                 else
                 {
-                    $rgb = imagecolorallocatealpha( $image_dest, $rgb['red'], $rgb['green'], $rgb['blue'], $alpha );
+                    $rgb = imagecolorallocatealpha( $image_dest, $rgb['red'], $rgb['green'], $rgb['blue'], $this->SetAlpha($alpha) );
                     imagesetpixel( $image_dest, $j, $height + $i - 1, $rgb );
                 }
             }
@@ -1787,6 +1787,17 @@ class Sonos extends IPSModule
         imagedestroy($im);
         imagedestroy($li);
         */
+    }
+
+    protected function SetAlpha($alpha)
+    {
+        $moretransparency = 20; // add more transparency
+        $alpha = $alpha + $moretransparency;
+        if ($alpha > 127)
+        {
+            $alpha = 127;
+        }
+        return $alpha;
     }
 
     protected function removeVariable($name, $links){
