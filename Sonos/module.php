@@ -1310,6 +1310,40 @@ class Sonos extends IPSModule
 
         $sonos->SetRadio($uri, $radio);
     }
+
+    public function NextRadiostation()
+    {
+        $radiostations = new RadioStations();
+        $AvailableStations     = $radiostations->get_available_stations();
+        $current_radiostation = $this->GetIDForIdent("Title");
+        $key = array_search($current_radiostation, array_column($AvailableStations, 'name'));
+        $nextkey = $key+1;
+        $count_radiostations = count($AvailableStations);
+        if ($nextkey > $count_radiostations)
+        {
+            $nextkey = 0;
+        }
+        $next_station = $AvailableStations[$nextkey]["name"];
+        $this->SetRadio($next_station);
+        return $next_station;
+    }
+
+    public function PreviousRadioStation()
+    {
+        $radiostations = new RadioStations();
+        $AvailableStations     = $radiostations->get_available_stations();
+        $current_radiostation = $this->GetIDForIdent("Title");
+        $key = array_search($current_radiostation, array_column($AvailableStations, 'name'));
+        $previouskey = $key-1;
+        $count_radiostations = count($AvailableStations);
+        if ($previouskey < 0)
+        {
+            $nextkey = $count_radiostations-1;
+        }
+        $next_station = $AvailableStations[$nextkey]["name"];
+        $this->SetRadio($next_station);
+        return $next_station;
+    }
     
     public function SetSleepTimer(int $minutes)
     {
@@ -1746,47 +1780,6 @@ class Sonos extends IPSModule
         ob_end_clean(); // delete buffer
         imagedestroy($image_dest);
         return $image_data;
-
-
-
-        /*
-         im = 'path/to/image.jpg'; // The input image
-        $size = getimagesize($im);
-        $rH = 150; // Reflection height
-        $tr = 30; // Starting transparency
-        $div = 1; // Size of the divider line
-        $w = $size[0];
-        $h = $size[1];
-
-        $im = imagecreatefromjpeg($im);
-        $li = imagecreatetruecolor($w, 1);
-        $bgc = imagecolorallocate($li, 255, 255, 255); // Background color
-        imagefilledrectangle($li, 0, 0, $w, 1, $bgc);
-        $bg = imagecreatetruecolor($w, $rH);
-        $wh = imagecolorallocate($im,255,255,255);
-
-        $im = imagerotate($im, -180, $wh);
-        imagecopyresampled($bg, $im, 0, 0, 0, 0, $w, $h, $w, $h);
-        $im = $bg;
-        $bg = imagecreatetruecolor($w, $rH);
-        for ($x = 0; $x < $w; $x++) {
-            imagecopy($bg, $im, $x, 0, $w-$x, 0, 1, $rH);
-        }
-        $im = $bg;
-
-        $in = 100/$rH;
-        for($i=0; $i<=$rH; $i++){
-            if($tr>100) $tr = 100;
-            imagecopymerge($im, $li, 0, $i, 0, 0, $w, 1, $tr);
-            $tr+=$in;
-        }
-        imagecopymerge($im, $li, 0, 0, 0, 0, $w, $div, 100); // Divider
-
-        header('content-type: image/jpeg');
-        imagejpeg($im, '', 100);
-        imagedestroy($im);
-        imagedestroy($li);
-        */
     }
 
     protected function SetAlpha($alpha)
@@ -2045,6 +2038,517 @@ class Sonos extends IPSModule
         ob_end_clean(); // delete buffer
         imagedestroy($thumb);
         return $image_data;
+    }
+}
+
+
+/* Copyright (C) 2009-2010 Nicolas Chourrout <nchourrout at gmail dot com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * or see http://www.gnu.org/
+ *
+ *
+ * Usage :
+ * 	- Demo
+ * 		$p = new Perspective();
+ * 		$p->demo();
+ *   	$p->display();
+ *
+ * 	- Rotate test.png 45� around z-axis and display the result
+ * 		$p = new Perspective('test.jpg');
+ *		$p->rotate(0,0,M_PI/4);
+ *		$p->display();
+ *
+ * 	- Rotate test.jpg 45� around z-axis and save it as a png file output.png
+ * 		$p = new Perspective('test.jpg');
+ * 		$p->rotate(0,0,M_PI/4);
+ *		$p->save("output.png");
+ *
+ *	- Rotate test.jpg 30� and display it as a gif
+ *		$p = new Perspective('test.jpg');
+ *		$p->rotate(0,0,M_PI/6);
+ *		$p->displayGIF();
+ *
+ *	- Create a animated gif of test.png spinning around z-axis
+ * 		$p = new Perspective('test.png');
+ *		$p->createAnimatedGIF();
+ *
+*/
+
+/* Todo
+* - Gérer transparence avec les fichiers PNGs
+* - parler dans l'interface avec des icones représentant roll, pitch and yaw instead of x,y,z
+* - Problème aux limites : l'algo n'est pas bon
+* - Time limit à ne pas excéder pour la génération de gifs animés
+* - la transfo perspective autour de l'axe z ressemble à une transformation affine (les côtés opposés restent parallèles)
+*/
+class Perspective{
+    //Settings
+    private $output_directory = "output_images/";
+    private $input_directory = "input_images/";
+
+    //Attributes
+    private $img;
+    private $imgWidth;
+    private $imgHeight;
+    private $imgName;
+    private $ext;
+    //Constructor
+    function __construct($imgName='demo.png'){
+        $this->imgName = $imgName;
+        $this->load();
+    }
+
+    //Public Methods
+
+
+    /**
+     * Demo Function : displays the image in a 3/4 view
+     * @author nchourrout
+     * @version 0.1
+     */
+    public function demo(){
+        $x0 = 0;$y0 = round(($this->imgHeight)/4);
+        $x1 = $this->imgWidth/2;$y1 = 0;
+        $x2 = $this->imgWidth/2;$y2 = $this->imgHeight;
+        $x3 = 0;$y3 = round(3*($this->imgHeight-1)/4);
+
+        $this->createPerspective($x0,$y0,$x1,$y1,$x2,$y2,$x3,$y3);
+    }
+
+    /**
+     * Create a perspective view of the original image as if it has been rotated in 3D
+     * @author nchourrout
+     * @version 0.1
+     * @param long $rx Rotation angle around X axis
+     * @param long $ry Rotation angle around Y axis
+     * @param long $rz Rotation angle around Z axis
+     */
+    public function rotate($rx,$ry,$rz){
+        $points = $this->getApexes($rx,$ry,$rz);
+        //On doit mieux gérer le fait que l'image résultat ne peut pas être agrandie sous peine d'avoir des zones blanches manquantes
+        $ratio = 2;
+        if ($rx!=0 || $ry!=0 || $rz!=0)
+            for($i=0;$i<count($points);$i++)
+                $points[$i]=array($points[$i][0]/$ratio,$points[$i][1]/$ratio);
+
+
+        list($x0,$y0) = $points[1];
+        list($x1,$y1) = $points[0];
+        list($x2,$y2) = $points[3];
+        list($x3,$y3) = $points[2];
+        $this->createPerspective($x0,$y0,$x1,$y1,$x2,$y2,$x3,$y3);
+    }
+
+    /**
+     * Create an animated gif of the image rotating around Z axis
+     * @author nchourrout
+     * @version 0.1
+     * @param time_div integer Duration in ms between two frames (default : 50ms)
+     */
+    public function createAnimatedGIF($time_div=50){
+        $this->ext = "gif";
+        for($i=1;$i<6;$i++){
+            $angle = 0.1+M_PI/12*$i;
+            $this->rotate(0,0,$angle);
+            $this->save($i.".gif");
+            $frames[] = $this->output_directory.$i.".gif";
+            $time[] = $time_div;
+        }
+        $loops = 0;//infinite
+        $gif = new GIFEncoder($frames,$time,$loops,2,0, 0, 0,"url");
+        Header ( 'Content-type:image/gif' );
+        echo    $gif->GetAnimation ( ); //Modifier cette ligne par quelquechose qui permette juste de stocker l'image dans un fichier
+
+        for($i=1;$i<6;$i++)
+            @unlink($this->output_directory.$i.".gif");
+    }
+
+    public function display($outputName=null){
+        if($outputName!=null)
+            $outputName = $this->output_directory.$outputName;
+
+        switch($this->ext){
+            case 'png':
+                $this->displayPNG($outputName);
+                break;
+            case 'gif':
+                $this->displayGIF($outputName);
+                break;
+            case 'jpeg':
+            case 'jpg' :
+                $this->displayJPEG($outputName);
+                break;
+        }
+    }
+
+    public function displayJPEG($outputName=null){
+        if($outputName==null){
+            Header ( 'Content-type:image/jpeg' );
+            imagejpeg($this->img);
+        }else
+            imagejpeg($this->img,$outputName);
+    }
+
+    public function displayPNG($outputName=null){
+        if($outputName==null){
+            Header ( 'Content-type:image/png' );
+            imagepng($this->img);
+        }else
+            imagepng($this->img,$outputName);
+    }
+
+    public function displayGIF($outputName=null){
+        if($outputName==null){
+            Header ( 'Content-type:image/gif' );
+            imagegif($this->img);
+        }else
+            imagegif($this->img,$outputName);
+    }
+
+    public function save($outputName=null){
+        if($outputName==null)
+            $outputName = $this->imgName;
+        $this->setExt($outputName);
+        $this->display($outputName);
+    }
+
+    public function setInputDirectory($dir){
+        $this->input_directory = $dir;
+    }
+
+    public function setOutputDirectory($dir){
+        $this->output_directory = $dir;
+    }
+
+    //Private Methods
+
+    private function load(){
+        $imgSize = getimagesize($this->input_directory.$this->imgName);
+        $this->imgWidth = $imgSize[0];
+        $this->imgHeight = $imgSize[1];
+        $this->setExt($this->imgName);
+        $path = $this->input_directory.$this->imgName;
+        switch($this->ext){
+            case 'png':
+                $this->img = imagecreatefrompng($path);
+                break;
+            case 'gif':
+                $this->img = imagecreatefrompng($path);
+                break;
+            case 'jpeg':
+            case 'jpg' :
+                $this->img = imagecreatefromjpeg($path);
+                break;
+            default :
+                die("Incorrect image file extension");
+        }
+    }
+
+    private function setExt($imgName){
+        $this->ext = strtolower(substr(strrchr($imgName,'.'),1));
+    }
+
+    private function getApexes($rx,$ry,$rz){
+        $cx = cos($rx);
+        $sx = sin($rx);
+        $cy = cos($ry);
+        $sy = sin($ry);
+        $cz = cos($rz);
+        $sz = sin($rz);
+
+        $ex = $this->imgWidth/2;
+        $ey = $this->imgHeight/2;
+        $ez = max($this->imgHeight,$this->imgWidth)/2;
+
+        $cam = array($this->imgWidth/2,$this->imgHeight/2,max($this->imgHeight,$this->imgWidth)/2);
+        $apexes = array(array(0,$this->imgHeight,0), array($this->imgWidth, $this->imgHeight, 0), array($this->imgWidth, 0, 0), array(0,0,0));
+        $points = array();
+
+        $i=0;
+        foreach($apexes as $pt) {
+            $ax = $pt[0];
+            $ay = $pt[1];
+            $az = $pt[2];
+
+            $dx = $cy*($sz*($ax-$cam[1])+$cz*($ax-$cam[0])) - $sy*($az-$cam[2]);
+            $dy = $sx*($cy*($az-$cam[2])+$sy*($sz*($ay-$cam[1])+$cz*($ax-$cam[0])))+$cx*($cz*($ay-$cam[1])-$sz*($ax-$cam[0]));
+            $dz = $cx*($cy*($az-$cam[2])+$sy*($sz*($ay-$cam[1])+$cz*($ax-$cam[0])))-$sx*($cz*($ay-$cam[1])-$sz*($ax-$cam[0]));
+
+            $points[$i] = array(round(($dx-$ex)/($ez/$dz)),round(($dy-$ey)/($ez/$dz)));
+            $i++;
+        }
+        return $points;
+    }
+
+    private function createPerspective($x0,$y0,$x1,$y1,$x2,$y2,$x3,$y3){
+        $SX = max($x0,$x1,$x2,$x3);
+        $SY = max($y0,$y1,$y2,$y3);
+        $newImage = imagecreatetruecolor($SX, $SY);
+        $bg_color=ImageColorAllocateAlpha($newImage,255,255,255,0);
+        imagefill($newImage, 0, 0, $bg_color);
+        for ($y = 0; $y < $this->imgHeight; $y++) {
+            for ($x = 0; $x < $this->imgWidth; $x++) {
+                list($dst_x,$dst_y) = $this->corPix($x0,$y0,$x1,$y1,$x2,$y2,$x3,$y3,$x,$y,$this->imgWidth,$this->imgHeight);
+                imagecopy($newImage,$this->img,$dst_x,$dst_y,$x,$y,1,1);
+            }
+        }
+        $this->img = $newImage;
+    }
+
+    private function corPix($x0,$y0,$x1,$y1,$x2,$y2,$x3,$y3,$x,$y,$SX,$SY) {
+        return $this->intersectLines(
+            (($SY-$y)*$x0 + ($y)*$x3)/$SY, (($SY-$y)*$y0 + $y*$y3)/$SY,
+            (($SY-$y)*$x1 + ($y)*$x2)/$SY, (($SY-$y)*$y1 + $y*$y2)/$SY,
+            (($SX-$x)*$x0 + ($x)*$x1)/$SX, (($SX-$x)*$y0 + $x*$y1)/$SX,
+            (($SX-$x)*$x3 + ($x)*$x2)/$SX, (($SX-$x)*$y3 + $x*$y2)/$SX);
+    }
+    private function det($a,$b,$c,$d) {
+        return $a*$d-$b*$c;
+    }
+    private function intersectLines($x1,$y1,$x2,$y2,$x3,$y3,$x4,$y4) {
+        $d = $this->det($x1-$x2,$y1-$y2,$x3-$x4,$y3-$y4);
+
+        if ($d==0) $d = 1;
+
+        $px = $this->det($this->det($x1,$y1,$x2,$y2),$x1-$x2,$this->det($x3,$y3,$x4,$y4),$x3-$x4)/$d;
+        $py = $this->det($this->det($x1,$y1,$x2,$y2),$y1-$y2,$this->det($x3,$y3,$x4,$y4),$y3-$y4)/$d;
+        return array($px,$py);
+    }
+
+}
+
+/*
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
+::	GIFEncoder Version 2.0 by László Zsidi, http://gifs.hu
+::
+::	This class is a rewritten 'GifMerge.class.php' version.
+::
+::  Modification:
+::   - Simplified and easy code,
+::   - Ultra fast encoding,
+::   - Built-in errors,
+::   - Stable working
+::
+::
+::	Updated at 2007. 02. 13. '00.05.AM'
+::
+::
+::
+::  Try on-line GIFBuilder Form demo based on GIFEncoder.
+::
+::  http://gifs.hu/phpclasses/demos/GifBuilder/
+::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+Class GIFEncoder {
+    var $GIF = "GIF89a";		/* GIF header 6 bytes	*/
+    var $VER = "GIFEncoder V2.05";	/* Encoder version		*/
+    var $BUF = Array ( );
+    var $LOP =  0;
+    var $DIS =  2;
+    var $COL = -1;
+    var $IMG = -1;
+    var $ERR = Array (
+        ERR00=>"Does not supported function for only one image!",
+        ERR01=>"Source is not a GIF image!",
+        ERR02=>"Unintelligible flag ",
+        ERR03=>"Does not make animation from animated GIF source",
+    );
+    /*
+    :::::::::::::::::::::::::::::::::::::::::::::::::::
+    ::
+    ::	GIFEncoder...
+    ::
+    */
+    function GIFEncoder	(
+        $GIF_src, $GIF_dly, $GIF_lop, $GIF_dis,
+        $GIF_red, $GIF_grn, $GIF_blu, $GIF_mod
+    ) {
+        if ( ! is_array ( $GIF_src ) && ! is_array ( $GIF_tim ) ) {
+            printf	( "%s: %s", $this->VER, $this->ERR [ 'ERR00' ] );
+            exit	( 0 );
+        }
+        $this->LOP = ( $GIF_lop > -1 ) ? $GIF_lop : 0;
+        $this->DIS = ( $GIF_dis > -1 ) ? ( ( $GIF_dis < 3 ) ? $GIF_dis : 3 ) : 2;
+        $this->COL = ( $GIF_red > -1 && $GIF_grn > -1 && $GIF_blu > -1 ) ?
+            ( $GIF_red | ( $GIF_grn << 8 ) | ( $GIF_blu << 16 ) ) : -1;
+        for ( $i = 0; $i < count ( $GIF_src ); $i++ ) {
+            if ( strToLower ( $GIF_mod ) == "url" ) {
+                $this->BUF [ ] = fread ( fopen ( $GIF_src [ $i ], "rb" ), filesize ( $GIF_src [ $i ] ) );
+            }
+            else if ( strToLower ( $GIF_mod ) == "bin" ) {
+                $this->BUF [ ] = $GIF_src [ $i ];
+            }
+            else {
+                printf	( "%s: %s ( %s )!", $this->VER, $this->ERR [ 'ERR02' ], $GIF_mod );
+                exit	( 0 );
+            }
+            if ( substr ( $this->BUF [ $i ], 0, 6 ) != "GIF87a" && substr ( $this->BUF [ $i ], 0, 6 ) != "GIF89a" ) {
+                printf	( "%s: %d %s", $this->VER, $i, $this->ERR [ 'ERR01' ] );
+                exit	( 0 );
+            }
+            for ( $j = ( 13 + 3 * ( 2 << ( ord ( $this->BUF [ $i ] { 10 } ) & 0x07 ) ) ), $k = TRUE; $k; $j++ ) {
+                switch ( $this->BUF [ $i ] { $j } ) {
+                    case "!":
+                        if ( ( substr ( $this->BUF [ $i ], ( $j + 3 ), 8 ) ) == "NETSCAPE" ) {
+                            printf	( "%s: %s ( %s source )!", $this->VER, $this->ERR [ 'ERR03' ], ( $i + 1 ) );
+                            exit	( 0 );
+                        }
+                        break;
+                    case ";":
+                        $k = FALSE;
+                        break;
+                }
+            }
+        }
+        GIFEncoder::GIFAddHeader ( );
+        for ( $i = 0; $i < count ( $this->BUF ); $i++ ) {
+            GIFEncoder::GIFAddFrames ( $i, $GIF_dly [ $i ] );
+        }
+        GIFEncoder::GIFAddFooter ( );
+    }
+    /*
+    :::::::::::::::::::::::::::::::::::::::::::::::::::
+    ::
+    ::	GIFAddHeader...
+    ::
+    */
+    function GIFAddHeader ( ) {
+        $cmap = 0;
+        if ( ord ( $this->BUF [ 0 ] { 10 } ) & 0x80 ) {
+            $cmap = 3 * ( 2 << ( ord ( $this->BUF [ 0 ] { 10 } ) & 0x07 ) );
+            $this->GIF .= substr ( $this->BUF [ 0 ], 6, 7		);
+            $this->GIF .= substr ( $this->BUF [ 0 ], 13, $cmap	);
+            $this->GIF .= "!\377\13NETSCAPE2.0\3\1" . GIFEncoder::GIFWord ( $this->LOP ) . "\0";
+        }
+    }
+    /*
+    :::::::::::::::::::::::::::::::::::::::::::::::::::
+    ::
+    ::	GIFAddFrames...
+    ::
+    */
+    function GIFAddFrames ( $i, $d ) {
+        $Locals_str = 13 + 3 * ( 2 << ( ord ( $this->BUF [ $i ] { 10 } ) & 0x07 ) );
+        $Locals_end = strlen ( $this->BUF [ $i ] ) - $Locals_str - 1;
+        $Locals_tmp = substr ( $this->BUF [ $i ], $Locals_str, $Locals_end );
+        $Global_len = 2 << ( ord ( $this->BUF [ 0  ] { 10 } ) & 0x07 );
+        $Locals_len = 2 << ( ord ( $this->BUF [ $i ] { 10 } ) & 0x07 );
+        $Global_rgb = substr ( $this->BUF [ 0  ], 13,
+            3 * ( 2 << ( ord ( $this->BUF [ 0  ] { 10 } ) & 0x07 ) ) );
+        $Locals_rgb = substr ( $this->BUF [ $i ], 13,
+            3 * ( 2 << ( ord ( $this->BUF [ $i ] { 10 } ) & 0x07 ) ) );
+        $Locals_ext = "!\xF9\x04" . chr ( ( $this->DIS << 2 ) + 0 ) .
+            chr ( ( $d >> 0 ) & 0xFF ) . chr ( ( $d >> 8 ) & 0xFF ) . "\x0\x0";
+        if ( $this->COL > -1 && ord ( $this->BUF [ $i ] { 10 } ) & 0x80 ) {
+            for ( $j = 0; $j < ( 2 << ( ord ( $this->BUF [ $i ] { 10 } ) & 0x07 ) ); $j++ ) {
+                if	(
+                    ord ( $Locals_rgb { 3 * $j + 0 } ) == ( ( $this->COL >> 16 ) & 0xFF ) &&
+                    ord ( $Locals_rgb { 3 * $j + 1 } ) == ( ( $this->COL >>  8 ) & 0xFF ) &&
+                    ord ( $Locals_rgb { 3 * $j + 2 } ) == ( ( $this->COL >>  0 ) & 0xFF )
+                ) {
+                    $Locals_ext = "!\xF9\x04" . chr ( ( $this->DIS << 2 ) + 1 ) .
+                        chr ( ( $d >> 0 ) & 0xFF ) . chr ( ( $d >> 8 ) & 0xFF ) . chr ( $j ) . "\x0";
+                    break;
+                }
+            }
+        }
+        switch ( $Locals_tmp { 0 } ) {
+            case "!":
+                $Locals_img = substr ( $Locals_tmp, 8, 10 );
+                $Locals_tmp = substr ( $Locals_tmp, 18, strlen ( $Locals_tmp ) - 18 );
+                break;
+            case ",":
+                $Locals_img = substr ( $Locals_tmp, 0, 10 );
+                $Locals_tmp = substr ( $Locals_tmp, 10, strlen ( $Locals_tmp ) - 10 );
+                break;
+        }
+        if ( ord ( $this->BUF [ $i ] { 10 } ) & 0x80 && $this->IMG > -1 ) {
+            if ( $Global_len == $Locals_len ) {
+                if ( GIFEncoder::GIFBlockCompare ( $Global_rgb, $Locals_rgb, $Global_len ) ) {
+                    $this->GIF .= ( $Locals_ext . $Locals_img . $Locals_tmp );
+                }
+                else {
+                    $byte  = ord ( $Locals_img { 9 } );
+                    $byte |= 0x80;
+                    $byte &= 0xF8;
+                    $byte |= ( ord ( $this->BUF [ 0 ] { 10 } ) & 0x07 );
+                    $Locals_img { 9 } = chr ( $byte );
+                    $this->GIF .= ( $Locals_ext . $Locals_img . $Locals_rgb . $Locals_tmp );
+                }
+            }
+            else {
+                $byte  = ord ( $Locals_img { 9 } );
+                $byte |= 0x80;
+                $byte &= 0xF8;
+                $byte |= ( ord ( $this->BUF [ $i ] { 10 } ) & 0x07 );
+                $Locals_img { 9 } = chr ( $byte );
+                $this->GIF .= ( $Locals_ext . $Locals_img . $Locals_rgb . $Locals_tmp );
+            }
+        }
+        else {
+            $this->GIF .= ( $Locals_ext . $Locals_img . $Locals_tmp );
+        }
+        $this->IMG  = 1;
+    }
+    /*
+    :::::::::::::::::::::::::::::::::::::::::::::::::::
+    ::
+    ::	GIFAddFooter...
+    ::
+    */
+    function GIFAddFooter ( ) {
+        $this->GIF .= ";";
+    }
+    /*
+    :::::::::::::::::::::::::::::::::::::::::::::::::::
+    ::
+    ::	GIFBlockCompare...
+    ::
+    */
+    function GIFBlockCompare ( $GlobalBlock, $LocalBlock, $Len ) {
+        for ( $i = 0; $i < $Len; $i++ ) {
+            if	(
+                $GlobalBlock { 3 * $i + 0 } != $LocalBlock { 3 * $i + 0 } ||
+                $GlobalBlock { 3 * $i + 1 } != $LocalBlock { 3 * $i + 1 } ||
+                $GlobalBlock { 3 * $i + 2 } != $LocalBlock { 3 * $i + 2 }
+            ) {
+                return ( 0 );
+            }
+        }
+        return ( 1 );
+    }
+    /*
+    :::::::::::::::::::::::::::::::::::::::::::::::::::
+    ::
+    ::	GIFWord...
+    ::
+    */
+    function GIFWord ( $int ) {
+        return ( chr ( $int & 0xFF ) . chr ( ( $int >> 8 ) & 0xFF ) );
+    }
+    /*
+    :::::::::::::::::::::::::::::::::::::::::::::::::::
+    ::
+    ::	GetAnimation...
+    ::
+    */
+    function GetAnimation ( ) {
+        return ( $this->GIF );
     }
 }
 ?>
