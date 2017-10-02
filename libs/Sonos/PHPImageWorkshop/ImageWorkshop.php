@@ -6,6 +6,7 @@ use Sonos\PHPImageWorkshop\Core\ImageWorkshopLayer as ImageWorkshopLayer;
 use Sonos\PHPImageWorkshop\Core\ImageWorkshopLib as ImageWorkshopLib;
 use Sonos\PHPImageWorkshop\Exception\ImageWorkshopException as ImageWorkshopException;
 
+namespace Sonos\PHPImageWorkshop;
 // If no autoloader, uncomment these lines:
 //require_once(__DIR__.'/Core/ImageWorkshopLayer.php');
 //require_once(__DIR__.'/Exception/ImageWorkshopException.php');

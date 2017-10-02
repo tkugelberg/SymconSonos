@@ -72,18 +72,18 @@ class Sonos extends IPSModule
                         
         
         // Start create profiles
-        $this->RegisterProfileIntegerEx("Sonos.Status", "Information", "", "",   Array( Array(0, "prev",       "", -1),
-                                                                                        Array(1, "play",       "", -1),
-                                                                                        Array(2, "pause",      "", -1),
-                                                                                        Array(3, "stop",       "", -1),
-                                                                                        Array(4, "next",       "", -1),
-                                                                                        Array(5, "transition", "", -1) ));
-        $this->RegisterProfileIntegerEx("Sonos.PlayMode", "Information", "", "",   Array( Array(0, "Normal",             "", -1),
-                                                                                          Array(1, "Repeat all",         "", -1),
-                                                                                          Array(2, "Repeat one",         "", -1),
-                                                                                          Array(3, "Shuffle no repeat",  "", -1),
-                                                                                          Array(4, "Shuffle",            "", -1),
-                                                                                          Array(5, "Shuffle repeat one", "", -1) ));
+        $this->RegisterProfileIntegerEx("Sonos.Status", "Information", "", "",   Array( Array(0, $this->Translate("prev"),       "", -1),
+                                                                                        Array(1, $this->Translate("play"),       "", -1),
+                                                                                        Array(2, $this->Translate("pause"),      "", -1),
+                                                                                        Array(3, $this->Translate("stop"),       "", -1),
+                                                                                        Array(4, $this->Translate("next"),       "", -1),
+                                                                                        Array(5, $this->Translate("transition"), "", -1) ));
+        $this->RegisterProfileIntegerEx("Sonos.PlayMode", "Information", "", "",   Array( Array(0, $this->Translate("Normal"),             "", -1),
+                                                                                          Array(1, $this->Translate("Repeat all"),         "", -1),
+                                                                                          Array(2, $this->Translate("Repeat one"),         "", -1),
+                                                                                          Array(3, $this->Translate("Shuffle no repeat"),  "", -1),
+                                                                                          Array(4, $this->Translate("Shuffle"),            "", -1),
+                                                                                          Array(5, $this->Translate("Shuffle repeat one"), "", -1) ));
         $this->RegisterProfileInteger("Sonos.Volume",   "Intensity",   "", " %",    0, 100, 1);
         $this->RegisterProfileInteger("Sonos.Tone",     "Intensity",   "", " %",  -10,  10, 1);
         $this->RegisterProfileInteger("Sonos.Balance",  "Intensity",   "", " %", -100, 100, 1);
@@ -144,14 +144,14 @@ class Sonos extends IPSModule
                              ('_updateGrouping') => 99
                            );
         // 1) general availabe
-        IPS_SetHidden( $this->RegisterVariableBoolean("Coordinator", "Coordinator", "", $positions['Coordinator']), true);
-        IPS_SetHidden( $this->RegisterVariableString("GroupMembers", "GroupMembers", "", $positions['GroupMembers']), true);
-        $this->RegisterVariableInteger("MemberOfGroup", "MemberOfGroup", "Sonos.Groups", $positions['MemberOfGroup']);
-        $this->RegisterVariableInteger("GroupVolume", "GroupVolume", "Sonos.Volume", $positions['GroupVolume']);
-        $this->RegisterVariableString("nowPlaying", "nowPlaying", "", $positions['nowPlaying']);
-        $this->RegisterVariableInteger("Radio", "Radio", "Sonos.Radio", $positions['Radio']);
-        $this->RegisterVariableInteger("Status", "Status", "Sonos.Status", $positions['Status']);
-        $this->RegisterVariableInteger("Volume", "Volume", "Sonos.Volume", $positions['Volume']);
+        IPS_SetHidden( $this->RegisterVariableBoolean("Coordinator", $this->Translate("Coordinator"), "", $positions['Coordinator']), true);
+        IPS_SetHidden( $this->RegisterVariableString("GroupMembers", $this->Translate("GroupMembers"), "", $positions['GroupMembers']), true);
+        $this->RegisterVariableInteger("MemberOfGroup", $this->Translate("MemberOfGroup"), "Sonos.Groups", $positions['MemberOfGroup']);
+        $this->RegisterVariableInteger("GroupVolume", $this->Translate("GroupVolume"), "Sonos.Volume", $positions['GroupVolume']);
+        $this->RegisterVariableString("nowPlaying", $this->Translate("nowPlaying"), "", $positions['nowPlaying']);
+        $this->RegisterVariableInteger("Radio", $this->Translate("Radio"), "Sonos.Radio", $positions['Radio']);
+        $this->RegisterVariableInteger("Status", $this->Translate("State"), "Sonos.Status", $positions['Status']);
+        $this->RegisterVariableInteger("Volume", $this->Translate("Volume"), "Sonos.Volume", $positions['Volume']);
         $this->EnableAction("GroupVolume");
         $this->EnableAction("MemberOfGroup");
         $this->EnableAction("Radio");
@@ -167,7 +167,7 @@ class Sonos extends IPSModule
           
         // 2a) Bass
         if ($this->ReadPropertyBoolean("BassControl")){
-            $this->RegisterVariableInteger("Bass", "Bass", "Sonos.Tone", $positions['Bass']);
+            $this->RegisterVariableInteger("Bass", $this->Translate("Bass"), "Sonos.Tone", $positions['Bass']);
             $this->EnableAction("Bass");
         }else{
             $this->removeVariableAction("Bass", $links);
@@ -175,7 +175,7 @@ class Sonos extends IPSModule
 
         // 2b) Treble
         if ($this->ReadPropertyBoolean("TrebleControl")){
-            $this->RegisterVariableInteger("Treble", "Treble", "Sonos.Tone", $positions['Treble']);
+            $this->RegisterVariableInteger("Treble", $this->Translate("Treble"), "Sonos.Tone", $positions['Treble']);
             $this->EnableAction("Treble");
         }else{
             $this->removeVariableAction("Treble", $links);
@@ -183,7 +183,7 @@ class Sonos extends IPSModule
 
         // 2c) Mute
         if ($this->ReadPropertyBoolean("MuteControl")){
-            $this->RegisterVariableInteger("Mute","Mute", "Sonos.Switch", $positions['Mute']);
+            $this->RegisterVariableInteger("Mute", $this->Translate("Mute"), "Sonos.Switch", $positions['Mute']);
             $this->EnableAction("Mute");
         }else{
             $this->removeVariableAction("Mute", $links);
@@ -191,7 +191,7 @@ class Sonos extends IPSModule
 
         // 2d) Loudness
         if ($this->ReadPropertyBoolean("LoudnessControl")){
-            $this->RegisterVariableInteger("Loudness", "Loudness", "Sonos.Switch", $positions['Loudness']);
+            $this->RegisterVariableInteger("Loudness", $this->Translate("Loudness"), "Sonos.Switch", $positions['Loudness']);
             $this->EnableAction("Loudness");
         }else{
             $this->removeVariableAction("Loudness", $links);
@@ -199,7 +199,7 @@ class Sonos extends IPSModule
 
         // 2e) Balance
         if ($this->ReadPropertyBoolean("BalanceControl")){
-            $this->RegisterVariableInteger("Balance", "Balance", "Sonos.Balance", $positions['Balance']);
+            $this->RegisterVariableInteger("Balance", $this->Translate("Balance"), "Sonos.Balance", $positions['Balance']);
             $this->EnableAction("Balance");
         }else{
             $this->removeVariableAction("Balance", $links);
@@ -207,7 +207,7 @@ class Sonos extends IPSModule
         
         // 2f Sleeptimer
         if ($this->ReadPropertyBoolean("SleeptimerControl")){
-            $this->RegisterVariableInteger("Sleeptimer", "Sleeptimer", "", $positions['Sleeptimer']);
+            $this->RegisterVariableInteger("Sleeptimer", $this->Translate("Sleeptimer"), "", $positions['Sleeptimer']);
         }else{
             $this->removeVariable("Sleeptimer", $links);
         }
@@ -216,7 +216,7 @@ class Sonos extends IPSModule
         if ($this->ReadPropertyInteger("PlaylistImport")){
             if(!IPS_VariableProfileExists("Sonos.Playlist"))
                 $this->RegisterProfileIntegerEx("Sonos.Playlist", "Database", "", "", Array());
-            $this->RegisterVariableInteger("Playlist", "Playlist", "Sonos.Playlist", $positions['Playlist']);
+            $this->RegisterVariableInteger("Playlist", $this->Translate("Playlist"), "Sonos.Playlist", $positions['Playlist']);
             $this->EnableAction("Playlist");
         }else{
             $this->removeVariable("Playlist", $links);
@@ -224,8 +224,8 @@ class Sonos extends IPSModule
 
         // 2h) PlayMode + Crossfade
         if ($this->ReadPropertyBoolean("PlayModeControl")){
-            $this->RegisterVariableInteger("PlayMode",  "PlayMode",  "Sonos.PlayMode", $positions['PlayMode']);
-            $this->RegisterVariableInteger("Crossfade", "Crossfade", "Sonos.Switch",   $positions['Crossfade']);
+            $this->RegisterVariableInteger("PlayMode",  $this->Translate("PlayMode"),  "Sonos.PlayMode", $positions['PlayMode']);
+            $this->RegisterVariableInteger("Crossfade", $this->Translate("Crossfade"), "Sonos.Switch",   $positions['Crossfade']);
             $this->EnableAction("PlayMode");
             $this->EnableAction("Crossfade");
         }else{
@@ -235,16 +235,16 @@ class Sonos extends IPSModule
 
         //2i) Detailed Now Playing informtion
         if ($this->ReadPropertyBoolean("DetailedInformation")){
-            $this->RegisterVariableString("Details", "Details", "~HTMLBox", $positions['Details']);
-            IPS_SetHidden($this->RegisterVariableString("CoverURL",      "CoverURL",      "",         $positions['CoverURL']),true);
-            IPS_SetHidden($this->RegisterVariableString("ContentStream", "ContentStream", "",         $positions['ContentStream']),true);
-            IPS_SetHidden($this->RegisterVariableString("Artist",        "Artist",        "",         $positions['Artist']),true);
-            IPS_SetHidden($this->RegisterVariableString("Title",         "Title",         "",         $positions['Title']),true);
-            IPS_SetHidden($this->RegisterVariableString("Album",         "Album",         "",         $positions['Album']),true);
-            IPS_SetHidden($this->RegisterVariableString("TrackDuration", "TrackDuration", "",         $positions['TrackDuration']),true);
-            IPS_SetHidden($this->RegisterVariableString("Position",      "Position",      "",         $positions['Position']),true);
+            $this->RegisterVariableString("Details", $this->Translate("Details"), "~HTMLBox", $positions['Details']);
+            IPS_SetHidden($this->RegisterVariableString("CoverURL",      $this->Translate("CoverURL"),      "",         $positions['CoverURL']),true);
+            IPS_SetHidden($this->RegisterVariableString("ContentStream", $this->Translate("ContentStream"), "",         $positions['ContentStream']),true);
+            IPS_SetHidden($this->RegisterVariableString("Artist",        $this->Translate("Artist"),        "",         $positions['Artist']),true);
+            IPS_SetHidden($this->RegisterVariableString("Title",         $this->Translate("Title"),         "",         $positions['Title']),true);
+            IPS_SetHidden($this->RegisterVariableString("Album",         $this->Translate("Album"),         "",         $positions['Album']),true);
+            IPS_SetHidden($this->RegisterVariableString("TrackDuration", $this->Translate("TrackDuration"), "",         $positions['TrackDuration']),true);
+            IPS_SetHidden($this->RegisterVariableString("Position",      $this->Translate("Position"),      "",         $positions['Position']),true);
             if(!@IPS_GetObjectIDByIdent("StationID", $this->InstanceID)){
-              $vidStationID = $this->RegisterVariableString("StationID", "StationID", "", $positions['StationID']);
+              $vidStationID = $this->RegisterVariableString("StationID", $this->Translate("StationID"), "", $positions['StationID']);
               IPS_SetHidden($vidStationID,true);
               //clear it 5 past the hour 
               $eid = IPS_CreateEvent(1);
@@ -268,7 +268,7 @@ class Sonos extends IPSModule
 
         //2j) Position
         if ($this->ReadPropertyBoolean("Position")){
-            $this->RegisterVariableInteger("PositionPercent", "Song Fortschritt", "Sonos.PositionP", $positions['Position']);
+            $this->RegisterVariableInteger("PositionPercent", $this->Translate("Track Progress"), "Sonos.PositionP", $positions['Position']);
         }else{
             $this->removeVariable("PositionPercent", $links);
         }
