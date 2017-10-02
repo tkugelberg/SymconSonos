@@ -33,7 +33,7 @@
                 { "type": "Label", "label": "Cover size for media image" },
                 { "type": "NumberSpinner", "name": "coversize", "caption": "cover size" },
                 { "type": "Label", "label": "Mirror effect for the cover in the media image" },
-                { "type": "NumberSpinner", "name": "coverangle", "caption": "cover size" },
+                { "type": "NumberSpinner", "name": "coverangle", "caption": "cover angle" },
                 { "name": "reflection",       "type": "CheckBox",          "caption": "mirror effect" },
                 { "name": "ForceOrder",                "type": "CheckBox",          "caption": "Force Variable order" },
                 { "type": "Label", "label": "Settings for radio stations:"},
