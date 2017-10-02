@@ -1313,36 +1313,34 @@ class Sonos extends IPSModule
 
     public function NextRadiostation()
     {
-        $radiostations = new RadioStations();
-        $AvailableStations     = $radiostations->get_available_stations();
-        $current_radiostation = $this->GetIDForIdent("Title");
-        $key = array_search($current_radiostation, array_column($AvailableStations, 'name'));
-        $nextkey = $key+1;
-        $count_radiostations = count($AvailableStations);
-        if ($nextkey > $count_radiostations)
+        $stationprofile = IPS_GetVariable($this->GetIDForIdent("Radio"))["VariableProfile"];
+        $valueradio = GetValue($this->GetIDForIdent("Radio"));
+        $nextkey = $valueradio;
+        if($nextkey > 32)
         {
             $nextkey = 0;
         }
-        $next_station = $AvailableStations[$nextkey]["name"];
+        $next_station = IPS_GetVariableProfile($stationprofile)['Associations'][$nextkey]['Name'];
         $this->SetRadio($next_station);
+        $this->Play();
         return $next_station;
     }
 
     public function PreviousRadioStation()
     {
-        $radiostations = new RadioStations();
-        $AvailableStations     = $radiostations->get_available_stations();
-        $current_radiostation = $this->GetIDForIdent("Title");
-        $key = array_search($current_radiostation, array_column($AvailableStations, 'name'));
-        $previouskey = $key-1;
-        $count_radiostations = count($AvailableStations);
+        $stationprofile = IPS_GetVariable($this->GetIDForIdent("Radio"))["VariableProfile"];
+        $stations = IPS_GetVariableProfile($stationprofile)["Associations"];
+        $count_stations = count($stations);
+        $valueradio = GetValue($this->GetIDForIdent("Radio"));
+        $previouskey = $valueradio-2;
         if ($previouskey < 0)
         {
-            $nextkey = $count_radiostations-1;
+            $previouskey = $count_stations-1;
         }
-        $next_station = $AvailableStations[$nextkey]["name"];
-        $this->SetRadio($next_station);
-        return $next_station;
+        $previous_station = IPS_GetVariableProfile($stationprofile)['Associations'][$previouskey]['Name'];
+        $this->SetRadio($previous_station);
+        $this->Play();
+        return $previous_station;
     }
     
     public function SetSleepTimer(int $minutes)
