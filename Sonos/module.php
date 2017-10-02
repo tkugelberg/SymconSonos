@@ -1445,7 +1445,6 @@ class Sonos extends IPSModule
     public function UpdateRadioStations()
     {
         $Associations          = Array();
-        $webfront_stations     = Array();
         $radiostations = new RadioStations();
         $AvailableStations     = $radiostations->get_available_stations();
         $WebFrontStations      = $this->ReadPropertyString("WebFrontStations");
@@ -1461,11 +1460,9 @@ class Sonos extends IPSModule
                     $Color = -1;
                 }
                 $Associations[] = Array($Value++, $val['name'], "", $Color);
-                $webfront_stations[] = $val['name'];
                 // associations only support up to 32 variables
                 if( $Value === 33 ) break;
             }
-            return $webfront_stations;
         }
        
         if ($this->ReadPropertyBoolean("IncludeTunein") && $Value < 33){
@@ -1491,7 +1488,7 @@ class Sonos extends IPSModule
             IPS_DeleteVariableProfile("Sonos.Radio");
 
         $this->RegisterProfileIntegerEx("Sonos.Radio", "Speaker", "", "", $Associations);
-    
+        return $Associations;
     }
  
     public function UpdateRINCON()
