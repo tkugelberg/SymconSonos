@@ -587,17 +587,13 @@ Liest die RINCON einer Instanz aus und schreibt diese in die Instanzkonfiguratio
 Jede Instanz (also eingebundene Sonos Box) benötigt zwischen 13 und 30 Variablen.  
 - Instanz selber
 - GroupMembers
-- Coordinator
+- Koordinator
 - GroupVolume
 - MemberOfGroup
 - nowPlaying
 - Radio
 - Status
 - Volume
-- _updateStatus Skript
-- Timer für _updateStatus Skript
-- _updateGrouping Skript
-- Timer _updateGrouping Skript
 - Bass (falls "Bass Control" aktiviert ist)
 - Treble (falls "Treble Control" aktiviert ist)
 - Mute (falls "Mute Control" aktiviert ist)
@@ -609,7 +605,7 @@ Jede Instanz (also eingebundene Sonos Box) benötigt zwischen 13 und 30 Variable
 - Crossfade (falls "Playmode Control" aktiviert ist)
 - CoverURL (falls "Endable detailed info" aktiviert ist)
 - ContentStream (falls "Endable detailed info" aktiviert ist)
-- Artist (falls "Endable detailed info" aktiviert ist)
+- Künstler (falls "Endable detailed info" aktiviert ist)
 - Album (falls "Endable detailed info" aktiviert ist)
 - TrackDuration (falls "Endable detailed info" aktiviert ist)
 - Position (falls "Endable detailed info" aktiviert ist)
