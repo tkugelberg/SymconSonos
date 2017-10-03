@@ -1317,7 +1317,7 @@ class Sonos extends IPSModule
         $valueradio = GetValue($this->GetIDForIdent("Radio"));
         $stations = IPS_GetVariableProfile($stationprofile)["Associations"];
         $count_stations = count($stations);
-        $nextkey = $valueradio+1;
+        $nextkey = $valueradio;
         if($nextkey >= $count_stations)
         {
             $nextkey = 0;
@@ -1334,7 +1334,7 @@ class Sonos extends IPSModule
         $stations = IPS_GetVariableProfile($stationprofile)["Associations"];
         $count_stations = count($stations);
         $valueradio = GetValue($this->GetIDForIdent("Radio"));
-        $previouskey = $valueradio-1;
+        $previouskey = $valueradio-2;
         if ($previouskey < 0)
         {
             $previouskey = $count_stations-1;
