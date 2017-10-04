@@ -34,12 +34,12 @@ Die folgenden Funktionalitäten sind implementiert:
 
 ## 2. Anforderungen
 
- - IPS 4.1
+ - IPS 4.3
  - Sonos Audio System
 
 ## 3. Installation & Konfiguration
 
-### Installation in IPS 4.1
+### Installation in IPS 4.3
 Füge im "Module Control" (Kern Instanzen->Modules) die URL
 
    ``` 

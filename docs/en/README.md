@@ -35,12 +35,12 @@ The following functionalities are implemented:
 
 ## 2. Requirements
 
- - IPS 4.1
+ - IPS 4.3
  - Sonos audio system
 
 ## 3. Installation & Configuration
 
-### Installation in IPS 4.1
+### Installation in IPS 4.3
 Add the URL
 ```
 git://github.com/tkugelberg/SymconSonos.git
