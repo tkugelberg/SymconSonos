@@ -1,6 +1,6 @@
-Sonos PHP Module for IP-Symcon
+Sonos PHP Modul für IP-Symcon
 ===
-IP-Symcon PHP module for accessing Sonos audio systems
+IP-Symcon PHP Modul um Sonos Audio Systeme anzusteuern
 
 **Content**
 
@@ -8,7 +8,7 @@ IP-Symcon PHP module for accessing Sonos audio systems
 2. [Anforderungen](#2-anforderungen)
 3. [Installation & Konfiguration](#3-installation--konfiguration)
 4. [Variablen](#4-variablen)
-5. [Hintergrund Skripte](#5-hintergrund-skripte)
+5. [Hintergrund Prozesse](#5-hintergrund-prozesse)
 6. [Funktionen](#6-funktionen)
 6. [FAQ](#7-faq)
 
@@ -23,35 +23,42 @@ Die folgenden Funktionalitäten sind implementiert:
   - Analogen Eingang
   - SPDIF Eingang
 - Gruppenhandling
-- Play/Pause/Stop/Previous/Next
+- Play / Pause / Stop / Previous / Next
 - Lautstärke anpassen (inkl. default volume)
 - Mute, Loudness, Bass, Treble
 - Balance
 - Sleeptimer
-- Ansagen  
-Audiodateien von einem Samba-Share (z.B. Synology) oder HTTP Server abspielen und danach den vorherigen zustand wieder herstellen
+- Ansagen
+- Coveranzeige  
+- Audiodateien von einem Samba-Share (z.B. Synology) oder HTTP Server abspielen und danach den vorherigen Zustand wieder herstellen
 
 ## 2. Anforderungen
 
- - IPS 4.x
- - Sonos audio system
+ - IPS 4.1
+ - Sonos Audio System
 
 ## 3. Installation & Konfiguration
 
-### Installation in IPS 4.x
-Füge im "Module Control" (Kern Instanzen->Modules) die URL "git://github.com/tkugelberg/SymconSonos.git" hinzu.  
+### Installation in IPS 4.1
+Füge im "Module Control" (Kern Instanzen->Modules) die URL
+
+   ``` 
+   git://github.com/tkugelberg/SymconSonos.git
+   ```
+hinzu.  
+
 Danach ist es möglich eine neue Sonos Instanz zu erstellen:
 ![Instanz erstellen](img/create_instance.png?raw=true "Instanz erstellen")
 ### Konfiguration
 ![Instanz konfigurieren](img/instance_config.png?raw=true "Instanz konfigurieren")
--  IP-Address/Host:  
-Adresse unter der die Sonos Instanz erreichbar ist.Hierbei kann es sich um eine IP oder einen Hostnamen handeln.  
+-  IP-Adresse / Host:  
+Adresse unter der die Sonos Instanz erreichbar ist. Hierbei kann es sich um eine IP oder einen Hostnamen handeln.  
 Wenn die Einstellungen gespeichert werden wird überprüft ob die Adresse erreichbar ist.
-- Maximal ping timeout:  
+- Maximaler Ping Timeout:  
 Bevor ein Kommando an eine Sonos Instanz gecshickt wird, wird per Sys_Ping() überprüft ob diese erreichbar ist.  
 Dieser Parameter steuert nach wie vielen Millisekunden angenommen wird, dass die Box nicht verfügbar ist.  
 Wenn der Parameter auf 0 gesetzt wird, wird die Erreichbarkeit nicht überprüft.
--  Default Volume:  
+-  Standard Lautstärke:  
 Die Lautstärke die eingestellt wird, wenn die Funktionen   
    ```php 
     SNS_SetDefaultVolume(<InstanceID>);
@@ -64,61 +71,62 @@ Die Lautstärke die eingestellt wird, wenn die Funktionen
 - RINCON:  
 Enthält die RINCON der Sonos Instanz. Dabei handelt es sich um einen weltweit eindeutigen Identifier in dem Format "RINCON_<MAC-Adresse>1400", wobei die "<MAC-Adresse>" nur die Ziffern und Buchstaben ohne Bindestriche enthält.  
 Wenn dieser Wert nicht gepflegt wird, wird er automatisch ermittelt.
-- Update Status Frq:  
-Dieser parameter enthält die Frequenz in sekunden in der das Script _updateStatus ausgeführt werden soll.  
+Update Frequenz (Sekunden)
+- Status:  
+Dieser Parameter enthält die Frequenz in Sekunden in der der Prozess _updateStatus ausgeführt werden soll.  
 Default: 5
-- NA Update Status Frq:
-Wenn eine Box nicht erreichbar ist (z.B. Stromlos) wird die Frequenz in der das Script _updateStatus ausgeführt wird auf diesen Wert gesetzt.  
+- NA Status:
+Wenn eine Box nicht erreichbar ist (z.B. Stromlos) wird die Frequenz in der der Prozess _updateStatus ausgeführt wird auf diesen Wert gesetzt.  
 Default 300
-- Update Grouping Frq:  
-Dieser Parameter enthält die Frequenz in sekunden in der das Script _updateGrouping ausgeführt werden soll.  
+- Gruppen:  
+Dieser Parameter enthält die Frequenz in Sekunden in der der Prozess _updateGrouping ausgeführt werden soll.  
 Default: 120
-- NA Update Grouping Frq:
-Wenn eine Box nicht erreichbar ist (z.B. Stromlos) wird die Frequenz in der das Script _updateGrouping ausgeführt wird auf diesen Wert gesetzt.  
+- NA Gruppen:
+Wenn eine Box nicht erreichbar ist (z.B. Stromlos) wird die Frequenz in der der Prozess _updateGrouping ausgeführt wird auf diesen Wert gesetzt.  
 Default: 900
-- Force Grouping in Sonos:  
+- Gruppieren in Sonos erzwingen:  
 Bezüglich des Verhaltens was passieren soll, wenn ein Unterschied in der Gruppenzuordnung zwischen Sonos und IPS vorgefunden wird, gibt es 2 Alternativen:
-  1. IPS übernimmt die Einstellungen aus Sonos --> Haken nicht gesetzt  
+  1. IPS übernimmt die Einstellungen aus Sonos :arrow_right: Haken nicht gesetzt  
 Diese Alternative hat den Vorteil, dass die Einstellungen die man über die Sonos APP getroffen hat sich im IPS wiederspiegeln. 
-  2. Die Einstellungen aus IPS werden in Sonos gesetz --> Haken gesetzt  
+  2. Die Einstellungen aus IPS werden in Sonos gesetz :arrow_right: Haken gesetzt  
 Dies ist dafür gedacht, dass eine Box die stromlos geschaltet wurde automatisch wieder der richtigen Gruppe hinzugefügt wird.  
-Hat aber leider den Nebeneffekt, dass eine Änderung in der Sonos APP wieder verworfen wird, wenn das _updateGrouping Script läuft.
-- Enable Mute Control:  
-Diese Option legt eine Variable "Mute" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch eine Konpf auf dem WebFront auf, über den man dies Steuern kann.
-- Enable Loudness Control:  
-Diese Option legt eine Variable "Loudness" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch eine Konpf auf dem WebFront auf, über den man dies Steuern kann.
-- Enable Bass Control:  
-Diese Option legt eine Variable "Bass" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
-- Enable Treble Control:  
-Diese Option legt eine Variable "Treble" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
-- Enable Balance Control:  
-Diese Option legt eine Variable "Balance" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
-- Enable Sleeptimer Contorl:  
-Diese Option legt eine Variable "Sleeptimer" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird.
-- Enable Playmode Control:  
-Diese Option legt die Variablen "Playmode" und "Crossfade" an und aktiviert dass diese auch über das Skript _updateStatus mit dem aktuellen Wert gepflegt wird.
-- Import Playlists:  
-Diese Option kann die Werte "none", "saved", "imported" und "saved & imported" annehmen.  
-Wenn "none" gewählt ist, passiert nichts.
-Bei den anderen Werten eine Variable "Playlist" an. Dadurch wird für jede Playlist die aus dem Sonos System importiert wurde ein Knopf auf dem WebFront angezeigt. Die Variable Playlist ist allerdings niemals gefüllt, da dies nicht der Logik in Sonos entspricht.  
+Hat aber leider den Nebeneffekt, dass eine Änderung in der Sonos APP wieder verworfen wird, wenn der _updateGrouping Prozess läuft.
+- Mute Steuerung anzeigen:  
+Diese Option legt eine Variable _"Stumm schalten"_ an und aktiviert dass diese auch über den Prozess _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch eine Knopf auf dem WebFront auf, über den man dies Steuern kann.
+- Loudness Steuerung anzeigen:  
+Diese Option legt eine Variable _"Loudness"_ an und aktiviert dass diese auch über den Prozess _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch eine Knopf auf dem WebFront auf, über den man dies Steuern kann.
+- Bass Steuerung anzeigen:  
+Diese Option legt eine Variable _"Bässe"_ an und aktiviert dass diese auch über den Prozess _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
+- Höhen Steuerung anzeigen:  
+Diese Option legt eine Variable _"Höhen"_ an und aktiviert dass diese auch über den Prozess _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
+- Balance Steuerung anzeigen:  
+Diese Option legt eine Variable _"Balance"_ an und aktiviert dass diese auch über den Prozess _updateStatus mit dem aktuellen Wert gepflegt wird. Weiterhin taucht dann auch einen Slider auf dem WebFront auf, über den man dies Steuern kann.
+- Sleeptimer Steuerung anzeigen:  
+Diese Option legt eine Variable _"Sleeptimer"_ an und aktiviert dass diese auch über den Prozess _updateStatus mit dem aktuellen Wert gepflegt wird.
+- Playmode Steuerung anzeigen:  
+Diese Option legt die Variablen _"Wiedergabe Modus"_ und _"Überblendung"_ an und aktiviert dass diese auch über den Prozess _updateStatus mit dem aktuellen Wert gepflegt wird.
+- Playlists Import:  
+Diese Option kann die Werte "keine", "gespeicherte", "importierte" und "gespeicherte & importierte" annehmen.  
+Wenn "keine" gewählt ist, passiert nichts.
+Bei den anderen Werten eine Variable _"Playlist"_ an. Dadurch wird für jede Playlist die aus dem Sonos System importiert wurde ein Knopf auf dem WebFront angezeigt. Die Variable Playlist ist allerdings niemals gefüllt, da dies nicht der Logik in Sonos entspricht.  
 Wenn eine Playliste gestartet wird, werden lediglich alle Titel der Liste der Queue hinzugefügt.  
 Falls die Box einer Gruppe zugeordnet wird, wird diese Variable ausgeblendet.
-- Enable detaild info:  
-Diese Option legt die Variablen "Details", "CoverURL", "ContentStream", "Artist", "Title", "Album", "TrackDuration" und "Position" an, die dann vom _updateStatus Skript gefüllt werden.  
-In der Variablen "Details" wird eine HTMLBox erzeugt, die am WebFront auch zu sehen ist. Alle anderen Variablen werden versteckt. 
-- Force Variable order:  
+- Detail Infomationen anzeigen:  
+Diese Option legt die Variablen _"Details"_, _"Cover URL"_, _"Content Stream"_, _"Künstler"_, _"Titel"_, _"Album"_, _"Lied Dauer"_ und _"Position"_ an, die dann vom _updateStatus Prozess gefüllt werden.  
+In der Variablen _"Details"_ wird eine HTMLBox erzeugt, die am WebFront auch zu sehen ist. Alle anderen Variablen werden versteckt. 
+- Variablen Sortierung vorgeben:  
 Wenn diese Option gesetzt ist, wird beim Speichern die vom Modul vorgeschlagene Reihenfolge der Vaiablen wieder hergestellt.
-- Include TuneIn favorites:  
+- TuneIn Favoriten einschließen:  
 Wenn dieser Haken gesetzt ist, werden neben den mitgelieferten Radio sendern auch die TuneIn Favoriten (Meine Radiosender) aus dem Sonos System ausgelesen und gespeichert. Sie werden im WebFront als blaue Köpfe angelegt.  
 Dies Gesamtzahl der verfügbaren Radiosender kann allerdings 32 nicht übersteigen. Da die ausgelieferten Sender zuerst ausgelesen werden müssen diese evtl begrenzt werden, damit die TuneIn Sender hinzugefügt werden.
-- Favorite Radio Station:  
+- Radio Stationen Favoriten:  
 Der hier ausgewählte Sender aus der ausgelieferten Sender Liste wird gestartet, wenn die Funktion
   ```php
   SNS_SetRadioFavorite(<InstranceID>);
   ```
   ausgeführt wird.
-- Stations in WebFront:  
-Dies ist eine Liste der Ausgelieferten Sender, die im WebFront als transparenter Knopf angezeigt werden sollen. Falls es sich um die "Favorite Station" handelt ist der Knopf gelb.  
+- Stationen im WebFront:  
+Dies ist eine Liste der ausgelieferten Sender, die im WebFront als transparenter Knopf angezeigt werden sollen. Falls es sich um die "Favorite Station" handelt ist der Knopf gelb.  
 Wenn alle angezeigt werden sollen ist &lt;all&gt; zu pflegen, wenn keiner angezeigt werden soll, ist dieser Parameter leer zu lassen.  
 Diese Sender stehen zur Verfügung:
   - 1LIVE
@@ -168,18 +176,18 @@ Dieser Knopf aktualisiert das Profil, in dem die im Webfront verfügbaren Radios
 Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
 - Update Playlists  
 Dieser Knopf aktualisiert das Profil, in dem die im Webfront verfügbaren Playlisten hinterlegt sind.  
-Abhängig von der Ein stellung für die Option "Import Playlists" werden gespeichert und in Sonos importiert e Playlisten angelegt.  
+Abhängig von der Einstellung für die Option "Import Playlists" werden gespeichert und in Sonos importiert und Playlisten angelegt.  
 Achtung: Dieses Update ist dann für alle Sonos Instanzen gültig!
-- Read RINCON from Sonos  
-Bei betätigen dieses Knopfes wird die RINCON aus der Sonos Box ausgelesen und in der Instazkonfiguration gespeichert.  
+- RINCON von Sonos auslesen  
+Bei betätigen dieses Knopfes wird die RINCON aus der Sonos Box ausgelesen und in der Instanzkonfiguration gespeichert.  
 ACHTUNG: Diese Änderung sieht man nicht sofort, sondern erst nach dem nächsten Öffnen der Istanzkonfiguration!
 
 ## 4. Variablen
-- Coordinator  
-Bei dieser versteckten Variable ist hinterlegt, ob es ich bei der Box zu dem aktuellen Zeitpunkt um einen Koordinator handelt.  
+- Koordinator  
+Bei dieser versteckten Variable ist hinterlegt, ob es sich bei der Box zu dem aktuellen Zeitpunkt um einen Koordinator handelt.  
 Auf einem Koordinator können z.B. Funktionen wie Play, Pause, Next oder der Sleeptimer verwendet werden.  
-Sollte es sich bei einer Box nixht um einne Koordinator handel und der zuständige Koordinator in IPS verfügbar sein, werden diese Kommandos automatisch an den Gruppenkoordinator weitergeleitet.
-- GroupMembers  
+Sollte es sich bei einer Box nicht um einen Koordinator handeln und der zuständige Koordinator in IPS verfügbar sein, werden diese Kommandos automatisch an den Gruppenkoordinator weitergeleitet.
+- Gruppenmitglied  
 Diese Variable enthält eine Liste von Sonos Instanz IDs, die diesem Gruppen Koordinator zugewiesen sind.  
 Wenn die Option "Force grouping in Sonos" aktiviert ist, wird diese Variable lediglich durch die Funktion
   ```php
@@ -187,8 +195,8 @@ Wenn die Option "Force grouping in Sonos" aktiviert ist, wird diese Variable led
   ```
   gesetzt.  
   Falls die Option "Force grouping in Sonos" nicht aktiviert ist, wird diese Variable zusätzlich von dem Skript _updateGrouping aktualisiert.
-- GroupVolume  
-Diese Variable wird automatisch eingeblendet, wenn eine Box als Gruppenmenber zugeordnet ist.  
+- Gruppen Lautstärke  
+Diese Variable wird automatisch eingeblendet, wenn eine Box als Gruppenmitglied zugeordnet ist.  
 Ihr Wert wird anhand der Lautstärke der einzelnen Gruppenmitglieder (Durchnittswert) berechnet.  
 Er wird durch die Fuktionen
   ```php
@@ -196,12 +204,12 @@ Er wird durch die Fuktionen
   SNS_SetDefaultGroupVolume(<InstanceID>);
   SNS_SetGroupVolume(<InstanceID>,<Volume>);
   ``` 
-  und das Skript "_updateStatus" des Gruppenkoordinators aktualisiert.
-- MemberOfGroup  
+  und den Prozess "_updateStatus" des Gruppenkoordinators aktualisiert.
+- Mitglied der Gruppe  
 Diese Variable wird erstellt, wenn die Option "Group Coordinator" __nicht__ aktiviert ist.  
 Sie enthält die InstanzID des Gruppenkoordinators der die Instanz zugeordnet ist.
-- nowPlaying  
-Diese Variable wird durch das Skript _updateStatus aktuell gehalten.  
+- jetzige Wiedergabe  
+Diese Variable wird durch den Prozess _updateStatus aktuell gehalten.  
 Sie enthält Informationen über das was momentan gespielt wird.  
 Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
 Wenn nicht kann sich der Wert auf 2 Arten zusammensetzen:
@@ -209,10 +217,10 @@ Wenn nicht kann sich der Wert auf 2 Arten zusammensetzen:
   2. Ansonsten wird sie mit "<Titel>|<Artist>" gefüllt
 - Radio  
 Diese Variable enthält den aktuell laufenden Radiosender, sofern er in der Liste im WebFront verfügbaren Radiosender auftaucht (siehe Konfiguration).  
-Eine Aktualisierung erfolgt durch das Skript _updateStatus.  
+Eine Aktualisierung erfolgt durch den Prozess _updateStatus.  
 Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
 - Status  
-Diese Variable enthält Informationen, in welchem Zustand sich die Sonos Instanz gerade befindet und wird von dem Script _updateStatus aktualisiert.  
+Diese Variable enthält Informationen, in welchem Zustand sich die Sonos Instanz gerade befindet und wird von dem Prozess _updateStatus aktualisiert.  
 Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
 Mögliche Werte sind:
   - 0 - Prev
@@ -223,82 +231,87 @@ Mögliche Werte sind:
   - 5 - Transition
 
   0 und 4 werden nur dazu genutzt um über das WebFront den Player zu steuern. 5 ist ein Wert der nur kurzfristig angenommen wird, wenn die Audioquelle gewechselt wird.
-- Volume  
-Diese Variable enthält die Aktuelle Lautstärke der Instanz und wird von dem Script _updateStatus aktualisiert.
-- Mute  
-Diese Variable wird nur erstellt, wenn die Option "Enable Mute Control" aktiviert ist.
-Sie enthält den aktuelle Zustand ob die Instanz genuted ist und wird von dem Script _updateStatus aktualisiert.
+- Lautstärke  
+Diese Variable enthält die Aktuelle Lautstärke der Instanz und wird von dem Prozess _updateStatus aktualisiert.
+- Stumm schalten  
+Diese Variable wird nur erstellt, wenn die Option _"Mute Steuerung anzeigen"_ aktiviert ist.
+Sie enthält den aktuelle Zustand ob die Instanz gemuted ist und wird von dem Prozess _updateStatus aktualisiert.
 - Loudness  
-Diese Variable wird nur erstellt, wenn die Option "Enable Mute Control" aktiviert ist.  
-Sie enthält den aktuellen Zustand ob die Instanz gemuted ist und wird von dem Script _updateStatus aktualisiert.
-- Bass  
-Diese Variable wird nur erstellt, wenn die Option "Enable Bass Control" aktiviert ist.  
-Sie enthält die aktuellen Equalizer Einstellungen der Instanz und wird von dem Script _updateStatus aktualisiert.
-- Treble  
-Diese Variable wird nur erstellt, wenn die Option "Enable Treble Control" aktiviert ist.  
-Sie enthält die aktuellen Equalizer Einstellungen der Instanz und wird von dem Script _updateStatus aktualisiert.
+Diese Variable wird nur erstellt, wenn die Option _"Loudness Steuerung anzeigen"_ aktiviert ist.  
+Sie enthält den aktuellen Zustand ob die Loudness aktiviert ist und wird von dem Prozess _updateStatus aktualisiert.
+- Bässe  
+Diese Variable wird nur erstellt, wenn die Option _"Bass Steuerung anzeigen"_ aktiviert ist.  
+Sie enthält die aktuellen Equalizer Einstellungen der Instanz und wird von dem Prozess _updateStatus aktualisiert.
+- Höhen  
+Diese Variable wird nur erstellt, wenn die Option _"Höhen Steuerung anzeigen"_ aktiviert ist.  
+Sie enthält die aktuellen Equalizer Einstellungen der Instanz und wird von dem Prozess _updateStatus aktualisiert.
 - Balance  
-Diese Variable wird nur erstellt, wenn die Option "Enable Balance Control" aktiviert ist.  
-Sie enthält die aktuellen Equalizer Einstellungen der Instanz und wird von dem Script _updateStatus aktualisiert.
+Diese Variable wird nur erstellt, wenn die Option _"Balance Steuerung anzeigen"_ aktiviert ist.  
+Sie enthält die aktuellen Equalizer Einstellungen der Instanz und wird von dem Prozess _updateStatus aktualisiert.
 - Sleeptimer  
-Diese Variable wird nur erstellt, wenn die Option "Enable Sleeptimer Control" aktiviert ist.  
-Sie enthält die aktuellen Wert des Sleeptimers der Instanz und wird von dem Script _updateStatus aktualisiert.  
+Diese Variable wird nur erstellt, wenn die Option _"Sleeptimer Steuerung anzeigen"_ aktiviert ist.  
+Sie enthält die aktuellen Wert des Sleeptimers der Instanz und wird von dem Prozess _updateStatus aktualisiert.  
 Falls die Instanz Mitglied einer Gruppe ist, wird die Variable versteckt (hidden) und mit dem Wert aus dem Gruppenkoordinator befüllt.
-- Playlist  
+- Widergabeliste  
 Diese Variable hat normalerweise keinen Wert gepflegt. Sie dient nur dazu vom WebFront aus eine Playliste anstarten zu können.  
-Lediglich direkt nach dem Drücken des Knopfes am WebFront wird die Variable für eine Sekunde auf den Gewählten Wert gesetzt. Dies soll dem Verwener ein kurzes Feedback geben.
-- PlayMode
-Diese Variable wird nur erstellt, wenn die Option "Enable Playmode Control" aktiviert ist.  
-In diese Variablen ist der aktuelle Wert des Play Mode abgelegt und wird von dem Script _updateStatus aktualisiert. Die möglichen Werte sind:
+Lediglich direkt nach dem Drücken des Knopfes am WebFront wird die Variable für eine Sekunde auf den Gewählten Wert gesetzt. Dies soll dem Benutzer ein kurzes Feedback geben.
+- Wiedergabe Modus  
+Diese Variable wird nur erstellt, wenn die Option _"Playmode Steuerung anzeigen"_ aktiviert ist.  
+In diese Variablen ist der aktuelle Wert des Play Mode abgelegt und wird von dem Prozess _updateStatus aktualisiert. Die möglichen Werte sind:
   - 0: "NORMAL"
   - 1: "REPEAT_ALL"
   - 2: "REPEAT_ONE"
   - 3: "SHUFFLE_NOREPEAT"
   - 4: "SHUFFLE"
   - 5: "SHUFFLE_REPEAT_ONE"
-- Crossfade
-Diese Variable wird nur erstellt, wenn die Option "Enable Playmode Control" aktiviert ist.  
-Sie enthält den aktuellen Wert der Crossfade instellungen und wird von dem Script _updateStatus aktualisiert.
-- CoverURL
-Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
+- Überblendung  
+Diese Variable wird nur erstellt, wenn die Option _"Playmode Steuerung anzeigen"_ aktiviert ist.  
+Sie enthält den aktuellen Wert der Crossfade Einstellungen und wird von dem Prozess _updateStatus aktualisiert.
+- Cover URL  
+Diese Variable wird nur erstellt, wenn die Option _"Detail Informationen anzeigen"_ aktiviert ist.  
 Sie enthält die URL zu dem Cover das gerade in Sonos angezeigt wird. Dies gilt aber nur für Titel, nicht für Streams.  
-Die Variable wird von dem Script _updateStatus aktualisiert.
-- ContentStream
-Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
-Sie enthält den Conten Stram bei bei gestreamten Sender (z.B. aktuelle Informationen) und wird von dem Script _updateStatus aktualisiert.
-- Artist
-Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
-Sie enthält den Künster des aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
-- Album
-Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
-Sie enthält das Album des aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
-- TrackDuration
-Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
-Sie enthält die länge des aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
-- Position
-Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
-Sie enthält die aktuelle Position in dem aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
-- Title
-Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
-Sie enthält den Titel des aktuell abgespielten Titels und wird von dem Script _updateStatus aktualisiert.
-- Details
-Diese Variable wird nur erstellt, wenn die Option "Enable detailed info" aktiviert ist.  
-Dies ist eine HTMLBox die das Cover, den Titel den Künster, das Album und Positionsinfos anzeigt:  
+Die Variable wird von dem Prozess _updateStatus aktualisiert.
+- Content Stream  
+Diese Variable wird nur erstellt, wenn die Option _"Detail Informationen anzeigen"_ aktiviert ist.  
+Sie enthält den Conten Stram bei bei gestreamten Sender (z.B. aktuelle Informationen) und wird von dem Prozess _updateStatus aktualisiert.
+- Künstler  
+Diese Variable wird nur erstellt, wenn die Option _"Detail Informationen anzeigen"_ aktiviert ist.  
+Sie enthält den Künster des aktuell abgespielten Titels und wird von dem Prozess _updateStatus aktualisiert.
+- Album  
+Diese Variable wird nur erstellt, wenn die Option _"Detail Informationen anzeigen"_ aktiviert ist.  
+Sie enthält das Album des aktuell abgespielten Titels und wird von dem Prozess _updateStatus aktualisiert.
+- Lied Dauer  
+Diese Variable wird nur erstellt, wenn die Option _"Detail Informationen anzeigen"_ aktiviert ist.  
+Sie enthält die länge des aktuell abgespielten Titels und wird von dem Prozess _updateStatus aktualisiert.
+- Position  
+Diese Variable wird nur erstellt, wenn die Option _"Detail Informationen anzeigen"_ aktiviert ist.  
+Sie enthält die aktuelle Position in dem aktuell abgespielten Titels und wird von dem Prozess _updateStatus aktualisiert.
+- Titel  
+Diese Variable wird nur erstellt, wenn die Option _"Detail Informationen anzeigen"_ aktiviert ist.  
+Sie enthält den Titel des aktuell abgespielten Titels und wird von dem Prozess _updateStatus aktualisiert.
+- Details  
+Diese Variable wird nur erstellt, wenn die Option _"Detail Informationen anzeigen"_ aktiviert ist.  
+Dies ist eine HTMLBox die das Cover, den Titel den Künster, das Album und Positionsinfos anzeigt: 
+ 
 ![Details Song](img/details_song.png?raw=true "Details song")
+
 Wenn gerade ein Sender gestreamt wird, sind nur ContenStram und Titel enthalten:  
+
 ![Details Radio](img/details_radio.png?raw=true "Details Radio")
 
+- Song Position
+Diese Variable wird nur erstellt, wenn die Option _"Song Position anzeigen"_ aktiviert ist.
+Sie enthält die aktuelle Position des abgespielten Titels und wird von dem Prozess _updateStatus aktualisiert.
 
-
-## 5. Hintergrund Skripte
-Wenn eine Sonos Instanz erstellt wird, werden 2 Skripte angelegt und mit einem Timer gestartet.
+## 5. Hintergrund Prozesse
+Wenn eine Sonos Instanz erstellt wird, werden 2 Prozesse angelegt und mit einem internen Timer, der im Konfigurationsformular eingestellt werden kann, verknüpft.
 1. _updateStatus  
-Dieses Skript wird alle 5 Sekunden ausgeführt.  
-Es aktualisiert die Variablen Voume, Mute, Loudness, Bass, Treble, Balance and Sleeptimer baserend auf den Werten in Sonos, sofern die relevanten Konfigurationsschalter dies erfordern.  
-Weiterhin werden die Parameter Status, Radio and NowPlaying aktualisiert.  
-Bei Gruppenkoordinatoren wird die Gruppenlautstärke (GroupVolume) berechnet.
+Dieser Prozess wird alle 5 Sekunden ausgeführt. Das Interval kann im Konfigurationsformular angepasst werden. 
+Es aktualisiert die Variablen _Lautstärke_, _Stumm Schalten_, _Loudness_, _Bässe_, _Höhen_, _Balance_ und _Sleeptimer_ basierend auf den Werten in Sonos, sofern die relevanten Konfigurationsschalter dies erfordern.  
+Weiterhin werden die Parameter _Status_, _Radio_ und _jetzige Wiedergabe_ aktualisiert.  
+Bei Gruppenkoordinatoren wird die Gruppenlautstärke (_Gruppen Lautstärke_) berechnet.
 2. _updateGrouping  
-Dieses Skript wird alle "Update Grouping Frq" Sekunden ausgeführt. Hierbei handelt es sich um einen Konfigurationsparameter.  
+Dieser Prozess wird wie unter _Update Frequenz (Sekunden)_ mit dem Einstellungswert unter _Gruppen_ ausgeführt. Hierbei handelt es sich um einen Konfigurationsparameter.  
 Die Gruppeneinstellungen werden entweder in Sonos oder in IP-Symcon aktualisiert.
 
 ## 6. Funktionen
@@ -412,15 +425,15 @@ Der Parameter $rampType kann als integer oder als string übergeben werden.
 SNS_SetAnalogInput(integer $InstanceID, integer $InputInstanceID)
 ```
 Selektiert den Analogen Input einer Instanz als Audioquelle.  
-Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
+Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audioquelle gesetzt.  
 Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
 
 ---
 ```php
 SNS_SetBalance(integer $InstanceID, integer $balance)
 ```
-Passt die Balance Einstellungen im Equalizer der Sonos Instanz an. Nur Sinnvoll bei Setreopaaren oder AMPS.  
-Mögliche Werte liegen zwischen -100 (ganz links) und 100 (gnaz rechts).
+Passt die Balance Einstellungen im Equalizer der Sonos Instanz an. Nur Sinnvoll bei Stereopaaren oder AMPS.  
+Mögliche Werte liegen zwischen -100 (ganz links) und 100 (ganz rechts).
 
 ---
 ```php
@@ -434,7 +447,7 @@ Mögliche Werte liegen zwischen -10 und 10.
 SNS_SetCrossfade(integer $InstanceID, boolean $crossfade)
 ```
 Schaltet den Crossfade Modus für eine Instanz ein oder aus.  
-Falls die Instanz Teil einer Gruppe ist, wird das Kommano automatisch an den Gruppenkoordinator weitergeleitet.  
+Falls die Instanz Teil einer Gruppe ist, wird das Kommando automatisch an den Gruppenkoordinator weitergeleitet.  
 0,1, true und false sind gültige Werte für $loudness.
 
 ---
@@ -482,9 +495,9 @@ Mutet or unmutet eine Instanz.
 SNS_SetPlaylist(integer $InstanceID, string $name)
 ```
 Entfernt alle Titel aus einer Queue und fügt alle Titel einer Playliste hinzu.  
-Der name der Playliste muss in Sonos bekannt sein.  
+Der Name der Playliste muss in Sonos bekannt sein.  
 Es wird zunächst nach dem Namen in den gespeicherten Playlisten gesucht. Wird er dort nciht gefunden, wird ebenfalls in den Importierten Playlisten gesucht. Dabei wird ein Unterstrich ("_") such ein Leerzeichen (" ") ersetzt und die Endungen ".m3u" und ".M3U" werden entfernt. Somit kann z.B. die Playliste mit dem Name "3_Doors_Down.m3u" mit dem Befehl SNS_SetPlaylist(12345,"3 Doors Down"); gestartet werden.  
-Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
+Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audioquelle gesetzt.  
 Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
 
 ---
@@ -513,7 +526,7 @@ Startet die Wiedergabe der "Favorite Radio Station".
 SNS_SetRadio(integer $InstanceID, string $radio)
 ```
 Setzt die Audioquelle auf die URL des in $radio mitgegebenen Radiosenders.  
-Zunächst wird gesucht, ob der Sender in den ausgelieferten Sendern gefunden wird. Wenn er dort nicht gefunden wird, wird in den TuneIn Favoriten (Meine Radiosneder) gesucht.  
+Zunächst wird gesucht, ob der Sender in den ausgelieferten Sendern gefunden wird. Wenn er dort nicht gefunden wird, wird in den TuneIn Favoriten (Meine Radiosender) gesucht.  
 Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
 Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
 
@@ -530,7 +543,7 @@ Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automati
 SNS_SetSpdifInput(integer $InstanceID, integer $InputInstanceID)
 ```
 Selektiert den SPDIF Input einer Instanz als Audioquelle.  
-Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
+Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audioquelle gesetzt.  
 Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
 
 ---
@@ -586,28 +599,29 @@ Liest die RINCON einer Instanz aus und schreibt diese in die Instanzkonfiguratio
 ### 7.1. Wie viele Variablen werden für das Modul benötigt?  
 Jede Instanz (also eingebundene Sonos Box) benötigt zwischen 13 und 30 Variablen.  
 - Instanz selber
-- GroupMembers
+- Gruppen Mitglied
 - Koordinator
-- GroupVolume
-- MemberOfGroup
-- nowPlaying
+- Gruppen Lautstärke
+- Mitglied der Gruppe
+- jetzige Wiedergabe
 - Radio
 - Status
-- Volume
-- Bass (falls "Bass Control" aktiviert ist)
-- Treble (falls "Treble Control" aktiviert ist)
-- Mute (falls "Mute Control" aktiviert ist)
-- Loudness (falls "Loudness Control" aktiviert ist)
-- Balance (falls "Balance Control" aktiviert ist)
-- Sleeptimer (falls "Sleeptimer Control" aktiviert ist)
-- Playlist (falls "Playlist Control" aktiviert ist)
-- PlayMode (falls "Playmode Control" aktiviert ist)
-- Crossfade (falls "Playmode Control" aktiviert ist)
-- CoverURL (falls "Endable detailed info" aktiviert ist)
-- ContentStream (falls "Endable detailed info" aktiviert ist)
-- Künstler (falls "Endable detailed info" aktiviert ist)
-- Album (falls "Endable detailed info" aktiviert ist)
-- TrackDuration (falls "Endable detailed info" aktiviert ist)
-- Position (falls "Endable detailed info" aktiviert ist)
-- Title (falls "Endable detailed info" aktiviert ist)
-- Details (falls "Endable detailed info" aktiviert ist)
+- Lautstärke
+- Bässe (falls _"Bass Steuerung anzeigen"_ aktiviert ist)
+- Höhen (falls _"Höhen Steuerung anzeigen"_ aktiviert ist)
+- Stumm schalten (falls _"Mute Steuerung anzeigen"_ aktiviert ist)
+- Loudness (falls _"Loudness Steuerung anzeigen"_ aktiviert ist)
+- Balance (falls _"Balance Steuerung anzeigen"_ aktiviert ist)
+- Sleeptimer (falls _"Sleeptimer Steuerung anzeigen"_ aktiviert ist)
+- Wiedergabeliste (falls _"Playlist Import"_ aktiviert ist)
+- Wiedergabe Modus (falls _"Playmode Steuerung anzeigen"_ aktiviert ist)
+- Überblendung (falls "Playmode Control" aktiviert ist)
+- Cover URL (falls _"Detail Informationen anzeigen"_ aktiviert ist)
+- Content Stream (falls _"Detail Informationen anzeigen"_ aktiviert ist)
+- Künstler (falls _"Detail Informationen anzeigen"_ aktiviert ist)
+- Album (falls _"Detail Informationen anzeigen"_ aktiviert ist)
+- Lied Dauer (falls _"Detail Informationen anzeigen"_ aktiviert ist)
+- Position (falls _"Detail Informationen anzeigen"_ aktiviert ist)
+- Titel (falls _"Detail Informationen anzeigen"_ aktiviert ist)
+- Details (falls _"Detail Informationen anzeigen"_ aktiviert ist)
+- Song Fortschritt (falls _"Song Position anzeigen"_ aktiviert ist)

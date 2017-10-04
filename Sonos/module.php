@@ -2,7 +2,7 @@
 require_once(__DIR__ . DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."bootstrap.php");
 use Sonos\Radio\RadioStations;
 use Sonos\Sonos\SonosAccess;
-use Sonos\PHPImageWorkshop\ImageWorkshop;
+
 
 
 class Sonos extends IPSModule
@@ -2363,10 +2363,10 @@ Class GIFEncoder {
     var $COL = -1;
     var $IMG = -1;
     var $ERR = Array (
-        ERR00=>"Does not supported function for only one image!",
-        ERR01=>"Source is not a GIF image!",
-        ERR02=>"Unintelligible flag ",
-        ERR03=>"Does not make animation from animated GIF source",
+        "ERR00"=>"Does not supported function for only one image!",
+        "ERR01"=>"Source is not a GIF image!",
+        "ERR02"=>"Unintelligible flag ",
+        "ERR03"=>"Does not make animation from animated GIF source",
     );
     /*
     :::::::::::::::::::::::::::::::::::::::::::::::::::
