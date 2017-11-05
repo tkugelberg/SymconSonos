@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.5.5
+- Add support for Favorites
+
 ### Version 1.5.4
 - minor fix in _updateGrouping in case a Sonos Box is not known in IPS
 

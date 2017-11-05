@@ -20,10 +20,14 @@
                 { "name": "PlayModeControl",           "type": "CheckBox",          "caption": "Enable Playmode Control" },
                 { "name": "PlaylistImport",            "type": "Select",            "caption": "Import Playlists",
                     "options": [ 
-                                 { "label": "none",             "value": 0 },
-                                 { "label": "saved",            "value": 1 },
-                                 { "label": "imported",         "value": 2 },
-                                 { "label": "saved & imported", "value": 3 }
+                                 { "label": "none",                  "value": 0 },
+                                 { "label": "saved",                 "value": 1 },
+                                 { "label": "imported",              "value": 2 },
+                                 { "label": "saved & imported",      "value": 3 },
+                                 { "label": "favorites",             "value": 4 },
+								 { "label": "saved & favorites",     "value": 5 },
+								 { "label": "imported & favorites",  "value": 6 },
+								 { "label": "saved, imported & fav", "value": 7 }
                                ] },
                 { "name": "DetailedInformation",       "type": "CheckBox",          "caption": "Enable detailed info" },
                 { "name": "ForceOrder",                "type": "CheckBox",          "caption": "Force Variable order" },
