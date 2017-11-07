@@ -269,6 +269,7 @@ class Sonos extends IPSModule
         //2j) Position
         if ($this->ReadPropertyBoolean("Position")){
             $this->RegisterVariableInteger("PositionPercent", $this->Translate("Track Progress"), "Sonos.PositionP", $positions['Position']);
+            $this->EnableAction("PositionPercent");
         }else{
             $this->removeVariable("PositionPercent", $links);
         }
@@ -410,19 +411,19 @@ class Sonos extends IPSModule
         if ($MemberOfGroup)
         {
             // If Sonos is member of a group, use values of Group Coordinator
-            SetValueInteger($vidStatus, GetValueInteger(IPS_GetObjectIDByName("Status", $MemberOfGroup)));
-            $actuallyPlaying = GetValueString(IPS_GetObjectIDByName("nowPlaying", $MemberOfGroup));
-            SetValueInteger($vidRadio, GetValueInteger(IPS_GetObjectIDByName("Radio", $MemberOfGroup)));
-            if($vidSleeptimer)    SetValueInteger($vidSleeptimer,   @GetValueInteger(IPS_GetObjectIDByName("Sleeptimer", $MemberOfGroup)));
-            if($vidCoverURL)      SetValueString($vidCoverURL,      @GetValueString(IPS_GetObjectIDByName("CoverURL", $MemberOfGroup)));
-            if($vidContentStream) SetValueString($vidContentStream, @GetValueString(IPS_GetObjectIDByName("ContentStream", $MemberOfGroup)));
-            if($vidArtist)        SetValueString($vidArtist,        @GetValueString(IPS_GetObjectIDByName("Artist", $MemberOfGroup)));
-            if($vidAlbum)         SetValueString($vidAlbum,         @GetValueString(IPS_GetObjectIDByName("Album", $MemberOfGroup)));
-            if($vidTrackDuration) SetValueString($vidTrackDuration, @GetValueString(IPS_GetObjectIDByName("TrackDuration", $MemberOfGroup)));
-            if($vidPosition)      SetValueString($vidPosition,      @GetValueString(IPS_GetObjectIDByName("Position", $MemberOfGroup)));
-            if($vidTitle)         SetValueString($vidTitle,         @GetValueString(IPS_GetObjectIDByName("Title", $MemberOfGroup)));
-            if($vidDetails)       SetValueString($vidDetails,       @GetValueString(IPS_GetObjectIDByName("Details", $MemberOfGroup)));
-            if($vidPositionPercent) SetValueInteger($vidPositionPercent,       @GetValueInteger(IPS_GetObjectIDByName("PositionPercent", $MemberOfGroup)));
+            SetValueInteger($vidStatus, GetValueInteger(IPS_GetObjectIDByIdent("Status", $MemberOfGroup)));
+            $actuallyPlaying = GetValueString(IPS_GetObjectIDByIdent("nowPlaying", $MemberOfGroup));
+            SetValueInteger($vidRadio, GetValueInteger(IPS_GetObjectIDByIdent("Radio", $MemberOfGroup)));
+            if($vidSleeptimer)    SetValueInteger($vidSleeptimer,   @GetValueInteger(IPS_GetObjectIDByIdent("Sleeptimer", $MemberOfGroup)));
+            if($vidCoverURL)      SetValueString($vidCoverURL,      @GetValueString(IPS_GetObjectIDByIdent("CoverURL", $MemberOfGroup)));
+            if($vidContentStream) SetValueString($vidContentStream, @GetValueString(IPS_GetObjectIDByIdent("ContentStream", $MemberOfGroup)));
+            if($vidArtist)        SetValueString($vidArtist,        @GetValueString(IPS_GetObjectIDByIdent("Artist", $MemberOfGroup)));
+            if($vidAlbum)         SetValueString($vidAlbum,         @GetValueString(IPS_GetObjectIDByIdent("Album", $MemberOfGroup)));
+            if($vidTrackDuration) SetValueString($vidTrackDuration, @GetValueString(IPS_GetObjectIDByIdent("TrackDuration", $MemberOfGroup)));
+            if($vidPosition)      SetValueString($vidPosition,      @GetValueString(IPS_GetObjectIDByIdent("Position", $MemberOfGroup)));
+            if($vidTitle)         SetValueString($vidTitle,         @GetValueString(IPS_GetObjectIDByIdent("Title", $MemberOfGroup)));
+            if($vidDetails)       SetValueString($vidDetails,       @GetValueString(IPS_GetObjectIDByIdent("Details", $MemberOfGroup)));
+            if($vidPositionPercent) SetValueInteger($vidPositionPercent,       @GetValueInteger(IPS_GetObjectIDByIdent("PositionPercent", $MemberOfGroup)));
         }
         else
         {
@@ -641,7 +642,7 @@ class Sonos extends IPSModule
 
         $GroupVolume = 0;
         foreach($groupMembersArray as $key=>$ID) {
-            $GroupVolume += GetValueInteger(IPS_GetObjectIDByName("Volume", $ID));
+            $GroupVolume += GetValueInteger(IPS_GetObjectIDByIdent("Volume", $ID));
         }
 
         SetValueInteger($this->GetIDForIdent("GroupVolume"), intval(round($GroupVolume / sizeof($groupMembersArray))));
@@ -720,10 +721,10 @@ class Sonos extends IPSModule
             SNS_SetGroup($sonosInstanceID,$groupToSet);
         }elseif($mySettings['COORDINATOR'] != $coordinatorInIPS){
             if(!$mySettings['COORDINATOR']){
-                SetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID),false);
+                SetValueBoolean(IPS_GetObjectIDByIdent("Coordinator", $sonosInstanceID),false);
                 @IPS_SetVariableProfileAssociation("Sonos.Groups", $sonosInstanceID, "", "", -1);
             }else{
-                SetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID),true);
+                SetValueBoolean(IPS_GetObjectIDByIdent("Coordinator", $sonosInstanceID),true);
                 @IPS_SetVariableProfileAssociation("Sonos.Groups", $sonosInstanceID, IPS_GetName($sonosInstanceID), "", -1);
             }
         }
@@ -761,14 +762,14 @@ class Sonos extends IPSModule
     {
         if (!@GetValueBoolean($this->GetIDForIdent("Coordinator"))) die("This function is only allowed for Coordinators");
 
-        $groupMembers        = GetValueString(IPS_GetObjectIDByName("GroupMembers",$this->InstanceID ));
+        $groupMembers        = GetValueString(IPS_GetObjectIDByIdent("GroupMembers",$this->InstanceID ));
         $groupMembersArray   = Array();
         if($groupMembers)
             $groupMembersArray = array_map("intval", explode(",",$groupMembers));
         $groupMembersArray[] = $this->InstanceID;
             
         foreach($groupMembersArray as $key=>$ID) {
-          $newVolume = (GetValueInteger(IPS_GetObjectIDByName("Volume",$ID)) + $increment);
+          $newVolume = (GetValueInteger(IPS_GetObjectIDByIdent("Volume",$ID)) + $increment);
           if ($newVolume > 100){
               $newVolume = 100;
           }elseif($newVolume < 0){
@@ -781,10 +782,10 @@ class Sonos extends IPSModule
 
         $GroupVolume = 0;
         foreach($groupMembersArray as $key=>$ID) {
-          $GroupVolume += GetValueInteger(IPS_GetObjectIDByName("Volume", $ID));
+          $GroupVolume += GetValueInteger(IPS_GetObjectIDByIdent("Volume", $ID));
         }
 
-        SetValueInteger(IPS_GetObjectIDByName("GroupVolume", $this->InstanceID), intval(round($GroupVolume / sizeof($groupMembersArray))));
+        SetValueInteger(IPS_GetObjectIDByIdent("GroupVolume", $this->InstanceID), intval(round($GroupVolume / sizeof($groupMembersArray))));
     }
 
     public function ChangeVolume(int $increment)
@@ -986,8 +987,8 @@ class Sonos extends IPSModule
              $settings["mediaInfo"]     = $settings["sonos"]->GetMediaInfo();
              $settings["positionInfo"]  = $settings["sonos"]->GetPositionInfo();
              $settings["transportInfo"] = $settings["sonos"]->GetTransportInfo();
-             $settings["group"]         = GetValueInteger(IPS_GetObjectIDByName("MemberOfGroup", $instanceID));
-             $settings["volumeBefore"]  = GetValueInteger(IPS_GetObjectIDByName("Volume", $instanceID));
+             $settings["group"]         = GetValueInteger(IPS_GetObjectIDByIdent("MemberOfGroup", $instanceID));
+             $settings["volumeBefore"]  = GetValueInteger(IPS_GetObjectIDByIdent("Volume", $instanceID));
 
              if(isset($settings["volume"]) && $settings["volume"] != 0){
                // volume request absolte or relative?
@@ -1108,7 +1109,7 @@ class Sonos extends IPSModule
     {
         if (!@GetValueBoolean($this->GetIDForIdent("Coordinator"))) die("This function is only allowed for Coordinators");
 
-        $groupMembers        = GetValueString(IPS_GetObjectIDByName("GroupMembers",$this->InstanceID ));
+        $groupMembers        = GetValueString(IPS_GetObjectIDByIdent("GroupMembers",$this->InstanceID ));
         $groupMembersArray   = Array();
         if($groupMembers)
             $groupMembersArray = array_map("intval", explode(",",$groupMembers));
@@ -1122,10 +1123,10 @@ class Sonos extends IPSModule
         
         $GroupVolume = 0;
         foreach($groupMembersArray as $key=>$ID) {
-          $GroupVolume += GetValueInteger(IPS_GetObjectIDByName("Volume", $ID));
+          $GroupVolume += GetValueInteger(IPS_GetObjectIDByIdent("Volume", $ID));
         }
 
-        SetValueInteger(IPS_GetObjectIDByName("GroupVolume", $this->InstanceID), intval(round($GroupVolume / sizeof($groupMembersArray))));
+        SetValueInteger(IPS_GetObjectIDByIdent("GroupVolume", $this->InstanceID), intval(round($GroupVolume / sizeof($groupMembersArray))));
     }
 
     public function SetDefaultVolume()
