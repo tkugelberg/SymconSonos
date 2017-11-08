@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.5.6
+- Merge from mrworta for "Fix occasional playback loop"
+
 ### Version 1.5.5
 - Add support for Favorites
 

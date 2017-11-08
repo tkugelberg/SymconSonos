@@ -475,7 +475,7 @@ class Sonos extends IPSModule
           }
 
           $sonos->SetAVTransportURI($uri);
-	  $sonos->SetPlayMode(0);	
+	      $sonos->SetPlayMode(0);	
           $sonos->Play();
           IPS_Sleep(500);
           $fileTransportInfo = $sonos->GetTransportInfo();
