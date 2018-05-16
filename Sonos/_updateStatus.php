@@ -30,6 +30,8 @@ $vidTitle         = @IPS_GetObjectIDByName("Title",         $vidInstance);
 $vidAlbum         = @IPS_GetObjectIDByName("Album",         $vidInstance);
 $vidTrackDuration = @IPS_GetObjectIDByName("TrackDuration", $vidInstance);
 $vidPosition      = @IPS_GetObjectIDByName("Position",      $vidInstance);
+$vidCrossfade     = @IPS_GetObjectIDByName("Crossfade",     $vidInstance);
+$vidPlaymode      = @IPS_GetObjectIDByName("PlayMode",      $vidInstance);
 
 // If the Sonos instance is not available update of grouping makes no sense
 if ( $timeout && Sys_Ping($ip, $timeout) == false ){
@@ -44,10 +46,13 @@ $sonos = new SonosAccess($ip);
 $status = $sonos->GetTransportInfo();
 
 SetValueInteger($vidVolume, $sonos->GetVolume());
-if($vidMute)     SetValueInteger($vidMute,     $sonos->GetMute()     );
-if($vidLoudness) SetValueInteger($vidLoudness, $sonos->GetLoudness() );
-if($vidBass)     SetValueInteger($vidBass,     $sonos->GetBass()     );
-if($vidTreble)   SetValueInteger($vidTreble,   $sonos->GetTreble()   );
+if($vidMute)      SetValueInteger($vidMute,     $sonos->GetMute()             );
+if($vidLoudness)  SetValueInteger($vidLoudness, $sonos->GetLoudness()         );
+if($vidBass)      SetValueInteger($vidBass,     $sonos->GetBass()             );
+if($vidTreble)    SetValueInteger($vidTreble,   $sonos->GetTreble()           );
+if($vidCrossfade) SetValueInteger($vidCrossfade,$sonos->GetCrossfade()        );
+if($vidPlaymode)  SetValueInteger($vidPlaymode, $sonos->GetTransportsettings());
+
 if($vidBalance){
   $leftVolume  = $sonos->GetVolume("LF");
   $rightVolume = $sonos->GetVolume("RF");

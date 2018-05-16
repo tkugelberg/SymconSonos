@@ -535,6 +535,14 @@ Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die n
 
 ---
 ```php
+SNS_SetTransportURI(string $uri)
+```
+Setzt die Transport URI auf den angegebenen Wert.  
+Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.
+Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
+
+---
+```php
 SNS_SetTreble(integer $InstanceID, integer $treble)
 ```
 Passt die Treble Einstellungen im Equalizer der Sonos Instanz an.

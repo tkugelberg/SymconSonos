@@ -922,6 +922,19 @@ class Sonos extends IPSModule
         $sonos->SetAVTransportURI("x-sonos-htastream:".IPS_GetProperty($input_instance ,"RINCON").":spdif");
     }
 
+	public function SetTransportURI (string $uri)
+	{
+        $ip = $this->getIP();
+
+        if(@GetValue($this->GetIDForIdent("MemberOfGroup")))
+          $this->SetGroup(0);
+
+        include_once(__DIR__ . "/sonosAccess.php");
+        $sonos = new SonosAccess($ip);
+        
+        $sonos->SetAVTransportURI($uri);		
+	}
+	
     public function SetTreble(int $treble)	
     {
         $ip = $this->getIP();

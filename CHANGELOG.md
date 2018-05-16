@@ -1,4 +1,8 @@
 # Changelog 
+### Version 1.5.5
+- Added SNS_SetTransportURI( )
+- added Crossfade and Transportsettings to _updatStatus
+
 ### Version 1.5.4
 - minor fix in _updateGrouping in case a Sonos Box is not known in IPS
 
