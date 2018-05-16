@@ -1,7 +1,13 @@
 # Changelog 
-### Version 1.5.5
+### Version 1.5.7
 - Added SNS_SetTransportURI( )
 - added Crossfade and Transportsettings to _updatStatus
+
+### Version 1.5.6
+- Merge from mrworta for "Fix occasional playback loop"
+
+### Version 1.5.5
+- Add support for Favorites
 
 ### Version 1.5.4
 - minor fix in _updateGrouping in case a Sonos Box is not known in IPS

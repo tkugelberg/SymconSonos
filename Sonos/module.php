@@ -475,6 +475,7 @@ class Sonos extends IPSModule
           }
 
           $sonos->SetAVTransportURI($uri);
+	      $sonos->SetPlayMode(0);	
           $sonos->Play();
           IPS_Sleep(500);
           $fileTransportInfo = $sonos->GetTransportInfo();
@@ -812,7 +813,9 @@ class Sonos extends IPSModule
         include_once(__DIR__ . "/sonosAccess.php");
         $sonos = new SonosAccess($ip);
 
-        $uri = '';
+        $uri  = '';
+		$meta = '';
+		
         foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:','BrowseDirectChildren',999)['Result']))->container as $container) {
             if ($container->xpath('dc:title')[0] == $name){
               $uri = (string)$container->res;
@@ -820,6 +823,17 @@ class Sonos extends IPSModule
             }
         }  
 
+		if($uri === '')
+        {
+            foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('FV:2','BrowseDirectChildren',999)['Result']))->item as $item) {
+                if (preg_replace($this->getPlaylistReplacementFrom(), $this->getPlaylistReplacementTo(), $item->xpath('dc:title')[0]) == $name){
+                    $uri  = (string)$item->res;
+                    $meta = (string)$item->xpath('r:resMD')[0];
+                    break;
+                }
+            }
+        }  
+		
         if($uri === ''){
             foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('A:PLAYLISTS','BrowseDirectChildren',999)['Result']))->container as $container) {
                 if (preg_replace($this->getPlaylistReplacementFrom(), $this->getPlaylistReplacementTo(), $container->xpath('dc:title')[0]) == $name){
@@ -833,7 +847,7 @@ class Sonos extends IPSModule
             throw new Exception('Playlist \''.$name.'\' not found');
 
         $sonos->ClearQueue();
-        $sonos->AddToQueue($uri);
+        $sonos->AddToQueue($uri, $meta);
         $sonos->SetAVTransportURI('x-rincon-queue:'.$this->ReadPropertyString("RINCON").'#0');
 
     }
@@ -983,7 +997,8 @@ class Sonos extends IPSModule
         $Value                 = 1;
         $PlaylistImport        = $this->ReadPropertyInteger("PlaylistImport");
 
-        if( $PlaylistImport === 1 || $PlaylistImport === 3  ){
+        // saved
+		if( $PlaylistImport === 1 || $PlaylistImport === 3 || $PlaylistImport === 5  || $PlaylistImport === 7 ){
             foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('SQ:')['Result']))->container as $container) {
                 $Associations[] = Array($Value++, (string)$container->xpath('dc:title')[0], "", -1);
                 // associations only support up to 32 variables
@@ -991,7 +1006,8 @@ class Sonos extends IPSModule
             }
         }
 
-        if(($PlaylistImport === 2 || $PlaylistImport === 3) && $Value < 33){
+		// imported
+        if(($PlaylistImport === 2 || $PlaylistImport === 3 || $PlaylistImport === 6  || $PlaylistImport === 7) && $Value < 33){
             foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('A:PLAYLISTS')['Result']))->container as $container) {
                 $Associations[] = Array($Value++, (string)preg_replace($this->getPlaylistReplacementFrom(), $this->getPlaylistReplacementTo(), $container->xpath('dc:title')[0]), "", -1);
                 // associations only support up to 32 variables
@@ -999,6 +1015,16 @@ class Sonos extends IPSModule
             }
         }
 
+		// favorites
+		if(($PlaylistImport === 4 || $PlaylistImport === 5 || $PlaylistImport === 6 || $PlaylistImport === 7) && $Value < 33) // Spotify Playlist saved as Sonos Favorite
+        {
+            foreach ((new SimpleXMLElement($sonos->BrowseContentDirectory('FV:2')['Result']))->item as $item) {
+                $Associations[] = Array($Value++, (string)preg_replace($this->getPlaylistReplacementFrom(), $this->getPlaylistReplacementTo(), $item->xpath('dc:title')[0]), "", -1);
+                // associations only support up to 32 variables
+                if( $Value === 33 ) break;
+            }
+        }
+		
         $this->RegisterProfileIntegerEx("Playlist.SONOS", "Database", "", "", $Associations);
     }
 

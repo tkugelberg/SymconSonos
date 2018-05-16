@@ -10,7 +10,7 @@ class SonosAccess{
     $this->address = $address;
   }
 
-  public function AddToQueue($file)
+  public function AddToQueue($file, $meta='')
   {
     $this->processSoapCall("/MediaRenderer/AVTransport/Control",
                            "urn:schemas-upnp-org:service:AVTransport:1",
@@ -18,12 +18,12 @@ class SonosAccess{
                            array( 
                                   new SoapParam("0"                     ,"InstanceID"                     ),
                                   new SoapParam(htmlspecialchars($file) ,"EnqueuedURI"                    ),
-                                  new SoapParam(""                      ,"EnqueuedURIMetaData"            ),
+                                  new SoapParam($meta                   ,"EnqueuedURIMetaData"            ),
                                   new SoapParam("0"                     ,"DesiredFirstTrackNumberEnqueued"),
                                   new SoapParam("1"                     ,"EnqueueAsNext"                  )
                                 ));
-  }
-
+  }  
+  
   public function BrowseContentDirectory($objectID='SQ:',$browseFlag='BrowseDirectChildren',$requestedCount=100,$startingIndex=0,$filter='',$sortCriteria='')
   {
     return $this->processSoapCall("/MediaServer/ContentDirectory/Control",
