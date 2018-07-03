@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.5.9
+- added function DelegateGroupCoordinationTo( )
+
 ### Version 1.5.8
 - Added "Radio BOB!" and "AC/DC Collection"
 - corrected regex for play files

@@ -358,6 +358,88 @@ class Sonos extends IPSModule
         }catch (Exception $e){throw $e;}
     }
 
+	public function DelegateGroupCoordinationTo(int $newGroupCoordinator, bool $rejoinGroup)
+	{
+		// do nothing if instance is the same as $newGroupCoordinator
+		if($this->InstanceID === $newGroupCoordinator) return;
+		
+		// $newGroupCoordinator is not part of group
+		if ( GetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$newGroupCoordinator)) === $this->InstanceID )
+		     throw new Exception("(".$newGroupCoordinator.") is not a member of this group");
+		
+		
+		// execute sonos change
+		$ip = $this->getIP();
+		
+        include_once(__DIR__ . "/sonosAccess.php");
+        (new SonosAccess($ip))->DelegateGroupCoordinationTo(IPS_GetProperty($newGroupCoordinator ,"RINCON"),$rejoinGroup);
+		
+		// get old membersOf and remove involved instances
+		$currentMembers = explode(",",GetValueString($this->GetIDForIdent("GroupMembers")));
+		$currentMembers = array_filter($currentMembers, function($v) { return $v != ""; });
+		$currentMembers = array_filter($currentMembers, function($v) { return $v != $this->InstanceID ; });
+		$currentMembers = array_filter($currentMembers, function($v) { return $v != $newGroupCoordinator ; });
+
+		// update memberOf in all members, but not new coordinator
+        foreach($currentMembers as $key=>$ID) {
+          SetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$ID),$newGroupCoordinator);
+        }
+		
+		// update GroupMembers in old and new coordinator
+        $currentMembers[] = $this->InstanceID;
+		SetValueString(IPS_GetObjectIDByName("GroupMembers",$newGroupCoordinator),implode(",",$currentMembers));
+		SetValueString($this->GetIDForIdent("GroupMembers"),"");
+		
+		// clear memberOf in new coordinator, set memberOf in old coordinator
+		SetValueInteger($this->GetIDForIdent("MemberOfGroup"), $newGroupCoordinator);
+		SetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$newGroupCoordinator), 0);
+		
+		// switch variable "Coordinator"
+		SetValueBoolean($this->GetIDForIdent("Coordinator"),false);
+		SetValueBoolean(IPS_GetObjectIDByName("Coordinator",$newGroupCoordinator),true);
+		
+		// update Groups.SONOS, achtung: $rejoinGroup
+		if ($rejoinGroup){
+          @IPS_SetVariableProfileAssociation("Groups.SONOS", $this->InstanceID, "", "", -1);
+		}else{
+	      @IPS_SetVariableProfileAssociation("Groups.SONOS", $this->InstanceID, IPS_GetName($this->InstanceID), "", -1);
+		}
+        @IPS_SetVariableProfileAssociation("Groups.SONOS", $newGroupCoordinator, IPS_GetName($newGroupCoordinator), "", -1);
+		
+		// Variablen anzeigen und verstecken.
+		// new coordinator
+		@IPS_SetHidden(IPS_GetVariableIDByName("GroupVolume",$groupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("MemberOfGroup",$groupCoordinator),true);
+        @IPS_SetHidden(IPS_GetVariableIDByName("nowPlaying",$groupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Radio",$groupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Playlist",$groupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("PlayMode",$groupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Crossfade",$groupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Status",$groupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Sleeptimer",$groupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Details",$groupCoordinator),false);		
+		
+		// old coordinator
+		if ($rejoinGroup){
+			$hidden = false;
+            @IPS_SetHidden($this->GetIDForIdent("GroupVolume"),true);		
+        }else{
+			$hidden = true;
+			@IPS_SetHidden($this->GetIDForIdent("GroupVolume"),false);
+		}
+
+        @IPS_SetHidden($this->GetIDForIdent("nowPlaying"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Radio"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Playlist"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("PlayMode"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Crossfade"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Status"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Sleeptimer"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("Details"),$hidden);
+        @IPS_SetHidden($this->GetIDForIdent("MemberOfGroup"),$hidden); 
+		
+	}
+	
     public function DeleteSleepTimer()
     {
         $targetInstance = $this->findTarget();
@@ -708,7 +790,7 @@ class Sonos extends IPSModule
     
     public function SetGroup(int $groupCoordinator)
     {
-        // Instance has Memners, do nothing
+        // Instance has Members, do nothing
         if(@GetValueString($this->GetIDForIdent("GroupMembers"))) return;
         // Do not try to assign to itself
         if($this->InstanceID === $groupCoordinator) $groupCoordinator = 0;

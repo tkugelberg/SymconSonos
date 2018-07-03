@@ -48,6 +48,18 @@ class SonosAccess{
                                    new SoapParam("0","InstanceID")
                                  ));
   }
+  
+  public function DelegateGroupCoordinationTo(string $NewCoordinator, bool $RejoinGroup)
+  {
+    $this->processSoapCall("/MediaRenderer/AVTransport/Control",
+                           "urn:schemas-upnp-org:service:AVTransport:1",
+                           "DelegateGroupCoordinationTo",
+                           array(
+                                  new SoapParam("0","InstanceID"),
+								  new SoapParam($NewCoordinator,"NewCoordinator"),
+								  new SoapParam($RejoinGroup,"RejoinGroup")
+                                ));	  
+  }
 
   public function GetBass()
   {
