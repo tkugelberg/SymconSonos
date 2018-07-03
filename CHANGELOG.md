@@ -1,4 +1,8 @@
 # Changelog 
+### Version 1.5.8
+- Added "Radio BOB!" and "AC/DC Collection"
+- corrected regex for play files
+
 ### Version 1.5.7
 - Added SNS_SetTransportURI( )
 - added Crossfade and Transportsettings to _updatStatus
