@@ -432,12 +432,12 @@ class Sonos extends IPSModule
 		// old coordinator
 		if ($rejoinGroup){
 			$hidden = true;
-            @IPS_SetHidden($this->GetIDForIdent("GroupVolume"),false);		
         }else{
 			$hidden = false;
-			@IPS_SetHidden($this->GetIDForIdent("GroupVolume"),true);
 		}
-
+		
+		@IPS_SetHidden($this->GetIDForIdent("GroupVolume"),true);
+        @IPS_SetHidden($this->GetIDForIdent("MemberOfGroup"),false); 		
         @IPS_SetHidden($this->GetIDForIdent("nowPlaying"),$hidden);
         @IPS_SetHidden($this->GetIDForIdent("Radio"),$hidden);
         @IPS_SetHidden($this->GetIDForIdent("Playlist"),$hidden);
@@ -446,7 +446,7 @@ class Sonos extends IPSModule
         @IPS_SetHidden($this->GetIDForIdent("Status"),$hidden);
         @IPS_SetHidden($this->GetIDForIdent("Sleeptimer"),$hidden);
         @IPS_SetHidden($this->GetIDForIdent("Details"),$hidden);
-        @IPS_SetHidden($this->GetIDForIdent("MemberOfGroup"),$hidden); 
+
 		
 	}
 	
