@@ -14,7 +14,7 @@ function get_available_stations(){
             Array( ('name') => "Antenne 1",
                    ('logo') => "http://cdn-radiotime-logos.tunein.com/s25770q.png",
                    ('url')  => "x-rincon-mp3radio://stream.antenne1.de/stream1/livestream.mp3" ),
-		    Array( ('name') => "AC/DC Collection",
+		    Array( ('name') => "ACDC Collection",
                    ('logo') => "http://cdn-radiotime-logos.tunein.com/s256712.png",
                    ('url')  => "x-rincon-mp3radio://streams.radiobob.de/bob-acdc/mp3-192/mediaplayer" ),
             Array( ('name') => "Antenne Bayern",
