@@ -397,7 +397,7 @@ class Sonos extends IPSModule
 		// clear memberOf in new coordinator, set memberOf in old coordinator
 		if($rejoinGroup){
 		   SetValueInteger($this->GetIDForIdent("MemberOfGroup"), $newGroupCoordinator);
-		else{
+		}else{
 		   SetValueInteger($this->GetIDForIdent("MemberOfGroup"), 0 );
 		}
 		SetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$newGroupCoordinator), 0);
