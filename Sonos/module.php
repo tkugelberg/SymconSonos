@@ -364,7 +364,7 @@ class Sonos extends IPSModule
 		if($this->InstanceID === $newGroupCoordinator) return;
 		
 		// $newGroupCoordinator is not part of group
-		if ( GetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$newGroupCoordinator)) === $this->InstanceID )
+		if ( GetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$newGroupCoordinator)) !== $this->InstanceID )
 		     throw new Exception("(".$newGroupCoordinator.") is not a member of this group");
 		
 		
