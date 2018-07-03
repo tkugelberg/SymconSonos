@@ -378,24 +378,34 @@ class Sonos extends IPSModule
 		$currentMembers = explode(",",GetValueString($this->GetIDForIdent("GroupMembers")));
 		$currentMembers = array_filter($currentMembers, function($v) { return $v != ""; });
 		$currentMembers = array_filter($currentMembers, function($v) { return $v != $this->InstanceID ; });
-		$currentMembers = array_filter($currentMembers, function($v) { return $v != $newGroupCoordinator ; });
+		//$currentMembers = array_filter($currentMembers, function($v) { return $v != $newGroupCoordinator ; });
 
 		// update memberOf in all members, but not new coordinator
         foreach($currentMembers as $key=>$ID) {
-          SetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$ID),$newGroupCoordinator);
+		  if ($ID != $newGroupCoordinator){
+            SetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$ID),$newGroupCoordinator);
+			$newMembers[] = $ID;
+		  }
         }
 		
 		// update GroupMembers in old and new coordinator
-        $currentMembers[] = $this->InstanceID;
-		SetValueString(IPS_GetObjectIDByName("GroupMembers",$newGroupCoordinator),implode(",",$currentMembers));
+		if ($rejoinGroup)
+           $newMembers[] = $this->InstanceID;
+		SetValueString(IPS_GetObjectIDByName("GroupMembers",$newGroupCoordinator),implode(",",$newMembers));
 		SetValueString($this->GetIDForIdent("GroupMembers"),"");
 		
 		// clear memberOf in new coordinator, set memberOf in old coordinator
-		SetValueInteger($this->GetIDForIdent("MemberOfGroup"), $newGroupCoordinator);
+		if ($rejoinGroup)
+		   SetValueInteger($this->GetIDForIdent("MemberOfGroup"), $newGroupCoordinator);
 		SetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$newGroupCoordinator), 0);
 		
-		// switch variable "Coordinator"
-		SetValueBoolean($this->GetIDForIdent("Coordinator"),false);
+		// switch variable "Coordinator", achtung: $rejoinGroup
+		if if ($rejoinGroup){
+		  SetValueBoolean($this->GetIDForIdent("Coordinator"),false);
+		}else{
+	      SetValueBoolean($this->GetIDForIdent("Coordinator"),true);
+		}
+		
 		SetValueBoolean(IPS_GetObjectIDByName("Coordinator",$newGroupCoordinator),true);
 		
 		// update Groups.SONOS, achtung: $rejoinGroup
@@ -408,16 +418,16 @@ class Sonos extends IPSModule
 		
 		// Variablen anzeigen und verstecken.
 		// new coordinator
-		@IPS_SetHidden(IPS_GetVariableIDByName("GroupVolume",$groupCoordinator),false);
-        @IPS_SetHidden(IPS_GetVariableIDByName("MemberOfGroup",$groupCoordinator),true);
-        @IPS_SetHidden(IPS_GetVariableIDByName("nowPlaying",$groupCoordinator),false);
-        @IPS_SetHidden(IPS_GetVariableIDByName("Radio",$groupCoordinator),false);
-        @IPS_SetHidden(IPS_GetVariableIDByName("Playlist",$groupCoordinator),false);
-        @IPS_SetHidden(IPS_GetVariableIDByName("PlayMode",$groupCoordinator),false);
-        @IPS_SetHidden(IPS_GetVariableIDByName("Crossfade",$groupCoordinator),false);
-        @IPS_SetHidden(IPS_GetVariableIDByName("Status",$groupCoordinator),false);
-        @IPS_SetHidden(IPS_GetVariableIDByName("Sleeptimer",$groupCoordinator),false);
-        @IPS_SetHidden(IPS_GetVariableIDByName("Details",$groupCoordinator),false);		
+		@IPS_SetHidden(IPS_GetVariableIDByName("GroupVolume",$newGroupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("MemberOfGroup",$newGroupCoordinator),true);
+        @IPS_SetHidden(IPS_GetVariableIDByName("nowPlaying",$newGroupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Radio",$newGroupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Playlist",$newGroupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("PlayMode",$newGroupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Crossfade",$newGroupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Status",$newGroupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Sleeptimer",$newGroupCoordinator),false);
+        @IPS_SetHidden(IPS_GetVariableIDByName("Details",$newGroupCoordinator),false);		
 		
 		// old coordinator
 		if ($rejoinGroup){
