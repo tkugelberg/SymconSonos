@@ -382,7 +382,7 @@ class Sonos extends IPSModule
 
 		// update memberOf in all members, but not new coordinator
         foreach($currentMembers as $key=>$ID) {
-		  if ($ID != $newGroupCoordinator){
+		  if($ID != $newGroupCoordinator){
             SetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$ID),$newGroupCoordinator);
 			$newMembers[] = $ID;
 		  }
@@ -395,12 +395,12 @@ class Sonos extends IPSModule
 		SetValueString($this->GetIDForIdent("GroupMembers"),"");
 		
 		// clear memberOf in new coordinator, set memberOf in old coordinator
-		if ($rejoinGroup)
+		if($rejoinGroup)
 		   SetValueInteger($this->GetIDForIdent("MemberOfGroup"), $newGroupCoordinator);
 		SetValueInteger(IPS_GetObjectIDByName("MemberOfGroup",$newGroupCoordinator), 0);
 		
 		// switch variable "Coordinator", achtung: $rejoinGroup
-		if if ($rejoinGroup){
+		if($rejoinGroup){
 		  SetValueBoolean($this->GetIDForIdent("Coordinator"),false);
 		}else{
 	      SetValueBoolean($this->GetIDForIdent("Coordinator"),true);
@@ -409,7 +409,7 @@ class Sonos extends IPSModule
 		SetValueBoolean(IPS_GetObjectIDByName("Coordinator",$newGroupCoordinator),true);
 		
 		// update Groups.SONOS, achtung: $rejoinGroup
-		if ($rejoinGroup){
+		if($rejoinGroup){
           @IPS_SetVariableProfileAssociation("Groups.SONOS", $this->InstanceID, "", "", -1);
 		}else{
 	      @IPS_SetVariableProfileAssociation("Groups.SONOS", $this->InstanceID, IPS_GetName($this->InstanceID), "", -1);
