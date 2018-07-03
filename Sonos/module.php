@@ -431,11 +431,11 @@ class Sonos extends IPSModule
 		
 		// old coordinator
 		if ($rejoinGroup){
-			$hidden = false;
-            @IPS_SetHidden($this->GetIDForIdent("GroupVolume"),true);		
-        }else{
 			$hidden = true;
-			@IPS_SetHidden($this->GetIDForIdent("GroupVolume"),false);
+            @IPS_SetHidden($this->GetIDForIdent("GroupVolume"),false);		
+        }else{
+			$hidden = false;
+			@IPS_SetHidden($this->GetIDForIdent("GroupVolume"),true);
 		}
 
         @IPS_SetHidden($this->GetIDForIdent("nowPlaying"),$hidden);
