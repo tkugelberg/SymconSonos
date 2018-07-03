@@ -74,7 +74,7 @@ function get_available_stations(){
             Array( ('name') => "Radio 91.2",
                    ('logo') => "http://cdn-radiotime-logos.tunein.com/s8923q.png",
                    ('url')  => "x-rincon-mp3radio://lokalradiostream.de:8004" ),
-            Array( ('name') => "Radio BOB!",
+            Array( ('name') => "Radio BOB",
                    ('logo') => "http://cdn-radiotime-logos.tunein.com/s96189q.png",
                    ('url')  => "x-rincon-mp3radio://streams.radiobob.de/bob-live/mp3-192/mediaplayer" ),
             Array( ('name') => "Radio Duisburg",
