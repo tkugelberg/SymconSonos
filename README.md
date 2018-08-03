@@ -124,11 +124,12 @@ Diese Sender stehen zur Verfügung:
   - 1LIVE
   - 1LIVE DIGGI 
   - 917xfm
+  - A State Of Trance
+  - AC/DC Collection
   - Antenne 1
   - Antenne Bayern
   - Antenne MV
   - Antenne Thueringen
-  - A State Of Trance
   - Bayern 3
   - bigFM
   - Bremen Vier
@@ -145,9 +146,12 @@ Diese Sender stehen zur Verfügung:
   - NDR2
   - N-JOY
   - OE3
+  - planet radio
   - Radio 91.2
+  - Radio BOB!
   - Radio Duisburg
   - Radio Essen
+  - Radio Hochstift
   - Radio K.W.
   - Radio Lippe
   - Radio Top40
@@ -319,6 +323,14 @@ Falls die Lautstärke 100 übersteigen oder 0 unterschreiten würde, wird die La
 
 ---
 ```php
+SNS_DelegateGroupCoordinationTo(integer $InstanceID, integer $newGroupCoordinator, bool $rejoinGroup)
+```
+Macht eine Andere Box zum Gruppenkoordinator.  
+Wird auf die instanz des aktuellen Gruppenkoordinators ausgeführt. $newGroupKoordinator ist der neue.
+Wenn die Box in der Gruppe bleiben soll, muss $rejoinGroup "true" sein, ansonsten wird der Alte Koordinator aus der Gruppe entfernt.
+
+---
+```php
 SNS_DeleteSleepTimer(integer $InstanceID)
 ```
 Bricht den Sleeptimer ab.  
@@ -465,6 +477,15 @@ Führt die Funktion SNS_ChangeGroupVolume($volume - "aktuelle Lautstärke" ) aus
 
 ---
 ```php
+SNS_SetHdmiInput(integer $InstanceID, integer $input_instance)
+```
+Selektiert den HDMI Input einer Instanz als Audioquelle.  
+Sollte die Instanz sich gerade in einer Gruppe befinden, wird sie automatisch aus der Gruppe genommen und danach die neue Audiquelle gesetzt.  
+Sollte diese Funktion auf einem Gruppenkoordinator ausgeführt werden gilt die neue Audioquelle für die ganze Gruppe.
+Anmerkung: Da HDMI scheinbar genau wie S/PDIF behandelt wird, wird intern lediglich SetSpdifInput aufgerufen.
+
+---
+```php
 SNS_SetLoudness(integer $InstanceID, boolean $loudness)
 ```
 Setzt das Loundess Flag an einer Instanz.  
@@ -589,6 +610,12 @@ Hinweis: Wenn nur Sender aus Sonos enthalten sein sollen, ist der Konfigurations
 SNS_UpdateRINCON(integer $InstanceID)
 ```
 Liest die RINCON einer Instanz aus und schreibt diese in die Instanzkonfiguration.
+
+---
+```php
+SNS_alexaResonse(integer $InstanceID)
+```
+Ist für den Anwender nicht relevant. Wird nur für/von Alexa benutzt.
 
 ## 7. FAQ
 ### 7.1. Wie viele Variablen werden für das Modul benötigt?  

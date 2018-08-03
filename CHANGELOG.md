@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.5.10
+- added function SetHdmiInput( )
+
 ### Version 1.5.9
 - added function DelegateGroupCoordinationTo( )
 

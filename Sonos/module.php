@@ -880,6 +880,12 @@ class Sonos extends IPSModule
         $this->ChangeGroupVolume($volume - GetValue($this->GetIDForIdent("GroupVolume")));
     }
 
+    public function SetHdmiInput(int $input_instance)
+    { 
+	  // seems to be the same as S/PDIF
+      $this->SetSpdifInput( $input_instance );
+    }	
+	
     public function SetLoudness(bool $loudness)
     {
         $ip = $this->getIP();
