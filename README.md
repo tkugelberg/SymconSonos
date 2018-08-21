@@ -13,7 +13,7 @@ IP-Symcon PHP module for accessing Sonos audio systems
 6. [FAQ](#7-faq)
 
 ## 1. Funktionsumfang
-Dieses Modul is dazu gedacht um allgemeine Funktionalitäten in Sonso aus IP-Symcon heraus auszulösen.  
+Dieses Modul is dazu gedacht um allgemeine Funktionalitäten in Sonos aus IP-Symcon heraus auszulösen.  
 Die folgenden Funktionalitäten sind implementiert:
 - verschiedene Quellen festlegen
   - Radiosender
