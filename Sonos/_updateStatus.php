@@ -2,7 +2,7 @@
 include_once("../modules/SymconSonos/Sonos/sonosAccess.php");
 include_once("../modules/SymconSonos/Sonos/radio_stations.php");
 
-$ip                    = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress");
+$ip                    = gethostbyname(IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "IPAddress"));
 $timeout               = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
 $frequency             = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "UpdateStatusFrequency");
 $frequencyNotAvailable = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "UpdateStatusFrequencyNA");

@@ -278,6 +278,15 @@ class SonosAccess{
                                   
   }
 
+  public function GetZoneGroupState()
+  {
+    return $this->processSoapCall("/ZoneGroupTopology/Control",
+                                  "urn:schemas-upnp-org:service:ZoneGroupTopology:1",
+                                  "GetZoneGroupState",
+                                  array() );
+                                  
+  }  
+  
   public function Next()
   {
     $this->processSoapCall("/MediaRenderer/AVTransport/Control",

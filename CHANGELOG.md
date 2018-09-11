@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.5.11
+- make Sonos version 9.1 work again
+
 ### Version 1.5.10
 - added function SetHdmiInput( )
 

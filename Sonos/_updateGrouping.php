@@ -1,10 +1,11 @@
 <?
+include_once("../modules/SymconSonos/Sonos/sonosAccess.php");
 
 $sonosInstanceID       = IPS_GetParent($_IPS["SELF"]);
 $memberOfGoup          = GetValueInteger(IPS_GetObjectIDByName("MemberOfGroup", $sonosInstanceID));
 $coordinatorInIPS      = GetValueBoolean(IPS_GetObjectIDByName("Coordinator", $sonosInstanceID));
 $forceGrouping         = IPS_GetProperty($sonosInstanceID, "GroupForcing");
-$ipAddress             = IPS_GetProperty($sonosInstanceID, "IPAddress");
+$ipAddress             = gethostbyname(IPS_GetProperty($sonosInstanceID, "IPAddress"));
 $timeout               = IPS_GetProperty($sonosInstanceID, "TimeOut");
 $frequency             = IPS_GetProperty($sonosInstanceID, "UpdateGroupingFrequency");
 $frequencyNotAvailable = IPS_GetProperty($sonosInstanceID, "UpdateGroupingFrequencyNA");
@@ -21,20 +22,25 @@ if ( $timeout && Sys_Ping($ipAddress, $timeout) == false ){
 // If box is available reset to 120 Seconds interval
 IPS_SetScriptTimer($_IPS["SELF"], $frequency);
 
-$topology = new SimpleXMLElement(file_get_contents('http://'.$ipAddress.':1400/status/topology'));
+$sonos = new SonosAccess($ipAddress);
+
+$grouping = $sonos->GetZoneGroupState();
 
 foreach($allSonosInstances as $key=>$SonosID) {
     $rincon = IPS_GetProperty($SonosID ,"RINCON");
 	$coordinatorInSonos = false;
-    foreach ($topology->ZonePlayers->ZonePlayer as $zonePlayer){
-        if($zonePlayer->attributes()['uuid'] == $rincon){
-            $group       = (string)$zonePlayer->attributes()['group'];
-            if((string)$zonePlayer->attributes()['coordinator'] === "true"){
-                $coordinatorInSonos = true;
-            }
-            break;
+    foreach ($grouping->ZoneGroup as $zoneGroup){
+    	if ( $zoneGroup->attributes()['Coordinator'] == $rincon ){  
+		      $coordinatorInSonos = true; 
         }
+		foreach ($zoneGroup->ZoneGroupMember as $zoneGroupMember){
+		  if ( $zoneGroupMember->attributes()['UUID'] == $rincon){
+		    $group = (string)$zoneGroup->attributes()['Coordinator'] ;
+		    break;
+		  }
+		}
     }
+
     $instance = Array( ("ID")          => $SonosID,
                        ("RINCON")      => $rincon,
                        ("COORDINATOR") => $coordinatorInSonos,
@@ -46,7 +52,7 @@ foreach($allSonosInstances as $key=>$SonosID) {
     }
     if($SonosID === $memberOfGoup){
         $MemberOfGroupIPS = $instance;
-    }
+    }	
 }
 
 foreach($rinconMapping as $key=>$instance){

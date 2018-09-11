@@ -36,7 +36,7 @@ class Sonos extends IPSModule
     
     public function ApplyChanges()
     {
-        $ipAddress = $this->ReadPropertyString("IPAddress");
+        $ipAddress = $this->getIP();
 		$timeout   = $this->ReadPropertyInteger("TimeOut");
         if ($ipAddress){
             $curl = curl_init();
@@ -634,7 +634,7 @@ class Sonos extends IPSModule
         
     
         foreach ($instances as $instanceID => &$settings){
-             $ip      = IPS_GetProperty($instanceID ,"IPAddress");
+             $ip      = gethostbyname(IPS_GetProperty($instanceID ,"IPAddress"));
              $timeout = $this->ReadPropertyInteger("TimeOut");
              if ($timeout && Sys_Ping($ip, $timeout) != true){
                  if (Sys_Ping($ip, $timeout) != true){
@@ -1292,7 +1292,7 @@ class Sonos extends IPSModule
     }
 
     protected function getIP(){
-        $ip      = $this->ReadPropertyString("IPAddress");
+        $ip      = gethostbyname($this->ReadPropertyString("IPAddress"));
         $timeout = $this->ReadPropertyInteger("TimeOut");
 
         if ($timeout && Sys_Ping($ip, $timeout) != true){
