@@ -1295,7 +1295,7 @@ class Sonos extends IPSModule
         $ip      = gethostbyname($this->ReadPropertyString("IPAddress"));
         $timeout = $this->ReadPropertyInteger("TimeOut");
 
-        if ($timeout && Sys_Ping($ip, $timeout) != true){
+        if ($ip && $timeout && Sys_Ping($ip, $timeout) != true){
            if (Sys_Ping($ip, $timeout)!= true){
              throw new Exception('Sonos Box '.$ip.' is not available, TimeOut: '.$timeout.'ms.');
            }

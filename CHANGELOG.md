@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.5.12
+- correct error in last bugfix which lead to dump in creating new instance
+
 ### Version 1.5.11
 - make Sonos version 9.1 work again
 
