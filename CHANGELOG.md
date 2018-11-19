@@ -1,4 +1,7 @@
 # Changelog 
+### Version 1.5.13
+- also correct bug on windows, where gethostbyname('') returns "localhost"
+
 ### Version 1.5.12
 - correct error in last bugfix which lead to dump in creating new instance
 

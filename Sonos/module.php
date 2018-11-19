@@ -1292,15 +1292,20 @@ class Sonos extends IPSModule
     }
 
     protected function getIP(){
-        $ip      = gethostbyname($this->ReadPropertyString("IPAddress"));
-        $timeout = $this->ReadPropertyInteger("TimeOut");
-
-        if ($ip && $timeout && Sys_Ping($ip, $timeout) != true){
-           if (Sys_Ping($ip, $timeout)!= true){
-             throw new Exception('Sonos Box '.$ip.' is not available, TimeOut: '.$timeout.'ms.');
+        $ipSetting = $this->ReadPropertyString("IPAddress");
+        $timeout   = $this->ReadPropertyInteger("TimeOut");
+		$ip        = '';
+        
+		if ($ipSetting){
+		   $ip = gethostbyname($ipSetting);
+           if ($timeout && Sys_Ping($ip, $timeout) != true){
+              if (Sys_Ping($ip, $timeout)!= true){
+                throw new Exception('Sonos Box '.$ipSetting.' is not available, TimeOut: '.$timeout.'ms.');
+              }
            }
-        }
+	    }
         return $ip;   
+	   
     }
 
     protected function findTarget(){
