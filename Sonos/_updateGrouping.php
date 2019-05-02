@@ -27,10 +27,14 @@ $sonos = new SonosAccess($ipAddress);
 $grouping = new SimpleXMLElement($sonos->GetZoneGroupState());
 $group = 0;
 
+// Some of my speakers moved ZoneGroup to ZoneGroups->ZoneGroup what leads to an error - this should solve it
+$zoneGroups = $grouping->ZoneGroup;
+if(count($zoneGroups) == 0) $zoneGroups = $grouping->ZoneGroups->ZoneGroup;
+
 foreach($allSonosInstances as $key=>$SonosID) {
     $rincon = IPS_GetProperty($SonosID ,"RINCON");
-	$coordinatorInSonos = false;
-    foreach ($grouping->ZoneGroup as $zoneGroup){
+    $coordinatorInSonos = false;
+    foreach ($zoneGroups as $zoneGroup){
     	if ( $zoneGroup->attributes()['Coordinator'] == $rincon ){  
 		      $coordinatorInSonos = true; 
         }
