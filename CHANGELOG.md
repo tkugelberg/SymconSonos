@@ -1,4 +1,9 @@
 # Changelog 
+### Version 1.6
+- Changed version to 1.6 to make it better visibe in Module overview
+- removed bug due to change in XML (thanks danielrdt)
+- disabled message "Sonos instance 192.168.1.32 is not available" in scripts
+
 ### Version 1.5.13
 - also correct bug on windows, where gethostbyname('') returns "localhost"
 

@@ -14,9 +14,8 @@ $allSonosInstances     = IPS_GetInstanceListByModuleID("{F6F3A773-F685-4FD2-805E
 
 // If the Sonos instance is not available update of grouping makes no sense
 if ( $timeout && Sys_Ping($ipAddress, $timeout) == false ){
-    // If the Box is not available, only ask every 15 Minutes...
     IPS_SetScriptTimer($_IPS["SELF"], $frequencyNotAvailable );
-    die('Sonos instance '.$ipAddress.' is not available');
+    return;
 }
 
 // If box is available reset to 120 Seconds interval
