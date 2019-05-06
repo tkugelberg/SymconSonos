@@ -1,4 +1,8 @@
 # Changelog 
+### Version 1.07
+- switched to string for files in PlayFiles --> json_encode now needed
+- switched to string for files and instances in PlayFilesGrouping --> json_encode now needed
+
 ### Version 1.6
 - Changed version to 1.6 to make it better visibe in Module overview
 - removed bug due to change in XML (thanks danielrdt)

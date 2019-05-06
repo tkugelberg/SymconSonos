@@ -512,9 +512,10 @@ class Sonos extends IPSModule
         }
     }
 
-    public function PlayFiles(array $files, string $volumeChange)
+    public function PlayFiles(string $files, string $volumeChange)
     {
         $ip = $this->getIP();
+		$filesArray = json_decode($files);
 
         include_once(__DIR__ . "/sonosAccess.php");
         $sonos = new SonosAccess($ip);
@@ -559,7 +560,7 @@ class Sonos extends IPSModule
 
         }
 
-        foreach ($files as $key => $file) {
+        foreach ($filesArray as $key => $file) {
           // only files on SMB share or http server can be used
           if (preg_match('/^\/\/[\w,.,\d,-]*\/\S*/',$file) == 1){
             $uri = "x-file-cifs:".$file;
@@ -605,10 +606,11 @@ class Sonos extends IPSModule
         }
     }
 
-    public function PlayFilesGrouping(array $instances, array $files, string $volumeChange)
+    public function PlayFilesGrouping(string $instances, string $files, string $volumeChange)
     {
         $ip = $this->getIP();
-
+		$instancesArray = json_decode($instances);
+		
         include_once(__DIR__ . "/sonosAccess.php");
         $sonos         = new SonosAccess($ip);
         $transportInfo = $sonos->GetTransportInfo();
@@ -633,7 +635,7 @@ class Sonos extends IPSModule
         }
         
     
-        foreach ($instances as $instanceID => &$settings){
+        foreach ($instancesArray as $instanceID => &$settings){
              $ip      = gethostbyname(IPS_GetProperty($instanceID ,"IPAddress"));
              $timeout = $this->ReadPropertyInteger("TimeOut");
              if ($timeout && Sys_Ping($ip, $timeout) != true){
@@ -667,7 +669,7 @@ class Sonos extends IPSModule
 
         $this->PlayFiles($files, 0);
  
-        foreach ($instances as $instanceID => $settings){
+        foreach ($instancesArray as $instanceID => $settings){
           if($settings["available"] == false) continue;
           SNS_SetGroup($instanceID, $settings["group"]);
           $settings["sonos"]->SetAVTransportURI($settings["mediaInfo"]["CurrentURI"],$settings["mediaInfo"]["CurrentURIMetaData"]);
