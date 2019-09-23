@@ -359,7 +359,7 @@ Sollte das Kommando auf einem Gruppenmember ausgeführt werden, wird es automati
 
 ---
 ```php
-SNS_PlayFiles(integer $InstanceID, array $files, string $volumeChange)
+SNS_PlayFiles(integer $InstanceID, string $files, string $volumeChange)
 ```
 1. Falls gerade etwas wiedergegeben wird, wird die Wiedergabe pausiert
 2. Die Lautstärke wird entsprechend $volumeChange angepasst  
@@ -367,7 +367,7 @@ SNS_PlayFiles(integer $InstanceID, array $files, string $volumeChange)
    - "17" würde die Lautstärke auf 17 setzen  
    - "+8" würde die Lautstärke um 8 anheben  
    - "-8" würde die Lautstärke um 8 absenken
-3. Alle Dateien, die in dem Array $filesangegeben wurden werden abgespielt.  
+3. Alle Dateien, die in dem (als JSON encodierten) Array $filesangegeben wurden werden abgespielt.  
 Entweder von einem Samba Share (CIFS) (z.B. "//server.local.domain/share/file.mp3") oder von einem HTTP Server (z.B.: "http://ipsymcon.fritz.box:3777/user/ansage/hallo.mp3")
 4. Die Ausgangslautstärke wird wieder hergestellt
 5. Die Audioquelle wird wieder hergestellt
@@ -376,24 +376,24 @@ Entweder von einem Samba Share (CIFS) (z.B. "//server.local.domain/share/file.mp
 Falls die Instanz einer Gruppe zugeordnet ist, wird sie für die Wiedergabe der Dateien aus der Gruppe genommen und danach wieder hinzugefügt.  
 Mehrere Dateien anzuspielen könnte so aussehen:
 ```php
-SNS_PlayFiles(17265, Array( "//ipsymcon.fritz.box/sonos/bla.mp3",
-                            "http://www.sounds.com/blubb.mp3"), 0);
+SNS_PlayFiles(17265, json_encode( Array( "//ipsymcon.fritz.box/sonos/bla.mp3",
+                                         "http://www.sounds.com/blubb.mp3") ), 0);
 ```
 
 ---
 
 ```php
-SNS_PlayFilesGrouping(integer $InstanceID, array $instances, array $files, $volume)
+SNS_PlayFilesGrouping(integer $InstanceID, string $instances, string $files, $volume)
 ```
-Diese Funktion ruft die Funktion SNS_PlayFiles auf. Dementsprechend ist das array $files göleich aufgebaut.  
+Diese Funktion ruft die Funktion SNS_PlayFiles auf. Dementsprechend ist das (als JSON encodierte) array $files gleich aufgebaut.  
 Vorher werden die in $instances mitgegebenen Instanzen zu der gruppe von $InstanceID hinzugefügt.  
-Das array $instances beinhaltet pro hinzuzufügender instanz einen Eintrag mit dem Key "&lt;instance ID&gt;" der hinzuzufügenden instanz und einem Array mit settings. Diese Array kennt derzeit lediglich einen Eintrag mit dem Key "volume" mit dem Volume Wert entsprechend dem $volumeChange aus der Funktion SNS_PlayFiles.
+Das (als JSON encodierte) array $instances beinhaltet pro hinzuzufügender instanz einen Eintrag mit dem Key "&lt;instance ID&gt;" der hinzuzufügenden instanz und einem Array mit settings. Diese Array kennt derzeit lediglich einen Eintrag mit dem Key "volume" mit dem Volume Wert entsprechend dem $volumeChange aus der Funktion SNS_PlayFiles.
 
 Beispiel:
 ```php
-SNS_PlayFilesGrouping(46954 , array( 11774 => array( "volume" => 10),
-                                     27728 => array( "volume" => "+10"),
-                                     59962 => array( "volume" => 30) ), array( IVNTTS_saveMP3(12748, "Dieser Text wird angesagt")), 28 );
+SNS_PlayFilesGrouping(46954 , json_encode( array( 11774 => array( "volume" => 10),
+                                                  27728 => array( "volume" => "+10"),
+                                                  59962 => array( "volume" => 30) ) ), json_encode(array( IVNTTS_saveMP3(12748, "Dieser Text wird angesagt"))), 28 );
 ```
 Die Instanzen 11774, 27728 und 59962 werden der Gruppe mit dem Koordinator 46954 hinzugefügt.  
 Die Instanz 11774 wird auf Lautstärke 10 gesetzt.  
