@@ -376,8 +376,13 @@ Entweder von einem Samba Share (CIFS) (z.B. "//server.local.domain/share/file.mp
 Falls die Instanz einer Gruppe zugeordnet ist, wird sie für die Wiedergabe der Dateien aus der Gruppe genommen und danach wieder hinzugefügt.  
 Mehrere Dateien anzuspielen könnte so aussehen:
 ```php
+<<<<<<< HEAD
 SNS_PlayFiles(17265, json_encode( Array( "//ipsymcon.fritz.box/sonos/bla.mp3",
                                          "http://www.sounds.com/blubb.mp3") ), 0);
+=======
+SNS_PlayFiles(17265, json_encode(Array("//ipsymcon.fritz.box/sonos/bla.mp3",
+                            "http://www.sounds.com/blubb.mp3")), 0);
+>>>>>>> origin/master
 ```
 
 ---
