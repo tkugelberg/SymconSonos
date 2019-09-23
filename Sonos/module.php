@@ -515,7 +515,6 @@ class Sonos extends IPSModule
     public function PlayFiles(string $files, string $volumeChange)
     {
         $ip = $this->getIP();
-		$filesArray = json_decode($files);
 		$filesArray = json_decode($files, true);
 
         include_once(__DIR__ . "/sonosAccess.php");
@@ -610,7 +609,6 @@ class Sonos extends IPSModule
     public function PlayFilesGrouping(string $instances, string $files, string $volumeChange)
     {
         $ip = $this->getIP();
-		$instancesArray = json_decode($instances);
 		$instancesArray = json_decode($instances, true);
 		
         include_once(__DIR__ . "/sonosAccess.php");
