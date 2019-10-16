@@ -41,6 +41,7 @@
                                  { "label": "AC/DC Collection",         "value": "AC/DC Collection"},
                                  { "label": "Antenne 1",                "value": "Antenne 1" },
                                  { "label": "Antenne Bayern",           "value": "Antenne Bayern" },
+                                 { "label": "Antenne Brandenburg",      "value": "Antenne Brandenburg" },
                                  { "label": "Antenne MV",               "value": "Antenne MV" },
                                  { "label": "Antenne Thueringen",       "value": "Antenne Thueringen" },
                                  { "label": "A State Of Trance",        "value": "A State Of Trance" },
@@ -69,6 +70,7 @@
                                  { "label": "Radio K.W.",               "value": "Radio K.W." },
                                  { "label": "Radio Lippe",              "value": "Radio Lippe" },
                                  { "label": "Radio Top40",              "value": "Radio Top40" },
+                                 { "label": "Radio Zürisee",            "value": "Radio Zürisee" },
                                  { "label": "RevivalKult",              "value": "RevivalKult" },
                                  { "label": "RPR1",                     "value": "RPR1" },
                                  { "label": "Sunshine Live",            "value": "Sunshine Live" },
@@ -81,7 +83,8 @@
                                  { "label": "WDR2 BI",                  "value": "WDR2 BI" },
                                  { "label": "YouFM",                    "value": "YouFM" }
                   ] },
-		{ "name": "WebFrontStations",          "type": "ValidationTextBox", "caption": "Stations in WebFront" }
+		{ "name": "WebFrontStations",          "type": "ValidationTextBox", "caption": "Stations in WebFront" },
+		{ "name": "AlbumArtHeight",            "type": "NumberSpinner",     "caption": "Album Art Hight in WebFront"}
 	],
 	"actions":
 	[

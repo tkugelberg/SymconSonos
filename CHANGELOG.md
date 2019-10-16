@@ -1,4 +1,8 @@
-# Changelog 
+# Changelog
+### Version 1.08
+- Added "Radio Zürichsee" and "Antenne Brandenburg"
+- Added a Poperty for Album Art
+ 
 ### Version 1.07
 - switched to string for files in PlayFiles --> json_encode now needed
 - switched to string for files and instances in PlayFilesGrouping --> json_encode now needed
