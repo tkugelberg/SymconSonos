@@ -185,7 +185,7 @@ if ($MemberOfGroup){
 
 			if(strlen($image) > 0) {
 			   $detailHTML .= "<td width=\"170px\" valign=\"top\">
-                              <div style=\"width: 170px; height: 170px; perspective: 170px; right: 0px; margin-bottom: 10px;\">
+                              <div style=\"width: 170px; height: ".$AlbumArtHeight."px; perspective: 170px; right: 0px; margin-bottom: 10px;\">
                               	<img src=\"".@$image."\" style=\"max-width: 170px; max-height: 170px; -webkit-box-reflect: below 0 -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(0.88, transparent), to(rgba(255, 255, 255, 0.5))); transform: rotateY(-10deg) translateZ(-35px);\">
                               </div>
                             </td>";
