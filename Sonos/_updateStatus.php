@@ -8,7 +8,9 @@ $frequency             = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "UpdateSt
 $frequencyNotAvailable = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "UpdateStatusFrequencyNA");
 $AlbumArtHeight        = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "AlbumArtHight");
 
-if (!isset($AlbumArtHeight)) $AlbumArtHeight = "170";
+if (!isset($AlbumArtHeight) || $AlbumArtHeight == 0 ){
+  $AlbumArtHeight = 170;	
+} 
 
 // Get all needed Variable IDs
 $vidInstance      = IPS_GetParent($_IPS["SELF"]);
