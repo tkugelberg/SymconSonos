@@ -16,7 +16,7 @@ class Sonos extends IPSModule
         $this->RegisterPropertyInteger("UpdateStatusFrequencyNA", 300);
         $this->RegisterPropertyInteger("UpdateGroupingFrequency", 120);
         $this->RegisterPropertyInteger("UpdateGroupingFrequencyNA", 900);
-        $this->RegisterPropertyInteger("AlbumArtHight", 170);
+        $this->RegisterPropertyInteger("AlbumArtHeight", 170);
         $this->RegisterPropertyBoolean("GroupForcing", false);
         $this->RegisterPropertyBoolean("MuteControl", false);
         $this->RegisterPropertyBoolean("LoudnessControl", false);
