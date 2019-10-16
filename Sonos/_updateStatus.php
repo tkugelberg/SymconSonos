@@ -6,7 +6,7 @@ $ip                    = gethostbyname(IPS_GetProperty(IPS_GetParent($_IPS["SELF
 $timeout               = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "TimeOut");
 $frequency             = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "UpdateStatusFrequency");
 $frequencyNotAvailable = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "UpdateStatusFrequencyNA");
-$AlbumArtHeight        = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "AlbumArtHight");
+$AlbumArtHeight        = IPS_GetProperty(IPS_GetParent($_IPS["SELF"]), "AlbumArtHeight");
 
 if (!isset($AlbumArtHeight) || $AlbumArtHeight == 0 ){
   $AlbumArtHeight = 170;	
